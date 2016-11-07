@@ -1,0 +1,17 @@
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z14calculate_tempiPfS_S_iiiiffffff' for 'sm_35'
+ptxas info    : Function properties for _Z14calculate_tempiPfS_S_iiiiffffff
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 38 registers, 3072 bytes smem, 392 bytes cmem[0]

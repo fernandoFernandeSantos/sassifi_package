@@ -1,0 +1,9 @@
+Host carolk402 using GPU 0: Tesla K20c
+Running until t=0.010000, Problem size=50x50x50
+Run completed:  
+   Problem size        =  50 
+   Iteration count     =  50 
+Running until t=0.010000, Problem size=50x50x50
+Run completed:  
+   Problem size        =  50 
+   Iteration count     =  50 

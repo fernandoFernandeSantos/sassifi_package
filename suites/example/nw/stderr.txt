@@ -1,0 +1,27 @@
+ptxas info    : 4 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z7maximumiii
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13GoldChkKernelPiS_i' for 'sm_35'
+ptxas info    : Function properties for _Z13GoldChkKernelPiS_i
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, 340 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z20needle_cuda_shared_1PiS_iiii' for 'sm_35'
+ptxas info    : Function properties for _Z20needle_cuda_shared_1PiS_iiii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 26 registers, 2180 bytes smem, 352 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z20needle_cuda_shared_2PiS_iiii' for 'sm_35'
+ptxas info    : Function properties for _Z20needle_cuda_shared_2PiS_iiii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 26 registers, 2180 bytes smem, 352 bytes cmem[0]

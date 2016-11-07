@@ -1,0 +1,11 @@
+(dp1
+S'_Z13lud_perimeterPdii'
+p2
+I44
+sS'_Z12lud_internalPdii'
+p3
+I21
+sS'_Z12lud_diagonalPdii'
+p4
+I44
+s.

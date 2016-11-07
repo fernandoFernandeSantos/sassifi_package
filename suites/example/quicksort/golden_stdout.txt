@@ -1,0 +1,6 @@
+GPU Device 0: "Tesla K20c" with compute capability 3.5
+
+GPU device Tesla K20c has compute capabilities (SM 3.5)
+Running qsort on 1048576 elements, on Tesla K20c
+Reading existing input quicksort_input_134217728 (delete it to generate a new one) ...Done in 0.00s
+.

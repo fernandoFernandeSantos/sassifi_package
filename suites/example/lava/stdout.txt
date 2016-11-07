@@ -1,0 +1,8 @@
+streams: 1 boxes:10 block_size:192
+[Iteration #0]=====================================
+[Iteration #0] Setup prepare time: 1.1799s
+[Iteration #0] Gold check time: 0.005462
+[Iteration #0] BOXES:10 BLOCK:192 OUTPUT/S:19604.85 FLOPS:55242071.32 (GFLOPS:0.06)
+[Iteration #0] kernel_time:39.173983
+.[Iteration #0] Elapsed time: 40.3600s
+

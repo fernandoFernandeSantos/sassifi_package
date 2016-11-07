@@ -1,0 +1,7 @@
+WG size of kernel = 16 
+Start Needleman-Wunsch
+open array...
+read...ok in
+test number: 0
+errors: 0
+total errors: 0
