@@ -136,9 +136,9 @@ void parse_params(std::string filename) {
     }
     ifs.close();
 
-    //if (INJ_DEBUG_LIGHT) {
-    print_inj_info();
-    //}
+    if (INJ_DEBUG_LIGHT) {
+		print_inj_info();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
