@@ -91,9 +91,9 @@ App::App(const Args& s) {
 }
 
 void App::run() {
-	if (args.dst_video.empty())
+	/*if (args.dst_video.empty())
 		throw runtime_error(
-				string("No output path. [--dst_data <path>] # output data\n"));
+				string("No output path. [--dst_data <path>] # output data\n"));*/
 	Size win_size(args.win_width, args.win_width * 2); //(64, 128) or (48, 96)
 	Size win_stride(args.win_stride_width, args.win_stride_height);
 
@@ -115,8 +115,21 @@ void App::run() {
 
 	VideoCapture vc;
 	Mat frame;
+	
+	vector <string> dataset;
+	string dataset_line;
+	ifstream images(args.src.c_str());
+	if(images.is_open()) {
+		while(getline(images, dataset_line)) {
+			dataset.push_back(dataset_line);
+		}
+	}
+	else
+		throw runtime_error(string("error opening dataset text file"));
 
-	frame = imread(args.src);
+	for (int index = 0; index < dataset.size(); index++) {
+
+	frame = imread(dataset[index]);
 	if (frame.empty())
 		throw runtime_error(string("can't open image file: " + args.src));
 
@@ -137,7 +150,7 @@ void App::run() {
 	vector<Rect> found;
 
 	// Perform HOG classification
-	cout << "Generating gold image\n";
+	cout << "Generating gold for " << dataset[index].c_str() << "\n";
 	if (use_gpu) {
 		gpu_img.upload(img);
 		gpu_hog.detectMultiScale(gpu_img, found, hit_threshold, win_stride,
@@ -146,11 +159,21 @@ void App::run() {
 		cpu_hog.detectMultiScale(img, found, hit_threshold, win_stride,
 				Size(0, 0), scale, gr_threshold);
 	}
-	cout << "Gold generated with success\n";
+	//cout << "Gold generated with success\n";
 	// Draw positive classified windows (OLD)
 	//save the data on the *.data file
+
+	vector<string> split_current_line = split(dataset[index], '/');
+	string gold_set = split_current_line[split_current_line.size() - 3].c_str();
+	string gold_video = split_current_line[split_current_line.size() - 2].c_str();
+	string gold_frame = split_current_line[split_current_line.size() - 1].c_str();
+	gold_set.append("_" + gold_video + "_" + gold_frame + ".data");
+
 	ofstream output_file;
-	output_file.open(args.dst_video.c_str());
+
+	string data_path("/home/carol/radiation-benchmarks/data/histogram_ori_gradients/");
+	data_path.append(gold_set);
+	output_file.open(data_path.c_str());
 
 	output_file << args.make_gray << ",";
 	output_file << args.scale << ",";
@@ -182,7 +205,8 @@ void App::run() {
 
 	//save the output
 	cvtColor(img_to_show, img, CV_BGRA2BGR);
-	imwrite(string("output_") + args.src, img);
+	imwrite(string("output_") + dataset[index], img);
+	}//txt loop
 }
 
 #endif /* GOLDGENERATOR_H_ */

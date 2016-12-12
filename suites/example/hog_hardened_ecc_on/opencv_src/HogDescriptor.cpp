@@ -170,11 +170,8 @@ int HogDescriptor::computeBlockHistograms(const cv::gpu::GpuMat& img) {
 
         int sdc_normalize_verified;
 
-        cv::gpu::GpuMat block_hists2;
-        block_hists.copyTo(block_hists2);
-		
 	sdc_normalize_verified = normalize_hists_ext(nbins, block_stride.width, block_stride.height, img.rows,
-			img.cols, block_hists.ptr<float>(), block_hists2.ptr<float>(), (float) threshold_L2hys, block_hists.rows);
+			img.cols, block_hists.ptr<float>(), (float) threshold_L2hys);
 
         return sdc_normalize_verified;
 }
@@ -339,28 +336,13 @@ int HogDescriptor::detect(const cv::gpu::GpuMat& img, vector<cv::Point>& hits,
 
         int sdc_verified_classify;
 
-        cv::gpu::GpuMat labels2;
-        labels.copyTo(labels2);
-
 	sdc_verified_classify = classify_hists_ext(win_size.height, win_size.width, block_stride.height,
 			block_stride.width, win_stride.height, win_stride.width, img.rows,
 			img.cols, block_hists.ptr<float>(), detector.ptr<float>(),
-			(float) free_coef, (float) hit_threshold, labels.ptr(), labels2.ptr(), labels.rows, wins_per_img.area());
-
-//	std::cout << "tamanho do labels " << labels.size() << " wins per img area " << wins_per_img.area()<< std::endl;
+			(float) free_coef, (float) hit_threshold, labels.ptr());
 
 	labels.download(labels_host);
-//	cv::Mat labels_host2;
-//	labels2.download(labels_host2);
-
 	unsigned char* vec = labels_host.ptr();
-//	unsigned char* vec2 = labels_host2.ptr();
-
-//	for (int i = 0; i < wins_per_img.area(); i++){
-//		if(vec[i] != vec2[i])
-//			std::cout <<  vec[i] << " " << vec2[i] << std::endl;
-//	}
-
 	for (int i = 0; i < wins_per_img.area(); i++) {
 		int y = i / wins_per_img.width;
 		int x = i - wins_per_img.width * y;
@@ -403,23 +385,26 @@ int HogDescriptor::detectMultiScale(const cv::gpu::GpuMat& img,
 		cv::Size sz(cvRound(img.cols / scale), cvRound(img.rows / scale));
 		cv::gpu::GpuMat smaller_img;
 
+		int sdc_resize = 0;
+
 		if (sz == img.size())
 			smaller_img = img;
+
 		else {
 			image_scales[i].create(sz, img.type());
 			switch (img.type()) {
 			case CV_8UC1:
-				resize_8UC1(img, image_scales[i]);
+				sdc_resize = resize_8UC1(img, image_scales[i]);
 				break;
 			case CV_8UC4:
-				resize_8UC4(img, image_scales[i]);
+				sdc_resize = resize_8UC4(img, image_scales[i]);
 				break;
 			}
 			smaller_img = image_scales[i];
 		}
                 int sdc_detected;
 		sdc_detected = detect(smaller_img, locations, hit_threshold, win_stride, padding);
-                if (sdc_detected && !has_sdc) has_sdc = 1;
+                if ((sdc_detected || sdc_resize) && !has_sdc) has_sdc = 1;
   
 		cv::Size scaled_win_size(cvRound(win_size.width * scale),
 				cvRound(win_size.height * scale));

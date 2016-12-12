@@ -71,17 +71,3 @@ ptxas info    : Compiling entry function '_Z25resize_for_hog_kernel_extffN2cv3gp
 ptxas info    : Function properties for _Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEi
     96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
 ptxas info    : Used 11 registers, 356 bytes cmem[0]
-In file included from HOG.cpp:2:0:
-App.h: In member function 'void App::run()':
-App.h:107:37: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
-  start_log_file("cudaHOG", test_info);
-                                     ^
-App.h:112:41: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
-   log_error_detail("Cant open gold file");
-                                         ^
-App.h:125:52: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
-    log_error_detail("wrong parameters on gold file");
-                                                    ^
-App.h:174:46: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
-     log_error_detail("Cant open matrix Frame");
-                                              ^

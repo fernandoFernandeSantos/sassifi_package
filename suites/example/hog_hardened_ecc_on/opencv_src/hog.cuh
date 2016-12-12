@@ -16,12 +16,12 @@
 			const cv::gpu::PtrStepSzb& qangle, float sigma, float* block_hists);
 
 	int normalize_hists_ext(int nbins, int block_stride_x, int block_stride_y,
-			int height, int width, float* block_hists, float* block_hists2, float threshold, int rows);
+			int height, int width, float* block_hists, float threshold);
 
 	int classify_hists_ext(int win_height, int win_width, int block_stride_y,
 			int block_stride_x, int win_stride_y, int win_stride_x, int height,
 			int width, float* block_hists, float* coefs, float free_coef,
-			float threshold, unsigned char* labels, unsigned char* labels2, int rows, int labels_size);
+			float threshold, unsigned char* labels);
 
 	void compute_confidence_hists_ext(int win_height, int win_width,
 			int block_stride_y, int block_stride_x, int win_stride_y,
@@ -46,8 +46,8 @@
 			cv::gpu::PtrStepSzf grad, cv::gpu::PtrStepSzb qangle,
 			bool correct_gamma);
 
-	void resize_8UC1(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst);
-	void resize_8UC4(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst);
+	int resize_8UC1(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst);
+	int resize_8UC4(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst);
 
 
 #endif /* HOG_CUH_ */

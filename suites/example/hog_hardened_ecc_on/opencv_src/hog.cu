@@ -44,6 +44,8 @@
 //#include "opencv2/gpu/device/warp_shuffle.hpp"
 //#include "opencv2/imgproc/imgproc.hpp"
 //#include "opencv2/gpu/gpu.hpp"
+
+
 #include "opencv2/gpu/device/reduce.hpp"
 #include "opencv2/gpu/device/functional.hpp"
 #include "hog.cuh"
@@ -55,8 +57,6 @@
 #define CELLS_PER_BLOCK_X 2
 #define CELLS_PER_BLOCK_Y 2
 
-#define THRESHOLD 0.00000000001
-
 __constant__ int cnbins;
 __constant__ int cblock_stride_x;
 __constant__ int cblock_stride_y;
@@ -67,65 +67,9 @@ __constant__ int cblock_hist_size_2up;
 __constant__ int cdescr_size;
 __constant__ int cdescr_width;
 
-__device__ int kerrors = 0;
 __device__ int kernel_sdc = 0;
 
-__global__ void reset_kernel_sdc() {
-	kernel_sdc = 0;
-}
-//__device__ unsigned times = 0;
-
-__device__ int char_to_int(unsigned char *src, int offset) {
-	int built = src[offset] & 0xffff;
-	built += (src[offset + 1] << 8) & 0xffff;
-	built += (src[offset + 2] << 16) & 0xffff;
-	built += (src[offset + 3] << 24) & 0xffff;
-	return built;
-}
-/*
- for(int i = ty*n+tx; i < (ty*n+tx + 4); i++){
- unsigned char gk = src[i];
- unsigned char ck = dst[i];
- if ((gk - ck) != 0)
- atomicAdd(&kerrors, 1);
- }
- */
-
-__global__ void sdc_check_kernel(float *src, float *dst, int n) {
-
-	int tx = blockIdx.x * 32 + threadIdx.x;
-	int ty = blockIdx.y * 32 + threadIdx.y;
-	//int gk = char_to_int(src, (ty*n+tx));
-	//int ck = char_to_int(dst, (ty*n+tx));
-	float gk = src[(ty * n + tx)];
-	float ck = dst[(ty * n + tx)];
-
-	float diff = fabs((fabs(gk) - fabs(ck)));
-	if (diff >= THRESHOLD) {
-//		if(tx == 0)
-//			printf("%lf\n", diff);
-		atomicAdd(&kerrors, 1);
-	}
-
-	//   atomicAdd(&times, 1);
-}
-
-__global__ void sdc_check_kernel_char(unsigned char *src, unsigned char *dst,
-		int n, int labels_size) {
-
-	int index = blockIdx.x * 32 + threadIdx.x;
-	if (index > labels_size)
-		return;
-	//int ty = blockIdx.y * 32 + threadIdx.y;
-//	int index = (tx);
-	int gk = src[index];
-	int dk = dst[index];
-
-	int diff = abs(gk) - abs(dk);
-	if (abs(diff) >= THRESHOLD)
-		atomicAdd(&kerrors, 1);
-
-}
+__global__ void reset_kernel_sdc() { kernel_sdc = 0; }
 
 /* Returns the nearest upper power of two, works only for
  the typical GPU thread count (pert block) values */
@@ -196,8 +140,8 @@ void set_up_constants_ext(int nbins, int block_stride_x, int block_stride_y,
 
 template<int nblocks> // Number of histogram blocks processed by single GPU thread block
 __global__ void compute_hists_kernel_many_blocks_ext(const int img_block_width,
-		const cv::gpu::PtrStepf grad, const cv::gpu::PtrStepb qangle,
-		float scale, float* block_hists) {
+		const cv::gpu::PtrStepf grad, const cv::gpu::PtrStepb qangle, float scale,
+		float* block_hists) {
 	const int block_x = threadIdx.z;
 	const int cell_x = threadIdx.x / 16;
 	const int cell_y = threadIdx.y;
@@ -273,8 +217,8 @@ __global__ void compute_hists_kernel_many_blocks_ext(const int img_block_width,
 }
 
 void compute_hists_ext(int nbins, int block_stride_x, int block_stride_y,
-		int height, int width, const cv::gpu::PtrStepSzf& grad,
-		const cv::gpu::PtrStepSzb& qangle, float sigma, float* block_hists) {
+		int height, int width, const cv::gpu::PtrStepSzf& grad, const cv::gpu::PtrStepSzb& qangle,
+		float sigma, float* block_hists) {
 	const int nblocks = 1;
 
 	int img_block_width = (width - CELLS_PER_BLOCK_X * CELL_WIDTH
@@ -286,8 +230,7 @@ void compute_hists_ext(int nbins, int block_stride_x, int block_stride_y,
 	dim3 threads(32, 2, nblocks);
 
 	cudaSafeCall(
-			cudaFuncSetCacheConfig(
-					compute_hists_kernel_many_blocks_ext<nblocks>,
+			cudaFuncSetCacheConfig(compute_hists_kernel_many_blocks_ext<nblocks>,
 					cudaFuncCachePreferL1));
 
 	// Precompute gaussian spatial window parameter
@@ -338,209 +281,182 @@ __device__ float reduce_smem_ext(float* smem, float val) {
 ////GRADIENT NORMALIZATION HARDENED///////
 //////////////////////////////////////////
 //////////////////////////////////////////
-template<int nthreads, // Number of threads which process one block historgam
-		int nblocks> // Number of block hisograms processed by one GPU thread block
-__global__ void normalize_hists_kernel_many_blocks_ext(int block_hist_size,
-		const int block_hist_size2, int img_block_width,
-		const int img_block_width2, float* block_hists, float threshold,
-		float threshold2, int& has_sdc) {
+        template <int nthreads, // Number of threads which process one block historgam
+                  int nblocks> // Number of block hisograms processed by one GPU thread block
+        __global__ void normalize_hists_kernel_many_blocks_ext(int block_hist_size, const int block_hist_size2,
+                                                           int img_block_width, const int img_block_width2,
+                                                           float* block_hists, float threshold, float threshold2, int& has_sdc)
+        {
+            
+            /////////////////////////////////////////////////
+            if(block_hist_size != block_hist_size2)
+            	kernel_sdc = 1;
+            
+            if(img_block_width != img_block_width2)
+            	kernel_sdc = 1;
 
-	/////////////////////////////////////////////////
-	if (block_hist_size != block_hist_size2)
-		kernel_sdc = 1;
+            if(threshold != threshold2)
+            	kernel_sdc = 1;
+           /////////////////////////////////////////////////
+  
+            if (blockIdx.x * blockDim.z + threadIdx.z >= img_block_width)
+                return;
 
-	if (img_block_width != img_block_width2)
-		kernel_sdc = 1;
+            float* hist = block_hists + (blockIdx.y * img_block_width +
+                                         blockIdx.x * blockDim.z + threadIdx.z) *
+                                        block_hist_size + threadIdx.x;
 
-	if (threshold != threshold2)
-		kernel_sdc = 1;
-	/////////////////////////////////////////////////
+           float* hist2 = block_hists + (blockIdx.y * img_block_width2 +
+                                         blockIdx.x * blockDim.z + threadIdx.z) *
+                                        block_hist_size2 + threadIdx.x;
 
-	if (blockIdx.x * blockDim.z + threadIdx.z >= img_block_width)
-		return;
+            
 
-	float* hist = block_hists
-			+ (blockIdx.y * img_block_width + blockIdx.x * blockDim.z
-					+ threadIdx.z) * block_hist_size + threadIdx.x;
+            __shared__ float sh_squares[nthreads * nblocks];
+            __shared__ float sh_squares2[nthreads * nblocks];
 
-	float* hist2 = block_hists
-			+ (blockIdx.y * img_block_width2 + blockIdx.x * blockDim.z
-					+ threadIdx.z) * block_hist_size2 + threadIdx.x;
+            float* squares = sh_squares + threadIdx.z * nthreads;
+            float* squares2 = sh_squares2 + threadIdx.z * nthreads;
 
-	__shared__ float sh_squares[nthreads * nblocks];
-	__shared__ float sh_squares2[nthreads * nblocks];
 
-	float* squares = sh_squares + threadIdx.z * nthreads;
-	float* squares2 = sh_squares2 + threadIdx.z * nthreads;
+            float elem = 0.f; 
+	    float elem2 = 0.f;
+ 
+            if (threadIdx.x < block_hist_size) {
+                elem = hist[0];
+                elem2 = hist2[0];
+            }
 
-	float elem = 0.f;
-	float elem2 = 0.f;
+            float sum = reduce_smem_ext<nthreads>(squares, elem * elem);
+            float sum2 = reduce_smem_ext<nthreads>(squares2, elem2 * elem2);
 
-	if (threadIdx.x < block_hist_size) {
-		elem = hist[0];
-		elem2 = hist2[0];
-	}
+            float scale = 1.0f / (::sqrtf(sum) + 0.1f * block_hist_size);
+            float scale2 = 1.0f / (::sqrtf(sum2) + 0.1f * block_hist_size2);
 
-	float sum = reduce_smem_ext<nthreads>(squares, elem * elem);
-	float sum2 = reduce_smem_ext<nthreads>(squares2, elem2 * elem2);
 
-	float scale = 1.0f / (::sqrtf(sum) + 0.1f * block_hist_size);
-	float scale2 = 1.0f / (::sqrtf(sum2) + 0.1f * block_hist_size2);
+            elem = ::min(elem * scale, threshold);
+            elem2 = ::min(elem2 * scale2, threshold2);
 
-	elem = ::min(elem * scale, threshold);
-	elem2 = ::min(elem2 * scale2, threshold2);
+            sum = reduce_smem_ext<nthreads>(squares, elem * elem);
+            sum2 = reduce_smem_ext<nthreads>(squares2, elem2 * elem2);
 
-	sum = reduce_smem_ext<nthreads>(squares, elem * elem);
-	sum2 = reduce_smem_ext<nthreads>(squares2, elem2 * elem2);
+            scale = 1.0f / (::sqrtf(sum) + 1e-3f);
+            scale2 = 1.0f / (::sqrtf(sum2) + 1e-3f);
 
-	scale = 1.0f / (::sqrtf(sum) + 1e-3f);
-	scale2 = 1.0f / (::sqrtf(sum2) + 1e-3f);
+            if (scale != scale2)
+            	kernel_sdc = 1;
 
-	if (scale != scale2)
-		kernel_sdc = 1;
+            if(elem != elem2)
+            	kernel_sdc = 1;
 
-	if (elem != elem2)
-		kernel_sdc = 1;
+            if (threadIdx.x < block_hist_size)
+                hist[0] = elem * scale;
+        }
 
-	if (threadIdx.x < block_hist_size)
-		hist[0] = elem * scale;
-}
 
-int normalize_hists_ext(int nbins, int block_stride_x, int block_stride_y,
-		int height, int width, float* block_hists, float* block_hists2,
-		float threshold, int rows) {
-	const int nblocks = 1;
-	unsigned int errors = 0, errors_prev;
-	int has_sdc = 0;
+        int normalize_hists_ext(int nbins, int block_stride_x, int block_stride_y,
+                             int height, int width, float* block_hists, float threshold)
+        {
+            const int nblocks = 1;
+            int errors = 0;
+            int has_sdc = 0;
 
-	int block_hist_size = nbins * CELLS_PER_BLOCK_X * CELLS_PER_BLOCK_Y;
-	/////////////////////////////////////////////////////////////////////
-	int block_hist_size2 = nbins * CELLS_PER_BLOCK_X * CELLS_PER_BLOCK_Y;
-	/////////////////////////////////////////////////////////////////////
+            int block_hist_size = nbins * CELLS_PER_BLOCK_X * CELLS_PER_BLOCK_Y;
+            /////////////////////////////////////////////////////////////////////	              
+            int block_hist_size2 = nbins * CELLS_PER_BLOCK_X * CELLS_PER_BLOCK_Y;
+            /////////////////////////////////////////////////////////////////////       
 
-	int nthreads = power_2up_ext(block_hist_size);
-	dim3 threads(nthreads, 1, nblocks);
+            int nthreads = power_2up_ext(block_hist_size);
+            dim3 threads(nthreads, 1, nblocks);
 
-	int img_block_width = (width - CELLS_PER_BLOCK_X * CELL_WIDTH
-			+ block_stride_x) / block_stride_x;
-	///////////////////////////////////////
-	int img_block_width2 = (width - CELLS_PER_BLOCK_X * CELL_WIDTH
-			+ block_stride_x) / block_stride_x;
-	float threshold2 = threshold;
-	///////////////////////////////////////
+            int img_block_width = (width - CELLS_PER_BLOCK_X * CELL_WIDTH + block_stride_x) / block_stride_x;
+            ///////////////////////////////////////
+            int img_block_width2 = (width - CELLS_PER_BLOCK_X * CELL_WIDTH + block_stride_x) / block_stride_x;
+            float threshold2 = threshold;
+            ///////////////////////////////////////
 
-	int img_block_height = (height - CELLS_PER_BLOCK_Y * CELL_HEIGHT
-			+ block_stride_y) / block_stride_y;
-	dim3 grid(cv::gpu::divUp(img_block_width, nblocks), img_block_height);
+            int img_block_height = (height - CELLS_PER_BLOCK_Y * CELL_HEIGHT + block_stride_y) / block_stride_y;
+            dim3 grid(cv::gpu::divUp(img_block_width, nblocks), img_block_height);
 
-	/* float *hists_copy;
-	 cudaMalloc((void**)&hists_copy, size);
-	 cudaMemcpy(hists_copy, block_hists, size, cudaMemcpyHostToDevice);
+           /* float *hists_copy;
+            cudaMalloc((void**)&hists_copy, size);
+            cudaMemcpy(hists_copy, block_hists, size, cudaMemcpyHostToDevice);
 
-	 float *hists_backup;
-	 cudaMalloc((void**)&hists_backup, (size * sizeof(float)));
-	 cudaMemcpy(hists_backup, block_hists, size, cudaMemcpyHostToDevice);*/
+            float *hists_backup;
+            cudaMalloc((void**)&hists_backup, (size * sizeof(float)));
+            cudaMemcpy(hists_backup, block_hists, size, cudaMemcpyHostToDevice);*/
 
-	if (nthreads == 32) {
-		normalize_hists_kernel_many_blocks_ext<32, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists, threshold, threshold2, has_sdc);
-		normalize_hists_kernel_many_blocks_ext<32, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists2, threshold, threshold2, has_sdc);
+            if (nthreads == 32) {
+                normalize_hists_kernel_many_blocks_ext<32, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2, img_block_width, img_block_width2, block_hists, threshold, threshold2, has_sdc);
+                /*normalize_hists_kernel_many_blocks<32, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2,  img_block_width, img_block_width2, hists_copy, threshold, threshold2);
 
-		cudaMemcpyFromSymbol(&errors_prev, kerrors, sizeof(unsigned int));
-		sdc_check_kernel<<<grid, threads>>>(block_hists, block_hists2, rows);
-		cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
+		sdc_check_kernel<<<grid, threads>>>(block_hists, hists_copy, rows);
+                cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
+               
+		if (errors != 0) cv::gpu::error("normalize_hists: SDC deteced", __FILE__, __LINE__, "normalize_hists"); //placeholder 
+*/
 
-		if (errors != errors_prev) {
-			has_sdc = 1;
+
 		}
-		//printf("\n-------\nErrors Prev: %d\nErrors:%d\nhas_sdc:%d", errors_prev, errors, has_sdc);
+            else if (nthreads == 64) {
+                normalize_hists_kernel_many_blocks_ext<64, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2, img_block_width, img_block_width2, block_hists, threshold, threshold2, has_sdc);
+               /* normalize_hists_kernel_many_blocks<64, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2,  img_block_width, img_block_width2, hists_copy, threshold, threshold2);
 
-	} else if (nthreads == 64) {
-		normalize_hists_kernel_many_blocks_ext<64, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists, threshold, threshold2, has_sdc);
-		normalize_hists_kernel_many_blocks_ext<64, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists2, threshold, threshold2, has_sdc);
+		sdc_check_kernel<<<grid, threads>>>(block_hists, hists_copy, rows);
+                cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
 
-		cudaMemcpyFromSymbol(&errors_prev, kerrors, sizeof(unsigned int));
-		sdc_check_kernel<<<grid, threads>>>(block_hists, block_hists2, rows);
-		cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
-
-		if (errors != errors_prev) {
-			has_sdc = 1;
+		if (errors != 0) cv::gpu::error("normalize_hists: SDC deteced", __FILE__, __LINE__, "normalize_hists"); //placeholder
+*/
 		}
-		//printf("\n-------\nErrors Prev: %d\nErrors:%d\nhas_sdc:%d", errors_prev, errors, has_sdc);
+            else if (nthreads == 128) {
+                normalize_hists_kernel_many_blocks_ext<64, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2, img_block_width, img_block_width2, block_hists, threshold, threshold2, has_sdc);
+                /*normalize_hists_kernel_many_blocks<64, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2,  img_block_width, img_block_width2, hists_copy, threshold, threshold2);
 
-	} else if (nthreads == 128) {
-		normalize_hists_kernel_many_blocks_ext<64, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists, threshold, threshold2, has_sdc);
-		normalize_hists_kernel_many_blocks_ext<64, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists2, threshold, threshold2, has_sdc);
+		sdc_check_kernel<<<grid, threads>>>(block_hists, hists_copy, rows);
+                cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
 
-		cudaMemcpyFromSymbol(&errors_prev, kerrors, sizeof(unsigned int));
-		sdc_check_kernel<<<grid, threads>>>(block_hists, block_hists2, rows);
-		cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
-
-		if (errors != errors_prev) {
-			has_sdc = 1;
+		if (errors != 0) cv::gpu::error("normalize_hists: SDC deteced", __FILE__, __LINE__, "normalize_hists"); //placeholder
+*/
 		}
-		//printf("\n-------\nErrors Prev: %d\nErrors:%d\nhas_sdc:%d", errors_prev, errors, has_sdc);
-	} else if (nthreads == 256) {
-		normalize_hists_kernel_many_blocks_ext<256, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists, threshold, threshold2, has_sdc);
-		normalize_hists_kernel_many_blocks_ext<256, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists2, threshold, threshold2, has_sdc);
+            else if (nthreads == 256) {
+                normalize_hists_kernel_many_blocks_ext<256, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2, img_block_width, img_block_width2, block_hists, threshold, threshold2, has_sdc);
+               /* normalize_hists_kernel_many_blocks<256, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2,  img_block_width, img_block_width2, hists_copy, threshold, threshold2);
 
-		cudaMemcpyFromSymbol(&errors_prev, kerrors, sizeof(unsigned int));
-		sdc_check_kernel<<<grid, threads>>>(block_hists, block_hists2, rows);
-		cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
+		sdc_check_kernel<<<grid, threads>>>(block_hists, hists_copy, rows);
+                cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
 
-		if (errors != errors_prev) {
-			has_sdc = 1;
+		if (errors != 0) cv::gpu::error("normalize_hists: SDC deteced", __FILE__, __LINE__, "normalize_hists"); //placeholder
+*/		
 		}
-		//printf("\n-------\nErrors Prev: %d\nErrors:%d\nhas_sdc:%d", errors_prev, errors, has_sdc);
-	} else if (nthreads == 512) {
-		normalize_hists_kernel_many_blocks_ext<512, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists, threshold, threshold2, has_sdc);
-		normalize_hists_kernel_many_blocks_ext<512, nblocks> <<<grid, threads>>>(
-				block_hist_size, block_hist_size2, img_block_width,
-				img_block_width2, block_hists2, threshold, threshold2, has_sdc);
+            else if (nthreads == 512) {
+                normalize_hists_kernel_many_blocks_ext<512, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2, img_block_width, img_block_width2, block_hists, threshold, threshold2, has_sdc);
+              /*  normalize_hists_kernel_many_blocks<512, nblocks><<<grid, threads>>>(block_hist_size, block_hist_size2,  img_block_width, img_block_width2, hists_copy, threshold, threshold2);
 
-		cudaMemcpyFromSymbol(&errors_prev, kerrors, sizeof(unsigned int));
-		sdc_check_kernel<<<grid, threads>>>(block_hists, block_hists2, rows);
-		cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
+		sdc_check_kernel<<<grid, threads>>>(block_hists, hists_copy, rows);
+                cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
 
-		if (errors != errors_prev) {
-			has_sdc = 1;
+		if (errors != 0) cv::gpu::error("normalize_hists: SDC deteced", __FILE__, __LINE__, "normalize_hists"); //placeholder
+*/
 		}
-		//printf("\n-------\nErrors Prev: %d\nErrors:%d\nhas_sdc:%d", errors_prev, errors, has_sdc);
-	} else
-		cv::gpu::error(
-				"normalize_hists: histogram's size is too big, try to decrease number of bins",
-				__FILE__, __LINE__, "normalize_hists");
+            else
+                cv::gpu::error("normalize_hists: histogram's size is too big, try to decrease number of bins", __FILE__, __LINE__, "normalize_hists");
+	    
 
-	cudaSafeCall(cudaGetLastError());
+            cudaSafeCall( cudaGetLastError() );
 
-	cudaSafeCall(cudaDeviceSynchronize());
+            cudaSafeCall( cudaDeviceSynchronize() );
 
-	int kernel_sdc_copy;
-	cudaMemcpyFromSymbol(&kernel_sdc_copy, kernel_sdc, sizeof(int));
-	if ((errors != errors_prev) || (kernel_sdc_copy == 1))
-		has_sdc = 1;
-	//printf("\n---NORMALIZE---\nErrors Prev: %d\nErrors:%d\nhas_sdc:%d\nkernel_sdc: %d", errors_prev, errors, has_sdc, kernel_sdc_copy);
-	reset_kernel_sdc<<<1, 1>>>();
+		cudaMemcpyFromSymbol(&errors, kernel_sdc, sizeof(int));
+		if (errors) has_sdc = 1;
+		//printf("\n---NORMALIZE---\nhas_sdc:%d\nkernel_sdc: %d",has_sdc, errors);
+		reset_kernel_sdc<<<1,1>>>();
 
-	return has_sdc;
-}
+	    return has_sdc;
+        }
+
+
+ 
+
 
 //---------------------------------------------------------------------
 //  Linear SVM based classification
@@ -577,8 +493,7 @@ __global__ void compute_confidence_hists_kernel_many_blocks_ext(
 
 	const int tid = threadIdx.z * nthreads + threadIdx.x;
 
-	cv::gpu::device::reduce < nthreads
-			> (products, product, tid, cv::gpu::device::plus<float>());
+	cv::gpu::device::reduce < nthreads > (products, product, tid, cv::gpu::device::plus<float>());
 
 	if (threadIdx.x == 0)
 		confidences[blockIdx.y * img_win_width + blockIdx.x * blockDim.z + win_x] =
@@ -586,10 +501,10 @@ __global__ void compute_confidence_hists_kernel_many_blocks_ext(
 
 }
 
-void compute_confidence_hists_ext(int win_height, int win_width,
-		int block_stride_y, int block_stride_x, int win_stride_y,
-		int win_stride_x, int height, int width, float* block_hists,
-		float* coefs, float free_coef, float threshold, float *confidences) {
+void compute_confidence_hists_ext(int win_height, int win_width, int block_stride_y,
+		int block_stride_x, int win_stride_y, int win_stride_x, int height,
+		int width, float* block_hists, float* coefs, float free_coef,
+		float threshold, float *confidences) {
 	const int nthreads = 256;
 	const int nblocks = 1;
 
@@ -621,175 +536,136 @@ void compute_confidence_hists_ext(int win_height, int win_width,
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-template<int nthreads, // Number of threads per one histogram block
-		int nblocks> // Number of histogram block processed by single GPU thread block
-__global__ void classify_hists_kernel_many_blocks_ext(int img_win_width,
-		const int img_win_width2, int img_block_width,
-		const int img_block_width2, int win_block_stride_x,
-		const int win_block_stride_x2, int win_block_stride_y,
-		const int win_block_stride_y2, const float* block_hists,
-		const float* coefs, float free_coef, float free_coef2, float threshold,
-		float threshold2, unsigned char* labels) {
+        template <int nthreads, // Number of threads per one histogram block
+                  int nblocks>  // Number of histogram block processed by single GPU thread block
+        __global__ void classify_hists_kernel_many_blocks_ext(int img_win_width, const int img_win_width2, int img_block_width, const int img_block_width2, int win_block_stride_x, const int win_block_stride_x2, int win_block_stride_y, const int win_block_stride_y2, const float* block_hists, const float* coefs, float free_coef, float free_coef2, float threshold, float threshold2, unsigned char* labels)
+        {
 
-	if (img_win_width != img_win_width2)
-		//kernel_sdc = 1;
-		atomicExch(&kernel_sdc, 1);
+            if (img_win_width != img_win_width2)
+            	    	kernel_sdc = 1;
 
-	if (img_block_width != img_block_width2)
-		kernel_sdc = 1;
+            if (img_block_width != img_block_width2)
+            	    	kernel_sdc = 1;
 
-	if (win_block_stride_x != win_block_stride_x2)
-		atomicExch(&kernel_sdc, 1);
+	    if (win_block_stride_x != win_block_stride_x2)
+            	    	kernel_sdc = 1;
 
-	if (win_block_stride_y != win_block_stride_y2)
-		atomicExch(&kernel_sdc, 1);
+	    if (win_block_stride_y != win_block_stride_y2)
+            	    	kernel_sdc = 1;
 
-	if (free_coef != free_coef2)
-		atomicExch(&kernel_sdc, 1);
+            if (free_coef != free_coef2)
+            	    	kernel_sdc = 1;
 
-	if (threshold != threshold2)
-		atomicExch(&kernel_sdc, 1);
+	    if (threshold != threshold2)
+            	    	kernel_sdc = 1;
 
-	int win_x = threadIdx.z;
-	const int win_x2 = threadIdx.z;
 
-	if (win_x != win_x2)
-		atomicExch(&kernel_sdc, 1);
+            int win_x = threadIdx.z;
+            const int win_x2 = threadIdx.z;
 
-	if (blockIdx.x * blockDim.z + win_x >= img_win_width)
-		return;
 
-	const float* hist = block_hists
-			+ (blockIdx.y * win_block_stride_y * img_block_width
-					+ blockIdx.x * win_block_stride_x * blockDim.z + win_x)
-					* cblock_hist_size;
+            if (win_x != win_x2)
+            	kernel_sdc = 1;
 
-	const float* hist2 = block_hists
-			+ (blockIdx.y * win_block_stride_y2 * img_block_width2
-					+ blockIdx.x * win_block_stride_x2 * blockDim.z + win_x)
-					* cblock_hist_size;
+            if (blockIdx.x * blockDim.z + win_x >= img_win_width)
+                return;
 
-	float product = 0.f;
-	float product2 = 0.f;
+            const float* hist = block_hists + (blockIdx.y * win_block_stride_y * img_block_width +
+                                               blockIdx.x * win_block_stride_x * blockDim.z + win_x) *
+                                              cblock_hist_size;
 
-	for (int i = threadIdx.x; i < cdescr_size; i += nthreads) {
-		int offset_y = i / cdescr_width;
-		int offset_x = i - offset_y * cdescr_width;
-		product +=
-				coefs[i]
-						* hist[offset_y * img_block_width * cblock_hist_size
-								+ offset_x];
-		product2 += coefs[i]
-				* hist2[offset_y * img_block_width2 * cblock_hist_size
-						+ offset_x];
-	}
+            const float* hist2 = block_hists + (blockIdx.y * win_block_stride_y2 * img_block_width2 +
+                                               blockIdx.x * win_block_stride_x2 * blockDim.z + win_x) *
+                                              cblock_hist_size;
 
-	__shared__ float products[nthreads * nblocks];
-	__shared__ float products2[nthreads * nblocks];
+            float product = 0.f;
+            float product2 = 0.f;
 
-	const int tid = threadIdx.z * nthreads + threadIdx.x;
+            for (int i = threadIdx.x; i < cdescr_size; i += nthreads)
+            {
+                int offset_y = i / cdescr_width;
+                int offset_x = i - offset_y * cdescr_width;
+                product += coefs[i] * hist[offset_y * img_block_width * cblock_hist_size + offset_x];
+                product2 += coefs[i] * hist2[offset_y * img_block_width2 * cblock_hist_size + offset_x];
+            }
 
-	cv::gpu::device::reduce < nthreads
-			> (products, product, tid, cv::gpu::device::plus<float>());
-	cv::gpu::device::reduce < nthreads
-			> (products2, product2, tid, cv::gpu::device::plus<float>());
+            __shared__ float products[nthreads * nblocks];
+            __shared__ float products2[nthreads * nblocks];
+          
 
-	/*if ((product - product2) > 0.1)
-	 asm("trap;");*/
+            const int tid = threadIdx.z * nthreads + threadIdx.x;
 
-	if (win_x != win_x2)
-		atomicExch(&kernel_sdc, 1);
+            cv::gpu::device::reduce<nthreads>(products, product, tid, cv::gpu::device::plus<float>());
+            cv::gpu::device::reduce<nthreads>(products2, product2, tid, cv::gpu::device::plus<float>());
 
-	if (threadIdx.x == 0)
-		labels[blockIdx.y * img_win_width + blockIdx.x * blockDim.z + win_x] =
-				(product + free_coef >= threshold);
-}
 
-int classify_hists_ext(int win_height, int win_width, int block_stride_y,
-		int block_stride_x, int win_stride_y, int win_stride_x, int height,
-		int width, float* block_hists, float* coefs, float free_coef,
-		float threshold, unsigned char* labels, unsigned char* labels2,
-		int rows, int labels_size) {
-	const int nthreads = 256;
-	const int nblocks = 1;
-	unsigned int errors = 0, errors_prev = 0;
-	int has_sdc = 0;
+            /*if ((product - product2) > 0.1)
+            	asm("trap;");*/
 
-	int win_block_stride_x = win_stride_x / block_stride_x;
-	int win_block_stride_x2 = win_stride_x / block_stride_x;
+            if (win_x != win_x2)
+            	kernel_sdc = 1;
 
-	int win_block_stride_y = win_stride_y / block_stride_y;
-	int win_block_stride_y2 = win_stride_y / block_stride_y;
 
-	int img_win_width = (width - win_width + win_stride_x) / win_stride_x;
-	int img_win_width2 = (width - win_width + win_stride_x) / win_stride_x;
 
-	float threshold2 = threshold;
+            if (threadIdx.x == 0)
+                labels[blockIdx.y * img_win_width + blockIdx.x * blockDim.z + win_x] = (product + free_coef >= threshold);
+        }
 
-	float free_coef2 = free_coef;
 
-	int img_win_height = (height - win_height + win_stride_y) / win_stride_y;
+        int classify_hists_ext(int win_height, int win_width, int block_stride_y, int block_stride_x,
+                            int win_stride_y, int win_stride_x, int height, int width, float* block_hists,
+                            float* coefs, float free_coef, float threshold, unsigned char* labels)
+        {
+            const int nthreads = 256;
+            const int nblocks = 1;
+            int errors = 0;
+            int has_sdc = 0;
 
-	dim3 threads(nthreads, 1, nblocks);
-	dim3 grid(cv::gpu::divUp(img_win_width, nblocks), img_win_height);
+            int win_block_stride_x = win_stride_x / block_stride_x;
+            int win_block_stride_x2 = win_stride_x / block_stride_x;
 
-	cudaSafeCall(
-			cudaFuncSetCacheConfig(
-					classify_hists_kernel_many_blocks_ext<nthreads, nblocks>,
-					cudaFuncCachePreferL1));
+            int win_block_stride_y = win_stride_y / block_stride_y;
+            int win_block_stride_y2 = win_stride_y / block_stride_y;
 
-	int img_block_width = (width - CELLS_PER_BLOCK_X * CELL_WIDTH
-			+ block_stride_x) / block_stride_x;
-	int img_block_width2 = (width - CELLS_PER_BLOCK_X * CELL_WIDTH
-			+ block_stride_x) / block_stride_x;
+            int img_win_width = (width - win_width + win_stride_x) / win_stride_x;
+            int img_win_width2 = (width - win_width + win_stride_x) / win_stride_x;
 
-	classify_hists_kernel_many_blocks_ext<nthreads, nblocks> <<<grid, threads>>>(
-			img_win_width, img_win_width2, img_block_width, img_block_width2,
-			win_block_stride_x, win_block_stride_x2, win_block_stride_y,
-			win_block_stride_y2, block_hists, coefs, free_coef, free_coef2,
-			threshold, threshold2, labels);
+            float threshold2 = threshold;
 
-	classify_hists_kernel_many_blocks_ext<nthreads, nblocks> <<<grid, threads>>>(
-			img_win_width, img_win_width2, img_block_width, img_block_width2,
-			win_block_stride_x, win_block_stride_x2, win_block_stride_y,
-			win_block_stride_y2, block_hists, coefs, free_coef, free_coef2,
-			threshold, threshold2, labels2);
+            float free_coef2 = free_coef;
+        
+            int img_win_height = (height - win_height + win_stride_y) / win_stride_y;
 
-	long blocks_label_check = ceil(double(labels_size) / double(1024));
-	long threads_check = ceil(double(labels_size) / double(blocks_label_check));
+            dim3 threads(nthreads, 1, nblocks);
+            dim3 grid(cv::gpu::divUp(img_win_width, nblocks), img_win_height);
 
-	cudaMemcpyFromSymbol(&errors_prev, kerrors, sizeof(unsigned int));
-//	printf(
-//			"\ngrid x %d y %d z %d\nthreads x %d y %d  z %d\nlabels_size %d threads_check %d  blocks_label_check %d\n",
-//			grid.x, grid.y, grid.z, threads.x, threads.y, threads.z,
-//			labels_size, threads_check, blocks_label_check);
+            cudaSafeCall(cudaFuncSetCacheConfig(classify_hists_kernel_many_blocks_ext<nthreads, nblocks>, cudaFuncCachePreferL1));
 
-	sdc_check_kernel_char<<<blocks_label_check, threads_check>>>(labels,
-			labels2, rows, labels_size);
-	cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
+            int img_block_width = (width - CELLS_PER_BLOCK_X * CELL_WIDTH + block_stride_x) / block_stride_x;
+            int img_block_width2 = (width - CELLS_PER_BLOCK_X * CELL_WIDTH + block_stride_x) / block_stride_x;
 
-	int kernel_sdc_copy;
-//	cudaMemcpyFromSymbol(&kernel_sdc_copy, kernel_sdc, sizeof(int));
+            classify_hists_kernel_many_blocks_ext<nthreads, nblocks><<<grid, threads>>>( img_win_width, img_win_width2, img_block_width, img_block_width2, win_block_stride_x, win_block_stride_x2, win_block_stride_y, win_block_stride_y2,  block_hists, coefs, free_coef, free_coef2,threshold, threshold2, labels);
 
-//	printf("\n\nTem sdc? %d\n\n", kernel_sdc_copy);
+           /* classify_hists_kernel_many_blocks<nthreads, nblocks><<<grid, threads>>>( img_win_width, img_win_width2, img_block_width, img_block_width2, win_block_stride_x, win_block_stride_x2, win_block_stride_y, win_block_stride_y2,  block_hists, coefs, free_coef, free_coef2,threshold, threshold2, labels_copy);
 
-	cudaMemcpyFromSymbol(&kernel_sdc_copy, kernel_sdc, sizeof(int));
+		sdc_check_kernel_char<<<grid, threads>>>(labels, labels, rows); //TODO: labels, labels_copy different? (labels, labels works for overhead calculation)
+                cudaMemcpyFromSymbol(&errors, kerrors, sizeof(unsigned int));
+               
+		if (errors != 0) cv::gpu::error("classify_hists: SDC deteced", __FILE__, __LINE__, "classify_hists"); //placeholder
+*/
 
-	if ((errors != errors_prev) || (kernel_sdc_copy == 1))
-		has_sdc = 1;
-	/*printf(
-			"\n---CLASSIFY---\nErrors Prev: %d\nErrors:%d\nhas_sdc:%d\nkernel_sdc: %d",
-			errors_prev, errors, has_sdc, kernel_sdc_copy);*/
-	reset_kernel_sdc<<<1, 1>>>();
 
-	cudaSafeCall(cudaGetLastError());
+            cudaSafeCall( cudaGetLastError() );
 
-	cudaSafeCall(cudaDeviceSynchronize());
+            cudaSafeCall( cudaDeviceSynchronize() );
 
-	//printf("\n %d", errors);
+		cudaMemcpyFromSymbol(&errors, kernel_sdc, sizeof(int));
+		if (errors) has_sdc = 1;
+		//printf("\n---CLASSIFY---\nhas_sdc:%d\nkernel_sdc: %d",has_sdc, errors);
+		reset_kernel_sdc<<<1,1>>>();
 
-	return has_sdc;
-}
+            return has_sdc;
+        }
 
 //----------------------------------------------------------------------------
 // Extract descriptors
@@ -815,10 +691,9 @@ __global__ void extract_descrs_by_rows_kernel_ext(const int img_block_width,
 	}
 }
 
-void extract_descrs_by_rows_ext(int win_height, int win_width,
-		int block_stride_y, int block_stride_x, int win_stride_y,
-		int win_stride_x, int height, int width, float* block_hists,
-		cv::gpu::PtrStepSzf descriptors) {
+void extract_descrs_by_rows_ext(int win_height, int win_width, int block_stride_y,
+		int block_stride_x, int win_stride_y, int win_stride_x, int height,
+		int width, float* block_hists, cv::gpu::PtrStepSzf descriptors) {
 	const int nthreads = 256;
 
 	int win_block_stride_x = win_stride_x / block_stride_x;
@@ -830,9 +705,8 @@ void extract_descrs_by_rows_ext(int win_height, int win_width,
 
 	int img_block_width = (width - CELLS_PER_BLOCK_X * CELL_WIDTH
 			+ block_stride_x) / block_stride_x;
-	extract_descrs_by_rows_kernel_ext<nthreads> <<<grid, threads>>>(
-			img_block_width, win_block_stride_x, win_block_stride_y,
-			block_hists, descriptors);
+	extract_descrs_by_rows_kernel_ext<nthreads> <<<grid, threads>>>(img_block_width,
+			win_block_stride_x, win_block_stride_y, block_hists, descriptors);
 	cudaSafeCall(cudaGetLastError());
 
 	cudaSafeCall(cudaDeviceSynchronize());
@@ -863,10 +737,9 @@ __global__ void extract_descrs_by_cols_kernel_ext(const int img_block_width,
 	}
 }
 
-void extract_descrs_by_cols_ext(int win_height, int win_width,
-		int block_stride_y, int block_stride_x, int win_stride_y,
-		int win_stride_x, int height, int width, float* block_hists,
-		cv::gpu::PtrStepSzf descriptors) {
+void extract_descrs_by_cols_ext(int win_height, int win_width, int block_stride_y,
+		int block_stride_x, int win_stride_y, int win_stride_x, int height,
+		int width, float* block_hists, cv::gpu::PtrStepSzf descriptors) {
 	const int nthreads = 256;
 
 	int win_block_stride_x = win_stride_x / block_stride_x;
@@ -878,9 +751,8 @@ void extract_descrs_by_cols_ext(int win_height, int win_width,
 
 	int img_block_width = (width - CELLS_PER_BLOCK_X * CELL_WIDTH
 			+ block_stride_x) / block_stride_x;
-	extract_descrs_by_cols_kernel_ext<nthreads> <<<grid, threads>>>(
-			img_block_width, win_block_stride_x, win_block_stride_y,
-			block_hists, descriptors);
+	extract_descrs_by_cols_kernel_ext<nthreads> <<<grid, threads>>>(img_block_width,
+			win_block_stride_x, win_block_stride_y, block_hists, descriptors);
 	cudaSafeCall(cudaGetLastError());
 
 	cudaSafeCall(cudaDeviceSynchronize());
@@ -891,8 +763,7 @@ void extract_descrs_by_cols_ext(int win_height, int win_width,
 
 template<int nthreads, int correct_gamma>
 __global__ void compute_gradients_8UC4_kernel_ext(int height, int width,
-		const cv::gpu::PtrStepb img, float angle_scale, cv::gpu::PtrStepf grad,
-		cv::gpu::PtrStepb qangle) {
+		const cv::gpu::PtrStepb img, float angle_scale, cv::gpu::PtrStepf grad, cv::gpu::PtrStepb qangle) {
 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
 
 	const uchar4* row = (const uchar4*) img.ptr(blockIdx.y);
@@ -991,9 +862,8 @@ __global__ void compute_gradients_8UC4_kernel_ext(int height, int width,
 }
 
 void compute_gradients_8UC4_ext(int nbins, int height, int width,
-		const cv::gpu::PtrStepSzb& img, float angle_scale,
-		cv::gpu::PtrStepSzf grad, cv::gpu::PtrStepSzb qangle,
-		bool correct_gamma) {
+		const cv::gpu::PtrStepSzb& img, float angle_scale, cv::gpu::PtrStepSzf grad,
+		cv::gpu::PtrStepSzb qangle, bool correct_gamma) {
 	(void) nbins;
 	const int nthreads = 256;
 
@@ -1014,8 +884,7 @@ void compute_gradients_8UC4_ext(int nbins, int height, int width,
 
 template<int nthreads, int correct_gamma>
 __global__ void compute_gradients_8UC1_kernel_ext(int height, int width,
-		const cv::gpu::PtrStepb img, float angle_scale, cv::gpu::PtrStepf grad,
-		cv::gpu::PtrStepb qangle) {
+		const cv::gpu::PtrStepb img, float angle_scale, cv::gpu::PtrStepf grad, cv::gpu::PtrStepb qangle) {
 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
 
 	const unsigned char* row = (const unsigned char*) img.ptr(blockIdx.y);
@@ -1067,9 +936,8 @@ __global__ void compute_gradients_8UC1_kernel_ext(int height, int width,
 }
 
 void compute_gradients_8UC1_ext(int nbins, int height, int width,
-		const cv::gpu::PtrStepSzb& img, float angle_scale,
-		cv::gpu::PtrStepSzf grad, cv::gpu::PtrStepSzb qangle,
-		bool correct_gamma) {
+		const cv::gpu::PtrStepSzb& img, float angle_scale, cv::gpu::PtrStepSzf grad,
+		cv::gpu::PtrStepSzb qangle, bool correct_gamma) {
 	(void) nbins;
 	const int nthreads = 256;
 
@@ -1094,8 +962,10 @@ void compute_gradients_8UC1_ext(int nbins, int height, int width,
 texture<uchar4, 2, cudaReadModeNormalizedFloat> resize8UC4_tex;
 texture<uchar, 2, cudaReadModeNormalizedFloat> resize8UC1_tex;
 
-__global__ void resize_for_hog_kernel_ext(float sx, float sy,
-		cv::gpu::PtrStepSz<uchar> dst, int colOfs) {
+__global__ void resize_for_hog_kernel_ext(float sx, float sy, cv::gpu::PtrStepSz<uchar> dst,
+		int colOfs, int colOfs2) {
+
+	if (colOfs != colOfs2) kernel_sdc = 1;
 	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -1103,8 +973,10 @@ __global__ void resize_for_hog_kernel_ext(float sx, float sy,
 		dst.ptr(y)[x] = tex2D(resize8UC1_tex, x * sx + colOfs, y * sy) * 255;
 }
 
-__global__ void resize_for_hog_kernel_ext(float sx, float sy,
-		cv::gpu::PtrStepSz<uchar4> dst, int colOfs) {
+__global__ void resize_for_hog_kernel_ext(float sx, float sy, cv::gpu::PtrStepSz<uchar4> dst,
+		int colOfs, int colOfs2) {
+
+	if (colOfs != colOfs2) kernel_sdc = 1;
 	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -1116,12 +988,13 @@ __global__ void resize_for_hog_kernel_ext(float sx, float sy,
 }
 
 template<class T, class TEX>
-static void resize_for_hog_ext(const cv::gpu::PtrStepSzb& src,
-		cv::gpu::PtrStepSzb dst, TEX& tex) {
+static int resize_for_hog_ext(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst, TEX& tex) {
 	tex.filterMode = cudaFilterModeLinear;
 
 	size_t texOfs = 0;
-	int colOfs = 0;
+	int colOfs = 0, colOfs2 = 0;
+
+	int errors = 0, has_sdc = 0;
 
 	cudaChannelFormatDesc desc = cudaCreateChannelDesc<T>();
 	cudaSafeCall(
@@ -1130,6 +1003,7 @@ static void resize_for_hog_ext(const cv::gpu::PtrStepSzb& src,
 
 	if (texOfs != 0) {
 		colOfs = static_cast<int>(texOfs / sizeof(T));
+		colOfs2 = static_cast<int>(texOfs / sizeof(T));
 		cudaSafeCall(cudaUnbindTexture(tex));
 		cudaSafeCall(
 				cudaBindTexture2D(&texOfs, tex, src.data, desc, src.cols,
@@ -1137,24 +1011,32 @@ static void resize_for_hog_ext(const cv::gpu::PtrStepSzb& src,
 	}
 
 	dim3 threads(32, 8);
-	dim3 grid(cv::gpu::divUp(dst.cols, threads.x),
-			cv::gpu::divUp(dst.rows, threads.y));
+	dim3 grid(cv::gpu::divUp(dst.cols, threads.x), cv::gpu::divUp(dst.rows, threads.y));
 
 	float sx = static_cast<float>(src.cols) / dst.cols;
 	float sy = static_cast<float>(src.rows) / dst.rows;
 
-	resize_for_hog_kernel_ext<<<grid, threads>>>(sx, sy,
-			(cv::gpu::PtrStepSz<T>) dst, colOfs);
+	resize_for_hog_kernel_ext<<<grid, threads>>>(sx, sy, (cv::gpu::PtrStepSz<T> ) dst,
+			colOfs, colOfs2);
 	cudaSafeCall(cudaGetLastError());
 
 	cudaSafeCall(cudaDeviceSynchronize());
 
 	cudaSafeCall(cudaUnbindTexture(tex));
+
+		cudaMemcpyFromSymbol(&errors, kernel_sdc, sizeof(int));
+		if (errors) has_sdc = 1;
+		//printf("\n---RESIZE---\nhas_sdc:%d\nkernel_sdc: %d",has_sdc, errors);
+		reset_kernel_sdc<<<1,1>>>();
+
+	return has_sdc;
+
+
 }
 
-void resize_8UC1(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst) {
-	resize_for_hog_ext<uchar>(src, dst, resize8UC1_tex);
+int resize_8UC1(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst) {
+	return resize_for_hog_ext<uchar>(src, dst, resize8UC1_tex);
 }
-void resize_8UC4(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst) {
-	resize_for_hog_ext<uchar4>(src, dst, resize8UC4_tex);
+int resize_8UC4(const cv::gpu::PtrStepSzb& src, cv::gpu::PtrStepSzb dst) {
+	return resize_for_hog_ext<uchar4>(src, dst, resize8UC4_tex);
 }

@@ -27,12 +27,26 @@ num_regs_p = {
 	       '_Z30CalcVolumeForceForElems_kernelILb1EEvPKdS1_S1_S1_diiPKiS1_S1_S1_S1_S1_S1_S1_S1_PdS4_S4_Pii':254,
 	       '_Z45ApplyMaterialPropertiesAndUpdateVolume_kernelidddPdS_S_S_dddddPiS_S_S_S_dS_dS0_iPKiS2_i':87,},
     'lud':{'_Z13lud_perimeterPdii':44,'_Z12lud_diagonalPdii':44,},
-    'hog_hardened_ecc_off':{ '_Z37classify_hists_kernel_many_blocks_extILi256ELi1EEviiiiPKfS1_ffPh':25, '_Z38normalize_hists_kernel_many_blocks_extILi64ELi1EEviiPff':30,},
-          #'_Z36compute_hists_kernel_many_blocks_extILi1EEviN2cv3gpu7PtrStepIfEENS2_IhEEfPf':32,
-          #'_Z33compute_gradients_8UC4_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_':31,
-          #           '_Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEi':11,
+    
+    'hog_hardened_ecc_off':{'_Z36compute_hists_kernel_many_blocks_extILi1EEviN2cv3gpu7PtrStepIfEENS2_IhEEfPf':32,
+							'_Z37classify_hists_kernel_many_blocks_extILi256ELi1EEviiiiPKfS1_ffPh':25, 
+							'_Z38normalize_hists_kernel_many_blocks_extILi64ELi1EEviiPff':30, 
+							'_Z33compute_gradients_8UC4_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_':31,
+							'_Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEi':11,
+                     },
+    'hog_extracted':{'_Z36compute_hists_kernel_many_blocks_extILi1EEviN2cv3gpu7PtrStepIfEENS2_IhEEfPf':32,
+							'_Z37classify_hists_kernel_many_blocks_extILi256ELi1EEviiiiPKfS1_ffPh':19, 
+							'_Z38normalize_hists_kernel_many_blocks_extILi64ELi1EEviiPff':23, 
+							'_Z33compute_gradients_8UC4_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_':31,
+							'_Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEi':11,
+		},
+	'hog_hardned_ecc_on':{'_Z36compute_hists_kernel_many_blocks_extILi1EEviN2cv3gpu7PtrStepIfEENS2_IhEEfPf':32,
+							'_Z37classify_hists_kernel_many_blocks_extILi256ELi1EEviiiiPKfS1_ffPh':25, 
+							'_Z38normalize_hists_kernel_many_blocks_extILi64ELi1EEviiPff':30, 
+							'_Z33compute_gradients_8UC4_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_':31,
+							'_Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEi':11,
+							},
 }
-
 NUM_INJECTIONS_P = 3000
 
 verbose_p = True

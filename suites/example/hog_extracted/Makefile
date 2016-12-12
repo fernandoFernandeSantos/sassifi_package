@@ -1,8 +1,7 @@
-TARGET = hog
+TARGET = hog_extracted
 SUITE_NAME = example
 
 OPTION = none
-CXX=g++
 
 GENCODE = -gencode arch=compute_35,code=sm_35
 INST_LIB_DIR = /home/carol/SASSIFI/SASSI/instlibs/lib/
@@ -61,24 +60,12 @@ endif
 LOGHELPER_INC=../include/
 LOGHELPER_LIB=../include/
 
+CUDA=cuda-7.0
+NVIDIA_LIB=/usr/local/$(CUDA)/lib64/
+HOG_EXT_DIR = ./
+ALL_CV_FLAGS=-L/usr/local/lib -lopencv_core -lopencv_imgproc -lopencv_highgui  -lopencv_objdetect
+CFLAGS+= -L$(NVIDIA_LIB) -lcuda -lcudart
 
-#NVIDIA_INC=/usr/local/cuda-7.0/include/
-#NVIDIA_LIB=/usr/local/cuda-7.0/lib64/
-
-PURE_NVCC=/usr/local/cuda-7.0/bin/nvcc
-LOGS=1
-ifeq ($(LOGS), 1)
-OPTS = -DLOGS
-LOG_FLAGS = -I$(LOGHELPER_LIB) -L$(LOGHELPER_LIB) -lLogHelperCuda -DLOGS
-endif
-
-debug = -g -G
-ALL_CV_FLAGS=-L/usr/local/lib -lopencv_core -lopencv_imgproc -lopencv_highgui  -lopencv_objdetect 
-
-ALL_GOLD_GEN=-L/usr/local/lib -lopencv_core -lopencv_imgproc -lopencv_highgui  -lopencv_objdetect  -lopencv_gpu -lopencv_calib3d -lopencv_video -lopencv_legacy -lopencv_stitching -lopencv_superres \
-			-lopencv_photo  -lopencv_ml -lopencv_ml \
-			-lopencv_contrib -lopencv_features2d -lopencv_flann \
-			-lopencv_nonfree 
 
 #NVCC_FLAGS = -O3 -g -rdc=true -Xptxas -v
 #LINK_FLAGS = -std=c++11 -g -lcudart -lcudadevrt -lm 
@@ -87,13 +74,6 @@ LINK_FLAGS = -std=c++11 $(GENCODE) -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
 
 all: clean $(TARGET) install
 
-$(TARGET): HOG.cpp
-	$(NVCC) opencv_src/hog.cu -c  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
-	$(NVCC) opencv_src/HogDescriptor.cpp -c $(ALL_CV_FLAGS)
-	$(NVCC) HOG.cpp -c $(ALL_CV_FLAGS) $(LOG_FLAGS)
-	$(NVCC) -o hog hog.o HogDescriptor.o HOG.o $(ALL_CV_FLAGS) $(LOG_FLAGS) -L/usr/local/cuda-7.0/lib64 -lcuda -lcudart -lcublas -lcurand $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
-
-
 #$(NVCC) -o hotspot hotspot.cu $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 install:
@@ -101,18 +81,24 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 
-gold_generator: GoldGenerator.cpp
-	$(PURE_NVCC) GoldGenerator.cpp -o generator $(ALL_GOLD_GEN)
+##hog extracted
+$(TARGET):
+	$(NVCC) $(HOG_EXT_DIR)/opencv_src/hog.cu -c -I$(NVIDIA_INC) -o $(HOG_EXT_DIR)/hog.o $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
+	$(NVCC) $(HOG_EXT_DIR)/opencv_src/HogDescriptor.cpp -c $(ALL_CV_FLAGS) -o $(HOG_EXT_DIR)/HogDescriptor.o $(LOG_FLAGS) $(CFLAGS) $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
+	$(NVCC) $(HOG_EXT_DIR)/HOG.cpp -c $(ALL_CV_FLAGS) -o $(HOG_EXT_DIR)/HOG.o $(LOG_FLAGS) $(CFLAGS) $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
+	$(NVCC) -o $(HOG_EXT_DIR)/$(TARGET) $(HOG_EXT_DIR)/hog.o $(LOGHELPER_INC)log_helper.o $(HOG_EXT_DIR)/HOG.o $(HOG_EXT_DIR)/HogDescriptor.o \
+							$(ALL_CV_FLAGS) $(CFLAGS) $(LOG_FLAGS) $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
+
+
+
+golden:
+	./$(TARGET) /home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt --iterations 1 > golden_stdout.txt 2>golden_stderr.txt
 
 test:
-	./hog 1x_pedestrians.jpg --dst_data GOLD_1x.data --iterations 1
+	./$(TARGET) /home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt --iterations 1
 
-generate:
-	./generator 1x_pedestrians.jpg --dst_data GOLD_1x.data --hit_threshold 0.9 --gr_threshold 1 --nlevels 100
-	
-golden:
-	./hog 1x_pedestrians.jpg --dst_data GOLD_1x.data --iterations 1  > golden_stdout.txt 2>golden_stderr.txt
+
 
 clean:
-	rm -rf hog generator *~ *.o
+	rm -f *.o *~ $(TARGET)
 

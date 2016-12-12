@@ -99,6 +99,7 @@ void App::run() {
 
 	//multiple images from txt
 	unsigned int current_dataset_index = 0;
+
 	string gold_path("/home/carol/radiation-benchmarks/data/histogram_ori_gradients/");
 
 	vector <string> dataset;
@@ -119,13 +120,12 @@ void App::run() {
 	string gold0_frame = split_gold0[split_gold0.size() - 1].c_str();	
 	gold0_set.append("_" + gold0_video + "_" + gold0_frame + ".data");
 
-
 	string gold0_abs_path(gold_path + gold0_set);
 	ifstream input_file(gold0_abs_path.c_str());
 	//================== Init logs
 #ifdef LOGS
 	char test_info[500]; 
-	snprintf(test_info, 500, "type: ecc_off dataset: %s", args.src.c_str());
+	snprintf(test_info, 500, "type: ecc_on dataset: %s", args.src.c_str());
 	start_log_file("cudaHOG", test_info);
 #endif
 	//====================================
@@ -193,6 +193,7 @@ void App::run() {
 
 		while (i < args.iterations) {
 			cv::Mat frame;
+
 			frame = cv::imread(dataset[current_dataset_index]);
 
 			if (frame.empty()) {
@@ -267,7 +268,7 @@ void App::run() {
 	//====================================
 			unsigned long int error_counter = 0;
 	//if the numbers of rects found is different from gold, log this info
-			if(found.size() != (gold.size()-1)){
+			if(found.size() != (gold.size()-1)) {
 				char message[120];
 				snprintf(message, 120, "Rectangles found: %lu (gold has %lu).\n", found.size(), (gold.size()-1));
 #ifdef LOGS
@@ -333,7 +334,7 @@ void App::run() {
 			//ss << (i + 1);
 			//imwrite(ss.str() + "_out.jpg", img_to_show);
 
-			if(current_dataset_index == (dataset.size()-1))  {
+			if(current_dataset_index == (dataset.size()-1)) {
 				current_dataset_index = 0;
 				i++;
 			}
