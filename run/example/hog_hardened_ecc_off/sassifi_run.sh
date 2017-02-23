@@ -1,3 +1,4 @@
-export PATH=/usr/local/cuda-7.0/bin:
-export LD_LIBRARY_PATH=/usr/local/cuda-7.0/lib64:/usr/local/sassi7/extras/CUPTI/lib64 
-${BIN_DIR}/hog_hardened_ecc_off ${APP_DIR}/1x_pedestrians.jpg --dst_data ${APP_DIR}/GOLD_1x.data --iterations 1 > stdout.txt 2> stderr.txt 
+export PATH=/usr/local/cuda-7.0/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-7.0/lib64:$LD_LIBRARY_PATH
+
+${BIN_DIR}/hog_hardened_ecc_off /home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt --iterations 1 > stdout.txt 2> stderr.txt 

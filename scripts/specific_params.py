@@ -135,7 +135,7 @@ set_paths()
 # compiler using "-Xptxas -v" option
 #########################################################################
 
-num_regs = par.num_regs_p
+num_regs = {} #par.num_regs_p
 # {    'simple_add': {        '_Z10simple_addi': 6,         } }
 
 # update dictionaries for different applications here
@@ -143,6 +143,7 @@ def set_num_regs():
     # update the path to the kerne_regcount.p file if it is stored in a different location
     app = par.benchmark
     num_regs[app] = cPickle.load(open(suites_base_dir + apps[app][0] + "/" + app + "/" + app + "_kernel_regcount.p", "rb"))
+    print "\n\n\n", num_regs[app] , "\n\n"
 
 set_num_regs()
 

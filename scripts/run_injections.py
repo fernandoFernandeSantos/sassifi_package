@@ -127,16 +127,16 @@ def run_multiple_injections_igid(app, is_rf, igid, where_to_run):
                     os.system(cmd)
                 if cp.verbose: print "done injection run "
 
-                check_sdc_fernando(app, kname, kcount, igid, bfm, iid, opid, bid)
+                check_sdc_fernando(app, kname, kcount, igid, bfm, iid, opid, bid, ('rf' if is_rf else 'inst'))
             else:
                 print "Line doesn't have enough params:%s" %line
             print_heart_beat(total_jobs, where_to_run)
 
 #generic sdc verification
-def check_sdc_fernando(app, kname, kcount, igid, bfm, iid, opid, bid):
-	fault_model = open(sp.SASSIFI_HOME + "logs_sdcs_"+str(app) + "_new.csv", "a")
+def check_sdc_fernando(app, kname, kcount, igid, bfm, iid, opid, bid, inj_type):
+	fault_model = open(sp.SASSIFI_HOME + "logs_sdcs_"+str(app) + "-" + str(inj_type) + ".csv", "a")
     #########################################################
-	proc = subprocess.Popen("sudo ls -Art /var/radiation-benchmarks/log/ | tail -n 1", stdout=subprocess.PIPE, shell=True)
+	proc = subprocess.Popen("ls -Art /var/radiation-benchmarks/log/ | tail -n 1", stdout=subprocess.PIPE, shell=True)
 	(out, err) = proc.communicate()             
 	has_sdc = 0
 	has_end = 1

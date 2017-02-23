@@ -1,1 +1,1 @@
-Iteration: 1 (image 0) Time: 0.097363 Verification time 7.89165e-05
+error: can't open gold0 file: /home/carol/radiation-benchmarks/data/histogram_ori_gradients/data_histogram_ori_gradients_pedestrians.jpg.data

@@ -1,0 +1,598 @@
+./src/utils.c: In function ‘fgetl’:
+./src/utils.c:259:8: warning: ignoring return value of ‘fgets’, declared with attribute warn_unused_result [-Wunused-result]
+   fgets(&line[curr], readsize, fp);
+        ^
+./src/data.c: In function ‘load_cifar10_data’:
+./src/data.c:907:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(bytes, 1, 3073, fp);
+              ^
+./src/data.c: In function ‘load_all_cifar10’:
+./src/data.c:971:18: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+             fread(bytes, 1, 3073, fp);
+                  ^
+./src/parser.c: In function ‘load_connected_weights’:
+./src/parser.c:1031:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.biases, sizeof(float), l.outputs, fp);
+          ^
+./src/parser.c:1032:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.weights, sizeof(float), l.outputs*l.inputs, fp);
+          ^
+./src/parser.c:1039:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.scales, sizeof(float), l.outputs, fp);
+              ^
+./src/parser.c:1040:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.rolling_mean, sizeof(float), l.outputs, fp);
+              ^
+./src/parser.c:1041:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.rolling_variance, sizeof(float), l.outputs, fp);
+              ^
+./src/parser.c: In function ‘load_batchnorm_weights’:
+./src/parser.c:1055:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.scales, sizeof(float), l.c, fp);
+          ^
+./src/parser.c:1056:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.rolling_mean, sizeof(float), l.c, fp);
+          ^
+./src/parser.c:1057:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.rolling_variance, sizeof(float), l.c, fp);
+          ^
+./src/parser.c: In function ‘load_convolutional_weights_binary’:
+./src/parser.c:1067:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.biases, sizeof(float), l.n, fp);
+          ^
+./src/parser.c:1069:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.scales, sizeof(float), l.n, fp);
+              ^
+./src/parser.c:1070:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.rolling_mean, sizeof(float), l.n, fp);
+              ^
+./src/parser.c:1071:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.rolling_variance, sizeof(float), l.n, fp);
+              ^
+./src/parser.c:1077:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(&mean, sizeof(float), 1, fp);
+              ^
+./src/parser.c:1081:18: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+             fread(&c, sizeof(char), 1, fp);
+                  ^
+./src/parser.c: In function ‘load_convolutional_weights’:
+./src/parser.c:1102:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.biases, sizeof(float), l.n, fp);
+          ^
+./src/parser.c:1104:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.scales, sizeof(float), l.n, fp);
+              ^
+./src/parser.c:1105:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.rolling_mean, sizeof(float), l.n, fp);
+              ^
+./src/parser.c:1106:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(l.rolling_variance, sizeof(float), l.n, fp);
+              ^
+./src/parser.c:1108:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(l.weights, sizeof(float), num, fp);
+          ^
+./src/parser.c: In function ‘load_weights_upto’:
+./src/parser.c:1137:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(&major, sizeof(int), 1, fp);
+          ^
+./src/parser.c:1138:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(&minor, sizeof(int), 1, fp);
+          ^
+./src/parser.c:1139:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(&revision, sizeof(int), 1, fp);
+          ^
+./src/parser.c:1140:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+     fread(net->seen, sizeof(int), 1, fp);
+          ^
+./src/parser.c:1152:18: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+             fread(l.biases, sizeof(float), l.n, fp);
+                  ^
+./src/parser.c:1153:18: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+             fread(l.weights, sizeof(float), num, fp);
+                  ^
+./src/parser.c:1187:18: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+             fread(l.biases, sizeof(float), l.outputs, fp);
+                  ^
+./src/parser.c:1188:18: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+             fread(l.weights, sizeof(float), size, fp);
+                  ^
+./src/darknet.c: In function ‘main’:
+./src/darknet.c:362:5: warning: format ‘%d’ expects argument of type ‘int’, but argument 9 has type ‘long int’ [-Wformat=]
+     ((to_parse.abft == 1) ? "dumb_abft":"no_abft"));
+     ^
+./src/darknet.c:362:5: warning: format ‘%d’ expects argument of type ‘int’, but argument 9 has type ‘long int’ [-Wformat=]
+./src/darknet.c: In function ‘change_rate’:
+./src/darknet.c:32:7: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+  fread(&rate, sizeof(float), 1, fp);
+       ^
+./src/yolo.c: In function ‘validate_yolo’:
+./src/yolo.c:320:6: warning: implicit declaration of function ‘set_gold_iterator_abft’ [-Wimplicit-function-declaration]
+      set_gold_iterator_abft(gold_iterator);
+      ^
+./src/yolo.c:382:9: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘long unsigned int’ [-Wformat=]
+         cmp);
+         ^
+./src/yolo.c:328:12: warning: unused variable ‘begin2’ [-Wunused-variable]
+     double begin2 = mysecond();
+            ^
+./src/yolo.c:265:7: warning: unused variable ‘it’ [-Wunused-variable]
+  long it = 0;
+       ^
+./src/rnn.c: In function ‘train_char_rnn’:
+./src/rnn.c:145:14: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+         fread(text, 1, size, fp);
+              ^
+./src/go.c: In function ‘engine_go’:
+./src/go.c:449:14: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+         scanf("%s", buff);
+              ^
+./src/go.c:463:18: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+             scanf("%s", comm);
+                  ^
+./src/go.c:484:18: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+             scanf("%d", &boardsize);
+                  ^
+./src/go.c:497:18: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+             scanf("%f", &komi);
+                  ^
+./src/go.c:501:18: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+             scanf("%s ", color);
+                  ^
+./src/go.c:533:18: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+             scanf("%s", color);
+                  ^
+./src/go.c:560:18: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+             scanf("%s", type);
+                  ^
+./src/log_processing.c: In function ‘new_prob_array’:
+./src/log_processing.c:37:3: warning: implicit declaration of function ‘error’ [-Wimplicit-function-declaration]
+   error("ERROR ON ALLOCATING ProbArray\n");
+   ^
+./src/log_processing.c: In function ‘saveLayer’:
+./src/log_processing.c:347:3: warning: passing argument 2 of ‘strcat’ from incompatible pointer type [enabled by default]
+   strcat(name, &b);
+   ^
+In file included from /usr/include/features.h:367:0,
+                 from /usr/include/x86_64-linux-gnu/sys/time.h:21,
+                 from ./src/log_processing.h:11,
+                 from ./src/log_processing.c:14:
+/usr/include/x86_64-linux-gnu/bits/string3.h:146:1: note: expected ‘const char * __restrict__’ but argument is of type ‘char (*)[8]’
+ __NTH (strcat (char *__restrict __dest, const char *__restrict __src))
+ ^
+./src/log_processing.c:349:3: warning: passing argument 2 of ‘strcat’ from incompatible pointer type [enabled by default]
+   strcat(name, &a);
+   ^
+In file included from /usr/include/features.h:367:0,
+                 from /usr/include/x86_64-linux-gnu/sys/time.h:21,
+                 from ./src/log_processing.h:11,
+                 from ./src/log_processing.c:14:
+/usr/include/x86_64-linux-gnu/bits/string3.h:146:1: note: expected ‘const char * __restrict__’ but argument is of type ‘char (*)[5]’
+ __NTH (strcat (char *__restrict __dest, const char *__restrict __src))
+ ^
+./src/log_processing.c:333:19: warning: unused variable ‘c’ [-Wunused-variable]
+  char a[5], b[8], c[8];
+                   ^
+./src/log_processing.c: In function ‘compareLayer’:
+./src/log_processing.c:390:2: warning: passing argument 2 of ‘strcat’ from incompatible pointer type [enabled by default]
+  strcat(name, &a);
+  ^
+In file included from /usr/include/features.h:367:0,
+                 from /usr/include/x86_64-linux-gnu/sys/time.h:21,
+                 from ./src/log_processing.h:11,
+                 from ./src/log_processing.c:14:
+/usr/include/x86_64-linux-gnu/bits/string3.h:146:1: note: expected ‘const char * __restrict__’ but argument is of type ‘char (*)[5]’
+ __NTH (strcat (char *__restrict __dest, const char *__restrict __src))
+ ^
+./src/log_processing.c:406:7: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result [-Wunused-result]
+  fread(s, sizeof(float), l.outputs, bin);
+       ^
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z15binarize_kernelPfiS_' for 'sm_35'
+ptxas info    : Function properties for _Z15binarize_kernelPfiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 7 registers, 344 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z21binarize_input_kernelPfiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z21binarize_input_kernelPfiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 344 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z23binarize_weights_kernelPfiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z23binarize_weights_kernelPfiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 20 registers, 344 bytes cmem[0]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21lhtan_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21lhtan_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z23hardtan_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z22linear_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z24logistic_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21loggy_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20relu_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z19elu_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21relie_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20ramp_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21leaky_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20tanh_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20plse_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21stair_activate_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z23hardtan_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z22linear_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z24logistic_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21loggy_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20relu_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z19elu_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21relie_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20ramp_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21leaky_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20tanh_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z20plse_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z21stair_gradient_kernelf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z15activate_kernelf10ACTIVATION
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z15gradient_kernelf10ACTIVATION
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z21activate_array_kernelPfi10ACTIVATION' for 'sm_35'
+ptxas info    : Function properties for _Z21activate_array_kernelPfi10ACTIVATION
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 336 bytes cmem[0], 64 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z21gradient_array_kernelPfi10ACTIVATIONS_' for 'sm_35'
+ptxas info    : Function properties for _Z21gradient_array_kernelPfi10ACTIVATIONS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, 344 bytes cmem[0], 20 bytes cmem[2]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z17im2col_gpu_kerneliPKfiiiiiiiPf' for 'sm_35'
+ptxas info    : Function properties for _Z17im2col_gpu_kerneliPKfiiiiiiiPf
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 31 registers, 376 bytes cmem[0]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z17col2im_gpu_kerneliPKfiiiiiiiPf' for 'sm_35'
+ptxas info    : Function properties for _Z17col2im_gpu_kerneliPKfiiiiiiiPf
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 35 registers, 376 bytes cmem[0]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z17scale_bias_kernelPfS_ii' for 'sm_35'
+ptxas info    : Function properties for _Z17scale_bias_kernelPfS_ii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, 344 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z21backward_scale_kernelPfS_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z21backward_scale_kernelPfS_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 19 registers, 2048 bytes smem, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z15add_bias_kernelPfS_ii' for 'sm_35'
+ptxas info    : Function properties for _Z15add_bias_kernelPfS_ii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, 344 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z20backward_bias_kernelPfS_iii' for 'sm_35'
+ptxas info    : Function properties for _Z20backward_bias_kernelPfS_iii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 14 registers, 2048 bytes smem, 348 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z16normalize_kerneliPfS_S_iii' for 'sm_35'
+ptxas info    : Function properties for _Z16normalize_kerneliPfS_S_iii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 364 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z22normalize_delta_kerneliPfS_S_S_S_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z22normalize_delta_kerneliPfS_S_S_S_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 23 registers, 392 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z21variance_delta_kernelPfS_S_S_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z21variance_delta_kernelPfS_S_S_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 23 registers, 376 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z17accumulate_kernelPfiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z17accumulate_kernelPfiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 14 registers, 344 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z22fast_mean_delta_kernelPfS_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z22fast_mean_delta_kernelPfS_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 2048 bytes smem, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z26fast_variance_delta_kernelPfS_S_S_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z26fast_variance_delta_kernelPfS_S_S_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 34 registers, 2048 bytes smem, 376 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z17mean_delta_kernelPfS_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z17mean_delta_kernelPfS_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z11mean_kernelPfiiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z11mean_kernelPfiiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 352 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z15variance_kernelPfS_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z15variance_kernelPfS_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 26 registers, 360 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z12reorg_kerneliPfiiiiiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z12reorg_kerneliPfiiiiiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 27 registers, 368 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z11axpy_kernelifPfiiS_ii' for 'sm_35'
+ptxas info    : Function properties for _Z11axpy_kernelifPfiiS_ii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 8 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z10pow_kernelifPfiS_i' for 'sm_35'
+ptxas info    : Function properties for _Z10pow_kernelifPfiS_i
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 19 registers, 356 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z12const_kernelifPfi' for 'sm_35'
+ptxas info    : Function properties for _Z12const_kernelifPfi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 5 registers, 340 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z16constrain_kernelifPfi' for 'sm_35'
+ptxas info    : Function properties for _Z16constrain_kernelifPfi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 5 registers, 340 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z11supp_kernelifPfi' for 'sm_35'
+ptxas info    : Function properties for _Z11supp_kernelifPfi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, 340 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z11scal_kernelifPfi' for 'sm_35'
+ptxas info    : Function properties for _Z11scal_kernelifPfi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 5 registers, 340 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z11fill_kernelifPfi' for 'sm_35'
+ptxas info    : Function properties for _Z11fill_kernelifPfi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 5 registers, 340 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z11mask_kerneliPffS_' for 'sm_35'
+ptxas info    : Function properties for _Z11mask_kerneliPffS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, 352 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z11copy_kerneliPfiiS_ii' for 'sm_35'
+ptxas info    : Function properties for _Z11copy_kerneliPfiiS_ii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 8 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z10mul_kerneliPfiS_i' for 'sm_35'
+ptxas info    : Function properties for _Z10mul_kerneliPfiS_i
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 8 registers, 356 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z16fast_mean_kernelPfiiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z16fast_mean_kernelPfiiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 2048 bytes smem, 352 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z20fast_variance_kernelPfS_iiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z20fast_variance_kernelPfS_iiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 31 registers, 2048 bytes smem, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z15shortcut_kerneliiiiiiiiiiPfiiiS_' for 'sm_35'
+ptxas info    : Function properties for _Z15shortcut_kerneliiiiiiiiiiPfiiiS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 19 registers, 392 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z16smooth_l1_kerneliPfS_S_S_' for 'sm_35'
+ptxas info    : Function properties for _Z16smooth_l1_kerneliPfS_S_S_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 12 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z9l2_kerneliPfS_S_S_' for 'sm_35'
+ptxas info    : Function properties for _Z9l2_kerneliPfS_S_S_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 12 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z19weighted_sum_kerneliPfS_S_S_' for 'sm_35'
+ptxas info    : Function properties for _Z19weighted_sum_kerneliPfS_S_S_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 10 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z21weighted_delta_kerneliPfS_S_S_S_S_S_' for 'sm_35'
+ptxas info    : Function properties for _Z21weighted_delta_kerneliPfS_S_S_S_S_S_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 16 registers, 384 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z20mult_add_into_kerneliPfS_S_' for 'sm_35'
+ptxas info    : Function properties for _Z20mult_add_into_kerneliPfS_S_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 8 registers, 352 bytes cmem[0]
+ptxas info    : Function properties for __internal_accurate_pow
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : 0 bytes gmem, 24 bytes cmem[3]
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z16get_pixel_kernelPfiiiii
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z17rgb_to_hsv_kernel6float3
+    16 bytes stack frame, 12 bytes spill stores, 12 bytes spill loads
+ptxas info    : Function properties for _Z17hsv_to_rgb_kernel6float3
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _Z27bilinear_interpolate_kernelPfiiffi
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z19levels_image_kernelPfS_iiiifffff' for 'sm_35'
+ptxas info    : Function properties for _Z19levels_image_kernelPfS_iiiifffff
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 31 registers, 372 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z25forward_crop_layer_kernelPfS_iiiiiiiifS_' for 'sm_35'
+ptxas info    : Function properties for _Z25forward_crop_layer_kernelPfS_iiiiiiiifS_
+    128 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 30 registers, 384 bytes cmem[0], 48 bytes cmem[2]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z28yoloswag420blazeit360noscopePfiS_ff' for 'sm_35'
+ptxas info    : Function properties for _Z28yoloswag420blazeit360noscopePfiS_ff
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, 352 bytes cmem[0]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z28forward_maxpool_layer_kerneliiiiiiiPfS_Pi' for 'sm_35'
+ptxas info    : Function properties for _Z28forward_maxpool_layer_kerneliiiiiiiPfS_Pi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 21 registers, 376 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z29backward_maxpool_layer_kerneliiiiiiiPfS_Pi' for 'sm_35'
+ptxas info    : Function properties for _Z29backward_maxpool_layer_kerneliiiiiiiPfS_Pi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 30 registers, 376 bytes cmem[0]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z28forward_softmax_layer_kerneliiPffS_' for 'sm_35'
+ptxas info    : Function properties for _Z28forward_softmax_layer_kerneliiPffS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 26 registers, 352 bytes cmem[0], 32 bytes cmem[2]
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z28forward_avgpool_layer_kerneliiiiPfS_' for 'sm_35'
+ptxas info    : Function properties for _Z28forward_avgpool_layer_kerneliiiiPfS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, 352 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z29backward_avgpool_layer_kerneliiiiPfS_' for 'sm_35'
+ptxas info    : Function properties for _Z29backward_avgpool_layer_kerneliiiiPfS_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 22 registers, 352 bytes cmem[0]

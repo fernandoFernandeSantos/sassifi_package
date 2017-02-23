@@ -1,0 +1,1 @@
+Iteration: 1 (image 0) Time: 0.078536 Verification time 1.69277e-05

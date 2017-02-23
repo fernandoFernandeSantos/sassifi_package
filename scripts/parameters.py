@@ -46,12 +46,32 @@ num_regs_p = {
 							'_Z33compute_gradients_8UC4_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_':31,
 							'_Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEi':11,
 							},
+
+   'darknet':{'_Z16constrain_kernelifPfi': 5, '_Z15variance_kernelPfS_iiiS_': 26, 
+	 '_Z21weighted_delta_kerneliPfS_S_S_S_S_S_': 16, '_Z17im2col_gpu_kerneliPKfiiiiiiiPf': 31,
+	 '_Z28forward_maxpool_layer_kerneliiiiiiiPfS_Pi': 21, '_Z21variance_delta_kernelPfS_S_S_iiiS_': 23,
+	 '_Z28forward_softmax_layer_kerneliiPffS_': 26, '_Z29backward_avgpool_layer_kerneliiiiPfS_': 22,
+	 '_Z21backward_scale_kernelPfS_iiiS_': 19, '_Z20backward_bias_kernelPfS_iii': 14, '_Z11scal_kernelifPfi': 5,
+	 '_Z22fast_mean_delta_kernelPfS_iiiS_': 18, '_Z11mask_kerneliPffS_': 6, '_Z11axpy_kernelifPfiiS_ii': 8, 
+	 '_Z22normalize_delta_kerneliPfS_S_S_S_iiiS_': 23, '_Z15binarize_kernelPfiS_': 7, '_Z15add_bias_kernelPfS_ii': 6,
+	 '_Z21activate_array_kernelPfi10ACTIVATION': 18, '_Z17mean_delta_kernelPfS_iiiS_': 18,
+	 '_Z19levels_image_kernelPfS_iiiifffff': 31, '_Z23binarize_weights_kernelPfiiS_': 20, '_Z9l2_kerneliPfS_S_S_': 12,
+	 '_Z10mul_kerneliPfiS_i': 8, '_Z20mult_add_into_kerneliPfS_S_': 8, '_Z12const_kernelifPfi': 5,
+	 '_Z12reorg_kerneliPfiiiiiiS_': 27, '_Z19weighted_sum_kerneliPfS_S_S_': 10, '_Z16fast_mean_kernelPfiiiS_': 18,
+	 '_Z29backward_maxpool_layer_kerneliiiiiiiPfS_Pi': 30, '_Z16normalize_kerneliPfS_S_iii': 18, 
+	 '_Z20fast_variance_kernelPfS_iiiS_': 31, '_Z11supp_kernelifPfi': 6, '_Z21binarize_input_kernelPfiiS_': 18,
+	 '_Z11mean_kernelPfiiiS_': 18, '_Z15shortcut_kerneliiiiiiiiiiPfiiiS_': 19, 
+	 '_Z25forward_crop_layer_kernelPfS_iiiiiiiifS_': 30, '_Z28forward_avgpool_layer_kerneliiiiPfS_': 18,
+	 '_Z26fast_variance_delta_kernelPfS_S_S_iiiS_': 34, '_Z21gradient_array_kernelPfi10ACTIVATIONS_': 6,
+	 '_Z17accumulate_kernelPfiiS_': 14, '_Z16smooth_l1_kerneliPfS_S_S_': 12, '_Z28yoloswag420blazeit360noscopePfiS_ff': 6,
+	 '_Z11copy_kerneliPfiiS_ii': 8, '_Z10pow_kernelifPfiS_i': 19, '_Z11fill_kernelifPfi': 5,
+	 '_Z17scale_bias_kernelPfS_ii': 6, '_Z17col2im_gpu_kerneliPKfiiiiiiiPf': 35},
 }
 NUM_INJECTIONS_P = 3000
 
 verbose_p = True
-
-THRESHOLD_JOBS_P = 800 #400# test
+#for inst 80 is a good number, for rf 1360
+THRESHOLD_JOBS_P = 60
 
 #########################################################################
 NUM_GPUS_P = 1

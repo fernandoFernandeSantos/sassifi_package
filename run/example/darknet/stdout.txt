@@ -1,0 +1,27 @@
+execution type = yolo
+execution model = valid
+config file = /home/carol/radiation-benchmarks/data/darknet/yolo.cfg
+weights = /home/carol/radiation-benchmarks/data/darknet/yolo.weights
+iterations = 1
+gold_input/output = /home/carol/radiation-benchmarks/data/darknet/gold.caltech.critical.abft.1K.test
+gold_flag = 0
+img_list_path = /home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt
+base_result_out = /home/carol/SASSIFI/sassifi_package/suites/example/darknet
+gpu_index = 0
+save_layer = 1
+abft = 0
+execution type = yolo
+execution model = valid
+config file = /home/carol/radiation-benchmarks/data/darknet/yolo.cfg
+weights = /home/carol/radiation-benchmarks/data/darknet/yolo.weights
+iterations = 1
+gold_input/output = /home/carol/radiation-benchmarks/data/darknet/gold.caltech.critical.abft.1K.test
+gold_flag = 0
+img_list_path = /home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt
+base_result_out = /home/carol/SASSIFI/sassifi_package/suites/example/darknet
+gpu_index = 0
+save_layer = 1
+abft = 0
+Images opening
+Images opening
+Total Detection Time: 61.221534 Seconds

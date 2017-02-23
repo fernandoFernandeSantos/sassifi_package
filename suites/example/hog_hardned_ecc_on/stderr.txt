@@ -1,0 +1,77 @@
+ptxas info    : 4 bytes gmem, 36 bytes cmem[3]
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z16reset_kernel_sdcv' for 'sm_35'
+ptxas info    : Function properties for _Z16reset_kernel_sdcv
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 4 registers, 320 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z36compute_hists_kernel_many_blocks_extILi1EEviN2cv3gpu7PtrStepIfEENS2_IhEEfPf' for 'sm_35'
+ptxas info    : Function properties for _Z36compute_hists_kernel_many_blocks_extILi1EEviN2cv3gpu7PtrStepIfEENS2_IhEEfPf
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 32 registers, 376 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z38normalize_hists_kernel_many_blocks_extILi32ELi1EEviiiiPfffRi' for 'sm_35'
+ptxas info    : Function properties for _Z38normalize_hists_kernel_many_blocks_extILi32ELi1EEviiiiPfffRi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 22 registers, 360 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z38normalize_hists_kernel_many_blocks_extILi64ELi1EEviiiiPfffRi' for 'sm_35'
+ptxas info    : Function properties for _Z38normalize_hists_kernel_many_blocks_extILi64ELi1EEviiiiPfffRi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 28 registers, 360 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z38normalize_hists_kernel_many_blocks_extILi256ELi1EEviiiiPfffRi' for 'sm_35'
+ptxas info    : Function properties for _Z38normalize_hists_kernel_many_blocks_extILi256ELi1EEviiiiPfffRi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 28 registers, 360 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z38normalize_hists_kernel_many_blocks_extILi512ELi1EEviiiiPfffRi' for 'sm_35'
+ptxas info    : Function properties for _Z38normalize_hists_kernel_many_blocks_extILi512ELi1EEviiiiPfffRi
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 28 registers, 360 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z47compute_confidence_hists_kernel_many_blocks_extILi256ELi1EEviiiiPKfS1_ffPf' for 'sm_35'
+ptxas info    : Function properties for _Z47compute_confidence_hists_kernel_many_blocks_extILi256ELi1EEviiiiPKfS1_ffPf
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 19 registers, 368 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z37classify_hists_kernel_many_blocks_extILi256ELi1EEviiiiiiiiPKfS1_ffffPh' for 'sm_35'
+ptxas info    : Function properties for _Z37classify_hists_kernel_many_blocks_extILi256ELi1EEviiiiiiiiPKfS1_ffffPh
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 25 registers, 392 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z33extract_descrs_by_rows_kernel_extILi256EEviiiPKfN2cv3gpu7PtrStepIfEE' for 'sm_35'
+ptxas info    : Function properties for _Z33extract_descrs_by_rows_kernel_extILi256EEviiiPKfN2cv3gpu7PtrStepIfEE
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 21 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z33extract_descrs_by_cols_kernel_extILi256EEviiiPKfN2cv3gpu7PtrStepIfEE' for 'sm_35'
+ptxas info    : Function properties for _Z33extract_descrs_by_cols_kernel_extILi256EEviiiPKfN2cv3gpu7PtrStepIfEE
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 26 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z33compute_gradients_8UC4_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_' for 'sm_35'
+ptxas info    : Function properties for _Z33compute_gradients_8UC4_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 31 registers, 384 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z33compute_gradients_8UC4_kernel_extILi256ELi0EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_' for 'sm_35'
+ptxas info    : Function properties for _Z33compute_gradients_8UC4_kernel_extILi256ELi0EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 25 registers, 384 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z33compute_gradients_8UC1_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_' for 'sm_35'
+ptxas info    : Function properties for _Z33compute_gradients_8UC1_kernel_extILi256ELi1EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 25 registers, 384 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z33compute_gradients_8UC1_kernel_extILi256ELi0EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_' for 'sm_35'
+ptxas info    : Function properties for _Z33compute_gradients_8UC1_kernel_extILi256ELi0EEviiN2cv3gpu7PtrStepIhEEfNS2_IfEES3_
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 25 registers, 384 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compiling entry function '_Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzIhEEii' for 'sm_35'
+ptxas info    : Function properties for _Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzIhEEii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 7 registers, 360 bytes cmem[0]
+ptxas info    : Compiling entry function '_Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEii' for 'sm_35'
+ptxas info    : Function properties for _Z25resize_for_hog_kernel_extffN2cv3gpu9PtrStepSzI6uchar4EEii
+    96 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 11 registers, 360 bytes cmem[0]

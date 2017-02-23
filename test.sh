@@ -27,7 +27,7 @@ inst_rf=$2
 ################################################
 printf "\nStep 4.1: Collect golden stdout.txt and stderr.txt files"
 cd $SUITE_FOLDER
-make  2> stderr.txt
+make GPU=1 2> stderr.txt
 make golden
 if [ $? -ne 0 ]; then
     echo "Return code was not zero: $?"
@@ -43,7 +43,8 @@ python $SASSIFI_HOME/scripts/process_kernel_regcount.py $BENCHMARK sm_35 stderr.
 # collect the instruction profile
 ################################################
 printf "\nStep 5: Profile the application"
-make OPTION=profiler
+make clean GPU=1
+make GPU=1 OPTION=profiler
 make test 
 if [ $? -ne 0 ]; then
     echo "Return code was not zero: $?"
@@ -54,8 +55,10 @@ fi
 # Step 6: Build the app for error injectors
 ################################################
 printf "\nStep 6: Prepare application for error injection"
-make OPTION=inst_injector logs=-DLOGS
-make OPTION=rf_injector logs=-DLOGS
+make clean GPU=1
+make OPTION=inst_injector logs=-DLOGS GPU=1 LOGS=1
+make clean GPU=1
+make OPTION=rf_injector logs=-DLOGS GPU=1 LOGS=1
 
 ################################################
 # Step 7.b: Generate injection list for the 
