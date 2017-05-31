@@ -1,5 +1,5 @@
-################################################################################### 
-# Copyright (c) 2015, NVIDIA CORPORATION. All rights reserved.
+#########################################################################
+# Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,16 +24,16 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################
+#########################################################################
 
 import sys, re, string, os, operator, math, datetime, random
 import common_params as cp
 import specific_params as sp
-import common_functions as cf
+import common_functions as cf 
 
 MAX_INJ = sp.NUM_INJECTIONS
 verbose = False
-is_rf = False # RF=True, Inst=False
+inj_mode = ""
 
 #################################################################
 # Generate injection list of each
@@ -41,10 +41,10 @@ is_rf = False # RF=True, Inst=False
 #   - instruction group 
 #   - bit-flip model
 #################################################################
-def write_injection_list_file(app, igid, bfm, num_injections, total_count, countList):
+def write_injection_list_file(app, inj_mode, igid, bfm, num_injections, total_count, countList):
 	if verbose:
 		print "total_count = %d, num_injections = %d" %(total_count, num_injections)
-	fName = sp.app_log_dir[app] + "/injection-list/igid" + str(igid) + ".bfm" + str(bfm) + "." + str(num_injections) + ".txt"
+	fName = sp.app_log_dir[app] + "/injection-list/mode" + inj_mode + "-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(num_injections) + ".txt"
 	print fName
 	f = open(fName, "w")
 
@@ -52,12 +52,9 @@ def write_injection_list_file(app, igid, bfm, num_injections, total_count, count
 		num_injections -= 1
 		injection_num = random.randint(0, total_count) # randomly select an injection index
 		if igid == "rf":
-			[inj_kname, inj_kcount, inj_icount] = cf.get_rf_injection_site_info(countList, injection_num) # convert injection index to [kname, kernel count, inst index]
-			#print sp.num_regs
+			[inj_kname, inj_kcount, inj_icount] = cf.get_rf_injection_site_info(countList, injection_num, True) # convert injection index to [kname, kernel count, inst index]
 			inj_op_id_seed = sp.num_regs[app][inj_kname]*random.random() # register selection
 		else:
-			#print app , inj_kname
-		
 			[inj_kname, inj_kcount, inj_icount] = cf.get_injection_site_info(countList, injection_num, igid) # convert injection index to [kname, kernel count, inst index]
 			inj_op_id_seed = random.random()
 		inj_bid_seed = random.random() 
@@ -70,25 +67,31 @@ def write_injection_list_file(app, igid, bfm, num_injections, total_count, count
 #################################################################
 # Generate injection list of each app for 
 # (1) RF AVF (for each error model)
-# (2) instruction-level injections (for each error model and instruction type)
+# (2) instruction-level value injections (for each error model and instruction type)
+# (3) instruction-level address injections (for each error model and instruction type)
 #################################################################
-def gen_lists(app, countList, is_rf):
-	if is_rf: # RF injection list
-		total_count = cf.get_total_insts(countList)
+def gen_lists(app, countList, inj_mode):
+	if inj_mode == cp.RF_MODE: # RF injection list
+		total_count = cf.get_total_insts(countList, True) if inj_mode == cp.RF_MODE else cf.get_total_insts(countList, False)
 		for bfm in sp.rf_bfm_list:
-			write_injection_list_file(app, "rf", bfm, MAX_INJ, total_count, countList)
-	else: # instruction injections
+			write_injection_list_file(app, inj_mode, "rf", bfm, MAX_INJ, total_count, countList)
+	elif inj_mode == cp.INST_VALUE_MODE: # instruction value injections
 		total_icounts = cf.get_total_counts(countList)
-		for igid in sp.igid_bfm_map:
-			for bfm in sp.igid_bfm_map[igid]: 
-				write_injection_list_file(app, igid, bfm, MAX_INJ, total_icounts[igid], countList)
+		for igid in sp.inst_value_igid_bfm_map:
+			for bfm in sp.inst_value_igid_bfm_map[igid]: 
+				write_injection_list_file(app, inj_mode, igid, bfm, MAX_INJ, total_icounts[igid], countList)
+	elif inj_mode == cp.INST_ADDRESS_MODE: # instruction value injections
+		total_icounts = cf.get_total_counts(countList)
+		for igid in sp.inst_address_igid_bfm_map:
+			for bfm in sp.inst_address_igid_bfm_map[igid]: 
+				write_injection_list_file(app, inj_mode, igid, bfm, MAX_INJ, total_icounts[igid], countList)
 
 #################################################################
 # Starting point of the script
 #################################################################
 def main():
 	if len(sys.argv) == 2: 
-		is_rf = (sys.argv[1] == "rf")
+		inj_mode = sys.argv[1] # rf or inst_value or inst_address
 	else:
 		print "Usage: ./script-name <rf or inst>"
 		print "There are two modes to conduct error injections"
@@ -102,12 +105,12 @@ def main():
 		os.system("mkdir -p %s/injection-list" %sp.app_log_dir[app]) # create directory to store injection list
 	
 		countList =  cf.read_inst_counts(sp.app_dir[app], app)
-		total_count = cf.get_total_insts(countList)
+		total_count = cf.get_total_insts(countList, True) if inj_mode == cp.RF_MODE else cf.get_total_insts(countList, False)
 		if total_count == 0:
 			print "Something is not right. Total instruction count = 0\n";
 			sys.exit(-1);
 	
-		gen_lists(app, countList, is_rf)
+		gen_lists(app, countList, inj_mode)
 		print "Output: Check %s" %(sp.app_log_dir[app] + "/injection-list/")
 
 if __name__ == "__main__":

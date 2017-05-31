@@ -1,13 +1,13 @@
 #!/bin/bash
-: ${SASSI_SRC:?"Need to set SASSI_SRC"}
-: ${SASSIFI_HOME:?"Need to set SASSIFI_HOME"}
+: ${SASSI_SRC:?"Need to set SASSI_SRC (e.g., export SASSI_SRC=/home/user/sassi/; do not set this to the instlibs/src directory)"}
+: ${SASSIFI_HOME:?"Need to set SASSIFI_HOME (e.g., export SASSI_SRC=/home/user/sassifi/)"}
 
 if [ ! -d $SASSI_SRC ] || [ ! -d $SASSIFI_HOME ] ; then
 	printf "Either SASSI_SRC or SASSIFI_HOME do not point to a directory!\n"
 	exit -1;
 fi
 
-NEW_HANDLER_DIR=$SASSI_SRC/instlibs/src/err_injector2
+NEW_HANDLER_DIR=$SASSI_SRC/instlibs/src/err_injector
 mkdir $NEW_HANDLER_DIR
 
 if [ $? -ne 0 ] ; then

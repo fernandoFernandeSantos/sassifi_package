@@ -18,13 +18,14 @@ This module is not needed if you want to run injection jobs sequentially on a
 single-gpu system. 
 \item (Optional) The final results can be parsed into an xlsx file using the
 xlsxwriter module. Instructions to install xlswriter can be found
-here~\cite{XlsxWriter}. The results will be parsed into multiple text files,
-which can be copied into an excel file to plot and visualize the results.
+here~\cite{XlsxWriter}. The results will be parsed into multiple text files, if
+you do not have xlswriter.  These can be copied into an excel file to plot and
+visualize the results.
 \end{itemize}
 
 \item SASSI, which can be downloaded from GitHub~\cite{SASSI}. SASSIFI is
-tested using the latest commit (5523d984ad047a272297c1a3ff8c63f55c0ad026) on
-7/19/2016. SASSIFI provides code  that needs to be compiled using the SASSI
+tested using the latest commit (5523d984ad047a272297c1a3ff8c63f55c0ad026).
+SASSIFI provides code  that needs to be compiled using the SASSI
 framework.  This code includes SASSI handlers that execute code before and
 after instructions for profiling and error injections. Please follow the steps
 provided in the SASSI documentation to install SASSI. 
@@ -68,10 +69,10 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 
 \item {\bf Compile the SASSIFI handlers}:
 		Simply type {\em make} in \$SASSI\_SRC/instlibs/src/err\_injector.  This should
-		create three libraries. The first one is for profiling the application and
-		identifying how many injection points exist. The remaining two are for
-		injecting errors during an application run (one each for performing
-		register file and instruction output-level injections).
+		create four libraries. The first one is for profiling the application and
+		identifying how many injection points exist. The remaining three are for
+		injecting errors during an application run (one each for the three 
+		injection modes).
 \label{step3}
 
 \item {\bf Prepare applications}:
@@ -99,8 +100,9 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 			
 			Tip: Prepare them such that you can type "make OPTION=profiler" to
 			generate binaries to do the profiling step (step 4) and "make
-			OPTION=inst\_injector"  or "make OPTION=rf\_injector" to generate
-			binaries for error injection campaigns for the two injection modes (see
+			OPTION=inst\_value\_injector"  or "make OPTION=inst\_address\_injector" 
+			or "make OPTION=rf\_injector" to generate
+			binaries for error injection campaigns for the three injection modes (see
 			Sections 1 and 2). See makefile in suites/example/simple\_add/ for an
 			example. This makefile installs different versions of the binaries to 
 			\$SASSIFI\_HOME/bin/\$OPTIONS/ directories. 
@@ -120,7 +122,8 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 \label{step5}
 
 \item {\bf Build the applications for error injection runs}:
-		Simply run "make OPTION=inst\_injector" and/or "make OPTION=rf\_injector"
+		Simply run "make OPTION=inst\_value\_injector", "make OPTION=inst\_address\_injector" 
+		and/or "make OPTION=rf\_injector"
 \label{step6}
 
 \item {\bf Generation injection sites}:
@@ -133,8 +136,9 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 				group and bit-flip model combination. See NUM\_INJECTION and
 				THRESHOLD\_JOBS in specific\_params.py file. 
 
-				\item Selecting instruction groups and bit-flip models. See the
-				rf\_bfm\_list and igid\_bfm\_map in specific\_params.py for the list of
+				\item Selecting instruction groups and bit-flip models. See 
+				rf\_bfm\_list,  inst\_value\_igid\_bfm\_map, and 
+				inst\_address\_igid\_bfm\_map in specific\_params.py for the list of
 				supported instruction groups (IGIDs) and bit-flip models (BFMs). Simply
 				uncomment the lines to include the IGID and the associated BFMs. User
 				can also select only a subset of the supported BFMs per IGID for
@@ -143,7 +147,7 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 				\item Listing the applications, benchmark suite name, application
 				binary file name, and the expected runtime on the system where the
 				injection job will be run. See the apps dictionary in
-				specific\_params.py for an example. This dictionary and the strings
+				specific\_params.py for an example. The dictionary and the strings
 				defined here are used by other scripts to identify the directory
 				structure in the suites directory and the application binary name.  The
 				expected runtime defined here is used later to determine when to
@@ -152,7 +156,7 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 
 				\item Setting paths for the suites, logs, bin, and run directories if
 				the user decides to use a different directory structure. If the
-				directory structure for the new benchmark suite that you decide to use,
+				directory structure for the new benchmark suite that you plan to use is different,
 				please update the app\_dir[app] and app\_data\_dir[app] variables
 				accordingly. 
 			
@@ -173,8 +177,8 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 				the stderr generated by compiling the simple\_add program using this
 				script in test.sh.
 				
-				The num\_regs dictionary is needed for the I-mode injections. If you do
-				not plan to perform I-mode injections, you can ignore this part.  
+				The num\_regs dictionary is needed for the RF mode injections. If you do
+				not plan to perform RF mode injections, you can ignore this part.  
 
 			
 			\end{itemize}
@@ -182,8 +186,8 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 
 			\item Run generate\_injection\_list.py script to generate a file that
 			contains what errors to inject. Instructions are selected randomly for
-			across the entire application for the I-mode and across the instructions
-			from the specified instruction group in the D-mode. Since we know the
+			across the entire application for the RF mode and across the instructions
+			from the specified instruction group in the IOV and IOA modes. Since we know the
 			instruction count breakdown per kernel invocation from the profiling
 			phase, we combine the instructions from all the kernel executions (based
 			on the instruction groups) and randomly select dynamic instruction
@@ -191,15 +195,15 @@ Follow these steps to setup and run SASSIFI. We provide a sample script (test.sh
 			to a dynamic kernel invocation index, along with static kernel name. We
 			create a random number (between 0 and 1) for selecting the destination
 			register among the number of destination registers in the selected
-			dynamic instruction for the D-mode. We select the register number within
+			dynamic instruction for the IOV and IOA modes. We select the register number within
 			the set of allocated registers for the selected static kernel for the
-			I-mode. We also select an additional random number for selecting the
+			RF mode. We also select an additional random number for selecting the
 			bit location to inject the error (according to the chosen bit-flip model). 
 			\label{step72}
 		\end{enumerate}
 
 \item {\bf Run injections}: 
-		Run the run\_injections.py	script to launch the error injection campaign.
+		Run the run\_injections.py script to launch the error injection campaign.
 		This script will run one injection after the other in the standalone mode.
 		Please do not attempt to run multiple jobs in parallel unless you install
 		the lockfile python module or modify the run\_one\_injection.py script such

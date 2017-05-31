@@ -1,5 +1,5 @@
-################################################################################### 
-# Copyright (c) 2015, NVIDIA CORPORATION. All rights reserved.
+#########################################################################
+# Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,7 +24,8 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################
+#########################################################################
+
 
 import os, sys, re, string, operator, math, datetime, time, signal, subprocess, shutil, glob, pkgutil
 import common_params as cp
@@ -35,7 +36,7 @@ import specific_params as sp
 ###############################################################################
 
 def print_usage():
-	print "Usage: run_one_injection.py <igid, bfm, app, kernel_name, kcount, instID, opID, bitID>"
+	print "Usage: run_one_injection.py <inj_mode, igid, bfm, app, kernel_name, kcount, instID, opID, bitID>"
 
 def get_seconds(td):
 	return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / float(10**6)
@@ -44,11 +45,14 @@ def get_seconds(td):
 # Set enviroment variables for run_script and clean_logs_script
 ###############################################################################
 [stdout_fname, stderr_fname, injection_seeds_file, new_directory] = ["", "", "", ""]
-def set_env_variables(igid, bfm, app, kname, kcount, iid, opid, bid): # Set directory paths 
-	if igid == "rf":
+def set_env_variables(inj_mode, igid, bfm, app, kname, kcount, iid, opid, bid): # Set directory paths 
+	if inj_mode == cp.RF_MODE:
 		cp.rf_inst = "rf"
+	elif inj_mode == cp.INST_VALUE_MODE:
+		cp.rf_inst = "inst_value"
 	else:
-		cp.rf_inst = "inst"
+		cp.rf_inst = "inst_address"
+
 	sp.set_paths() # update paths 
 	global stdout_fname, stderr_fname, injection_seeds_file, new_directory
 	kname_truncated = kname[:100] if len(kname) > 100 else kname
@@ -67,8 +71,14 @@ def set_env_variables(igid, bfm, app, kname, kcount, iid, opid, bid): # Set dire
 # Record result in to a common file. This function uses file-locking such that
 # mutliple parallel jobs can run safely write results to the file
 ###############################################################################
-def record_result(igid, bfm, app, kname, kcount, iid, opid, bid, cat, pc, inst_type, tid, injBID, runtime, dmesg):
-	res_fname = sp.app_log_dir[app] + "/results-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt"
+def record_result(inj_mode, igid, bfm, app, kname, kcount, iid, opid, bid, cat, pc, inst_type, tid, injBID, runtime, dmesg, value_str):
+	res_fname = sp.app_log_dir[app] + "/results-mode" + inj_mode + "-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt"
+	result_str = kname + "-" + kcount + "-" + iid + "-" + opid 
+	result_str += "-" + bid + ":" + str(pc) + ":" + str(inst_type) + ":" +  str(tid) 
+	result_str += ":" + str(injBID) + ":" + str(runtime) + ":" + str(cat) + ":" + dmesg 
+	result_str += ":" + value_str + "\n"
+	if cp.verbose:
+		print result_str
 
 	has_filelock = False
 	if pkgutil.find_loader('lockfile') is not None:
@@ -80,7 +90,7 @@ def record_result(igid, bfm, app, kname, kcount, iid, opid, bid, cat, pc, inst_t
 		lock.acquire() #acquire lock
 
 	rf = open(res_fname, "a")
-	rf.write(kname + "-" + kcount + "-" + iid + "-" + opid + "-" + bid + ":" + str(pc) + ":" + str(inst_type) + ":" +  str(tid) + ":" + str(injBID) + ":" + str(runtime) + ":" + str(cat) + ":" + dmesg + "\n")
+	rf.write(result_str)
 	rf.close()
 
 	if has_filelock:
@@ -123,6 +133,23 @@ def get_inj_info():
 	return [pc, inst_type, tid, injBID];
 
 ###############################################################################
+# Parse stadout file and obtain values before and after the injection 
+###############################################################################
+def get_inj_value_str():
+	value_str = ""
+	if os.path.isfile(stdout_fname): 
+		logf = open(stdout_fname, "r")
+		for line in logf:
+			matchObj = re.match( r'.*:::value_before(.*)value_before_end:::.*', line, re.M)
+			if matchObj:
+				value_str += "value_before" + matchObj.group(1)
+			matchObj = re.match( r'.*:::value_after(.*)value_after_end:::.*', line, re.M)
+			if matchObj:
+				value_str += ":value_after" + matchObj.group(1)
+		logf.close()
+	return value_str
+
+###############################################################################
 # Classify error injection result based on stdout, stderr, application output,
 # exit status, etc.
 ###############################################################################
@@ -137,7 +164,7 @@ def classify_injection(app, igid, kname, kcount, iid, opid, bid, retcode, dmesg_
 		stdout_str = open(stdout_fname).read()
 	
 	if "Masked: Write before read" in stdout_str:
-		return cp.masked_written
+		return cp.MASKED_WRITTEN
 	if "Masked: Error was never read" in stdout_str:
 		return cp.MASKED_NOT_READ
 	if "Skipped injection" in stdout_str:
@@ -151,7 +178,7 @@ def classify_injection(app, igid, kname, kcount, iid, opid, bid, retcode, dmesg_
 	if "Error: an illegal memory access was encountered" in stdout_str: 
 		return cp.STDOUT_ERROR_MESSAGE
 	if "Error: misaligned address" in open(stderr_fname).read(): # if error is found in the log standard err 
-			return cp.STDOUT_ERROR_MESSAGE
+		return cp.STDOUT_ERROR_MESSAGE
 
 	os.system(sp.script_dir[app] + "/sdc_check.sh") # perform SDC check
 
@@ -230,7 +257,7 @@ def is_timeout(app, pr): # check if the process is active every 'factor' sec for
 ###############################################################################
 # Run the actual injection run 
 ###############################################################################
-def run_one_injection_job(igid, bfm, app, kname, kcount, iid, opid, bid):
+def run_one_injection_job(inj_mode, igid, bfm, app, kname, kcount, iid, opid, bid):
 	start = datetime.datetime.now() # current time
 	[pc, inst_type, tid, injBID, ret_vat] = ["", "", -1, -1, -1]
 
@@ -255,17 +282,19 @@ def run_one_injection_job(igid, bfm, app, kname, kcount, iid, opid, bid):
 
 	if cp.verbose: os.system("cat " + sp.stdout_file + " " + sp.stderr_file)
 	
+	value_str = ""
 	if timeout_flag:
 		ret_cat = cp.TIMEOUT 
 	else:
 		ret_cat = classify_injection(app, igid, kname, kcount, iid, opid, bid, retcode, dmesg_delta)
 		[pc, inst_type, tid, injBID] = get_inj_info()
+		value_str = get_inj_value_str()
 	
 	os.chdir(cwd) # return to the main dir
 	# print ret_cat
 
 	elapsed = datetime.datetime.now() - start
-	record_result(igid, bfm, app, kname, kcount, iid, opid, bid, ret_cat, pc, inst_type, tid, injBID, get_seconds(elapsed), dmesg_delta)
+	record_result(inj_mode, igid, bfm, app, kname, kcount, iid, opid, bid, ret_cat, pc, inst_type, tid, injBID, get_seconds(elapsed), dmesg_delta, value_str)
 
 	if get_seconds(elapsed) < 0.5: time.sleep(0.5)
 	shutil.rmtree(new_directory, True) # remove the directory once injection job is done
@@ -280,15 +309,15 @@ def main():
 	if not os.path.isdir(sp.SASSIFI_HOME): print "Error: Regression dir not found!"
 	if not os.path.isdir(sp.logs_base_dir + "/results"): os.system("mkdir -p " + sp.logs_base_dir + "/results") # create directory to store summary
 
-	if len(sys.argv) == 9:
+	if len(sys.argv) == 10:
 		start= datetime.datetime.now()
-		[igid, bfm, app, kname, kcount, iid, opid, bid] = [sys.argv[1], sys.argv[2], sys.argv[3], str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8])]
-		set_env_variables(igid, bfm, app, kname, kcount, iid, opid, bid) 
+		[inj_mode, igid, bfm, app, kname, kcount, iid, opid, bid] = [sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9])]
+		set_env_variables(inj_mode, igid, bfm, app, kname, kcount, iid, opid, bid) 
 		
-		err_cat = run_one_injection_job(igid, bfm, app, kname, kcount, iid, opid, bid) 
+		err_cat = run_one_injection_job(inj_mode, igid, bfm, app, kname, kcount, iid, opid, bid) 
 	
 		elapsed = datetime.datetime.now() - start
-		print "App=%s, IGID=%s, EM=%s, Time=%f, Outcome: %s" %(app, igid, bfm, get_seconds(elapsed), cp.CAT_STR[err_cat-1])
+		print "App=%s, Mode=%s, IGID=%s, EM=%s, Time=%f, Outcome: %s" %(app, inj_mode, igid, bfm, get_seconds(elapsed), cp.CAT_STR[err_cat-1])
 	else:
 		print_usage()
 

@@ -1,5 +1,5 @@
-################################################################################### 
-# Copyright (c) 2015, NVIDIA CORPORATION. All rights reserved.
+#########################################################################
+# Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,38 +24,49 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################
-import parameters as par
+#########################################################################
+
 
 PYTHON_P = "python2.7"
 
-TIMEOUT_THRESHOLD =10 # 10X usual runtime 
+TIMEOUT_THRESHOLD = 10 # 10X usual runtime 
 
 #verbose = True
-verbose = par.verbose_p
+verbose = False
+
+#######################################################################
+# Three injection modes
+#######################################################################
+RF_MODE = "rf"
+INST_VALUE_MODE = "inst_value"
+INST_ADDRESS_MODE = "inst_address"
 
 #######################################################################
 # Categories of instruction types (IGIDs): This should match the values set in
 # err_injector/error_injector.h. 
 #######################################################################
-IADD_IMUL_OP = 0
-FADD_FMUL_OP = 1
-MAD_OP = 2
-FMA_OP = 3 
-SETP_OP = 4 
-LDS_OP = 5
-LD_OP = 6
-MISC_OP = 7
+GPR = 0
+CC = 1
+PR = 2
+STORE_OP = 3
+IADD_IMUL_OP = 4
+FADD_FMUL_OP = 5
+DADD_DMUL_OP = 6
+MAD_OP = 7
+FFMA_OP = 8 
+DFMA_OP = 9 
+SETP_OP = 10 
+LDS_OP = 11
+LD_OP = 12
+MISC_OP = 13
+NUM_INST_TYPES = 14
 
-GPR = 8
-CC = 9
-PR = 10
-STORE_VAL = 11
-NUM_INST_TYPES = 12
+IGID_STR = [ "GPR", "CC", "PR", "STORE_OP",
+"IADD_IMUL_OP", "FADD_FMUL_OP", "DADD_DMUL_OP",
+"MAD_OP", "FFMA_OP", "DFMA_OP", "SETP_OP",
+"LDS_OP", "LD_OP", "MISC_OP"]
 
-IGID_STR = ["IADD_IMUL", "FADD_FMUL", "MAD",
-"FMA", "SETP", "LDS", "LD",
-"MISC_OP", "GPR", "CC", "PR", "STORE_VAL"]
+
 
 #######################################################################
 # Types of avaialble error models (bit-flip model, BFM): This should match the

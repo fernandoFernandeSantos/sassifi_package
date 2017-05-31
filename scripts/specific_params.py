@@ -1,5 +1,5 @@
-################################################################################### 
-# Copyright (c) 2015, NVIDIA CORPORATION. All rights reserved.
+#########################################################################
+# Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,11 +24,11 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################
+#########################################################################
+
 
 import os, sys, cPickle
 import common_params as p
-import parameters as par
 
 #########################################################################
 # Number of injections per app, per instruction group (IGID), per bit-flip
@@ -44,12 +44,11 @@ import parameters as par
 # campaign. This is essentially the maximum number of injections one can run
 # per instruction group (IGID) and bit-flip model (BFM).
 # 
-NUM_INJECTIONS = par.NUM_INJECTIONS_P #644
-
+NUM_INJECTIONS = 644
 
 # Specify how many injections you want to perform per IGID and BFM combination. 
 # Only the first THRESHOLD_JOBS will be selected from the generated NUM_INJECTIONS.
-THRESHOLD_JOBS = par.THRESHOLD_JOBS_P #2 # test
+THRESHOLD_JOBS = 10 # test
 
 # THRESHOLD_JOBS sould be <= NUM_INJECTIONS
 assert THRESHOLD_JOBS <= NUM_INJECTIONS
@@ -62,47 +61,64 @@ assert THRESHOLD_JOBS <= NUM_INJECTIONS
 #    bfm: bit-flip model
 #    igid: instruction group ID
 #########################################################################
-#rf_bfm_list = [p.FLIP_SINGLE_BIT, p.RANDOM_VALUE,] #p.FLIP_TWO_BITS]
-rf_bfm_list = [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE]
+rf_bfm_list = [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS]
 
-# Used for instruction output-level injection runs 
-igid_bfm_map = {
-#	p.GPR: [p.FLIP_SINGLE_BIT]
+# Used for instruction output-level value injection runs 
+inst_value_igid_bfm_map = {
+	p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
 
 #  Supported models
- 	p.GPR:          [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
- 	p.CC:           [p.FLIP_SINGLE_BIT],
- 	p.PR:           [p.FLIP_SINGLE_BIT],
- 	p.STORE_VAL:    [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
- 	p.IADD_IMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
- 	p.FADD_FMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
- 	p.MAD_OP:       [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
- 	p.FMA_OP:       [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
- 	p.SETP_OP:      [p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
- 	p.LDS_OP:       [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
- 	p.LD_OP:        [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.CC: [p.FLIP_SINGLE_BIT],
+# 	p.PR: [p.FLIP_SINGLE_BIT],
+# 	p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.IADD_IMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.FADD_FMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.DADD_DMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.MAD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.FFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.DFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.SETP_OP: [p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+# 	p.LDS_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+# 	p.LD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+
 }
+
+# Used for instruction output-level address injection runs 
+inst_address_igid_bfm_map = {
+	p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+
+#  Supported models
+# 	p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+# 	p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+}
+
+
 
 #########################################################################
 # List of apps 
 # app_name: [suite name, binary name, expected runtime in secs on the target PC]
 #########################################################################
 
-apps = par.apps_p 
+apps = {
+	'simple_add': ['example', 'simple_add', 2],
+}
+
 #########################################################################
 # Separate list of apps and error models for parsing because one may want to
 # parse results from a differt set of applications and error models 
 #########################################################################
 parse_rf_bfm_list = rf_bfm_list
-parse_igid_bfm_map = igid_bfm_map
+parse_inst_value_igid_bfm_map = inst_value_igid_bfm_map
+parse_inst_address_igid_bfm_map = inst_address_igid_bfm_map
 parse_apps = apps
 
 #########################################################################
 # Set paths for application binary, run script, etc. 
 #########################################################################
 if 'SASSIFI_HOME' not in os.environ:
-    print "Error: Please set SASSIFI_HOME environment variable" 
-    sys.exit(-1)
+	print "Error: Please set SASSIFI_HOME environment variable" 
+	sys.exit(-1)
 
 SASSIFI_HOME = os.environ['SASSIFI_HOME']
 suites_base_dir = SASSIFI_HOME + "/suites/"
@@ -116,17 +132,17 @@ bin_dir = {}
 app_dir = {}
 app_data_dir = {}
 def set_paths(): 
-    merged_apps = apps # merge the two dictionaries 
-    merged_apps.update(parse_apps) 
-    
-    for app in merged_apps:
-        suite_name = merged_apps[app][0]
+	merged_apps = apps # merge the two dictionaries 
+	merged_apps.update(parse_apps) 
+	
+	for app in merged_apps:
+		suite_name = merged_apps[app][0]
 
-        app_log_dir[app] = logs_base_dir + suite_name + "/" + app + "/"
-        script_dir[app] = run_script_base_dir + suite_name + "/" + app + "/"
-        bin_dir[app] = bin_base_dir + p.rf_inst + "_injector/" + suite_name + "/"
-        app_dir[app] = suites_base_dir +  suite_name + "/" + app + "/"
-        app_data_dir[app] = suites_base_dir +  suite_name + "/data/" # without the app name here!
+		app_log_dir[app] = logs_base_dir + suite_name + "/" + app + "/"
+		script_dir[app] = run_script_base_dir + suite_name + "/" + app + "/"
+		bin_dir[app] = bin_base_dir + p.rf_inst + "_injector/" + suite_name + "/"
+		app_dir[app] = suites_base_dir +  suite_name + "/" + app + "/"
+		app_data_dir[app] = suites_base_dir +  suite_name + "/data/" # without the app name here!
 
 set_paths()
 
@@ -135,15 +151,17 @@ set_paths()
 # compiler using "-Xptxas -v" option
 #########################################################################
 
-num_regs = {} #par.num_regs_p
-# {    'simple_add': {        '_Z10simple_addi': 6,         } }
+num_regs = {
+	'simple_add': {
+		'_Z10simple_addi': 6, 
+		}
+}
 
 # update dictionaries for different applications here
 def set_num_regs(): 
-    # update the path to the kerne_regcount.p file if it is stored in a different location
-    app = par.benchmark
-    num_regs[app] = cPickle.load(open(suites_base_dir + apps[app][0] + "/" + app + "/" + app + "_kernel_regcount.p", "rb"))
-    print "\n\n\n", num_regs[app] , "\n\n"
+	# update the path to the kerne_regcount.p file if it is stored in a different location
+	app = "simple_add"
+	num_regs[app] = cPickle.load(open(suites_base_dir + apps[app][0] + "/" + app + "/" + app + "_kernel_regcount.p", "rb"))
 
 set_num_regs()
 
@@ -163,5 +181,5 @@ special_sdc_check_log = "special_check.log"
 #########################################################################
 # Number of gpus to use for error injection runs
 #########################################################################
-NUM_GPUS = par.NUM_GPUS_P
+NUM_GPUS = 2
 

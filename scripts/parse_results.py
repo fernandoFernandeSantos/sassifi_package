@@ -1,5 +1,5 @@
-################################################################################### 
-# Copyright (c) 2015, NVIDIA CORPORATION. All rights reserved.
+#########################################################################
+# Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,8 +24,7 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################
-
+#########################################################################
 
 import os, sys, re, string, math, datetime, time, pkgutil
 import common_params as cp
@@ -33,10 +32,8 @@ import specific_params as sp
 import common_functions as cf 
 
 output_format = []
-for cat in range(cp.NUM_CATS-2):
+for cat in range(cp.NUM_CATS-1):
 	output_format.append(cp.CAT_STR[cat])
-
-num_outcomes = len(output_format)
 
 workbook = ""
 fname_prefix = ""
@@ -102,7 +99,7 @@ def populate_inst_fraction():
 	global inst_fraction
 	for app in results_app_table:
 		inst_counts = cf.get_total_counts(cf.read_inst_counts(sp.app_dir[app], app))
-		total = cf.get_total_insts(cf.read_inst_counts(sp.app_dir[app], app))
+		total = cf.get_total_insts(cf.read_inst_counts(sp.app_dir[app], app), False)
 		inst_fraction[app] = [total] + [1.0*i/total for i in inst_counts]
 		inst_count[app] = inst_counts 
 
@@ -129,18 +126,18 @@ def print_inst_fractions_txt():
 	f.close()
 
 
-def parse_results_file(app, igid, bfm):
+def parse_results_file(app, inj_mode, igid, bfm):
 	try:
-		rf = open(sp.app_log_dir[app] + "results-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt", "r")
+		rf = open(sp.app_log_dir[app] + "results-mode" + inj_mode + "-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt", "r")
 	except IOError: 
-		print "app=%s, igid=%d, bfm=%d " %(app, igid, bfm),
-		print sp.app_log_dir[app] + "results-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt"
+		print "Error opening file: " + sp.app_log_dir[app] + "results-mode" + inj_mode + "-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt"
+		print "It is possible that no injections were performed for app=%s, inj_mode=%s, igid=%s, bfm=%s " %(app, inj_mode, str(igid), str(bfm))
 		return 
 
 	num_lines = 0
 	for line in rf: # for each injection site 
-		#Example line: _Z22bpnn_layerforward_CUDAPfS_S_S_ii-0-26605491-0.506809798834-0.560204950825:..:MOV:773546:17:0.759537:3:dmesg, 
-		#kname-kcount-iid-opid-bid:pc:opcode:tid:injBID:runtime_sec:outcome_category:dmesg
+		#Example line: _Z22bpnn_layerforward_CUDAPfS_S_S_ii-0-26605491-0.506809798834-0.560204950825:..:MOV:773546:17:0.759537:3:dmesg:value_before_value_after, 
+		#kname-kcount-iid-opid-bid:pc:opcode:tid:injBID:runtime_sec:outcome_category:dmesg:value_before:value_after
 		words = line.split(":")
 		inj_site_info = words[0].split("-")
 		[kname, invocation_index, opcode, injBID, runtime, outcome] = [inj_site_info[0], int(inj_site_info[1]), words[2], int(words[4]), float(words[5]), int(words[6])]
@@ -154,21 +151,25 @@ def parse_results_file(app, igid, bfm):
 		num_lines += 1
 	rf.close()
 
-	if num_lines == 0 and app in results_app_table and os.stat(sp.app_log_dir[app] + "injection-list/igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt").st_size != 0: 
-		print "%s, igid=%d, bfm=%d not done" %(app, igid, bfm)
+	if num_lines == 0 and app in results_app_table and os.stat(sp.app_log_dir[app] + "injection-list/mode" + inj_mode + "-igid" + str(igid) + ".bfm" + str(bfm) + "." + str(sp.NUM_INJECTIONS) + ".txt").st_size != 0: 
+		print "%s, inj_mode=%s, igid=%d, bfm=%d not done" %(app, inj_mode, igid, bfm)
 
 ###################################################################################
 # Parse results files and populate summary to results table 
 ###################################################################################
 def parse_results_apps(typ): 
 	for app in sp.parse_apps:
-		if typ == "inst":
-			for igid in sp.parse_igid_bfm_map:
-				for bfm in sp.parse_igid_bfm_map[igid]:
-					parse_results_file(app, igid, bfm)
+		if typ == cp.INST_VALUE_MODE:
+			for igid in sp.parse_inst_value_igid_bfm_map:
+				for bfm in sp.parse_inst_value_igid_bfm_map[igid]:
+					parse_results_file(app, typ, igid, bfm)
+		elif typ == cp.INST_ADDRESS_MODE:
+			for igid in sp.parse_inst_address_igid_bfm_map:
+				for bfm in sp.parse_inst_address_igid_bfm_map[igid]:
+					parse_results_file(app, typ, igid, bfm)
 		else:
 			for bfm in sp.parse_rf_bfm_list:
-				parse_results_file(app, "rf", bfm)
+				parse_results_file(app, typ, "rf", bfm)
 
 ###############################################################################
 # Convert a dictionary to list
@@ -183,6 +184,32 @@ def to_list(d, s):
 		l.append(d[i])
 	return l
 
+
+###############################################################################
+# Helper function
+###############################################################################
+def get_igid_list(inj_mode):
+	if inj_mode == cp.INST_VALUE_MODE:
+		return sp.parse_inst_value_igid_bfm_map 
+	elif inj_mode == cp.INST_ADDRESS_MODE:
+		return sp.parse_inst_address_igid_bfm_map 
+	else: # if inj_mode == cp.RF_MODE:
+		return ["rf"]
+
+def get_bfm_list(inj_mode, igid):
+	if inj_mode == cp.INST_VALUE_MODE:
+		return sp.parse_inst_value_igid_bfm_map[igid] 
+	elif inj_mode == cp.INST_ADDRESS_MODE:
+		return sp.parse_inst_address_igid_bfm_map[igid] 
+	else: # if inj_mode == cp.RF_MODE:
+		return sp.parse_rf_bfm_list
+
+def get_igid_str(inj_mode, igid):
+	if inj_mode == cp.INST_VALUE_MODE or inj_mode == cp.INST_ADDRESS_MODE:
+		return cp.IGID_STR[igid]
+	else: # if inj_mode == cp.RF_MODE:
+		return "rf"
+
 ###############################################################################
 # Print Stats to a worksheet in the xlsx file
 ###############################################################################
@@ -194,12 +221,11 @@ def print_stats_worksheet(typ):
 	for app in num_injections_app_table: 
 		ws2.write(row, 0, app)
 
-		igid_list = sp.parse_igid_bfm_map if typ == "inst" else ["rf"]  
+		igid_list = get_igid_list(typ)
 		for igid in igid_list: 
-			igid_str = cp.IGID_STR[igid] if typ == "inst" else "rf"
-			ws2.write(row, 1, igid_str)
+			ws2.write(row, 1, get_igid_str(typ, igid))
 
-			bfm_list = sp.parse_igid_bfm_map[igid] if typ == "inst" else sp.parse_rf_bfm_list
+			bfm_list = get_bfm_list(typ, igid)
 			for bfm in bfm_list: 
 				if igid in num_injections_app_table[app]:
 					if bfm in num_injections_app_table[app][igid]:
@@ -218,12 +244,11 @@ def print_stats_txt(typ):
 	for app in num_injections_app_table: 
 		f.write(app + "\t") 
 
-		igid_list = sp.parse_igid_bfm_map if typ == "inst" else ["rf"]  
+		igid_list = get_igid_list(typ)
 		for igid in igid_list: 
-			igid_str = cp.IGID_STR[igid] if typ == "inst" else "rf"
-			f.write(igid_str + "\t")
+			f.write(get_igid_str(typ, igid) + "\t")
 
-			bfm_list = sp.parse_igid_bfm_map[igid] if typ == "inst" else sp.parse_rf_bfm_list
+			bfm_list = get_bfm_list(typ, igid)
 			for bfm in bfm_list: 
 				if igid in num_injections_app_table[app]:
 					if bfm in num_injections_app_table[app][igid]:
@@ -243,12 +268,11 @@ def print_detailed_sassifi_results_txt(typ):
 	for app in results_app_table: 
 		f.write(app + "\t") # write app name
 
-		igid_list = sp.parse_igid_bfm_map if typ == "inst" else ["rf"]
+		igid_list = get_igid_list(typ)
 		for igid in igid_list: 
-			igid_str = cp.IGID_STR[igid] if typ == "inst" else "rf"
-			f.write(igid_str + "\t")
+			f.write(get_igid_str(typ, igid) + "\t")
 
-			bfm_list = sp.parse_igid_bfm_map[igid] if typ == "inst" else sp.parse_rf_bfm_list
+			bfm_list = get_bfm_list(typ, igid)
 			for bfm in bfm_list: 
 				written = False
 				if igid in results_app_table[app]:
@@ -270,12 +294,11 @@ def print_detailed_sassifi_results_worksheet(typ):
 	for app in results_app_table: 
 		ws0.write(row0, 0, app) # write app name
 
-		igid_list = sp.parse_igid_bfm_map if typ == "inst" else ["rf"]
+		igid_list = get_igid_list(typ)
 		for igid in igid_list: 
-			igid_str = cp.IGID_STR[igid] if typ == "inst" else "rf"
-			ws0.write(row0, 1, igid_str)
+			ws0.write(row0, 1, get_igid_str(typ, igid))
 
-			bfm_list = sp.parse_igid_bfm_map[igid] if typ == "inst" else sp.parse_rf_bfm_list
+			bfm_list = get_bfm_list(typ, igid)
 			for bfm in bfm_list: 
 				written = False
 				if igid in results_app_table[app]:
@@ -288,9 +311,40 @@ def print_detailed_sassifi_results_worksheet(typ):
 					row0 += 1
 
 
+###############################################################################
+# Print detailed SASSIFI Results on per kernel basis for analysis to a
+# worksheet in the xlsx file
+###############################################################################
+def print_detailed_sassifi_kernel_results_worksheet(typ):
+	ws0 = workbook.add_worksheet("SASSIFI Kernel Details")
+	ws0.write_row(0, 0, ["App", "kernel", "IGID", "Injection Model"] + output_format)
+	row0 = 1
+
+	for app in results_kname_table: 
+		ws0.write(row0, 0, app) # write app name
+
+		for kname in results_kname_table[app]:
+			ws0.write(row0, 1, kname) # write app name
+
+			igid_list = get_igid_list(typ)
+			for igid in igid_list: 
+				ws0.write(row0, 2, get_igid_str(typ, igid))
+	
+				bfm_list = get_bfm_list(typ, igid)
+				for bfm in bfm_list: 
+					written = False
+					if igid in results_kname_table[app][kname]:
+						if bfm in results_kname_table[app][kname][igid]:
+							ws0.write_row(row0, 3, [cp.EM_STR[bfm]] + to_list(results_kname_table[app][kname][igid][bfm], cp.NUM_CATS))
+							row0 += 1
+							written = True
+					if not written:
+						ws0.write_row(row0, 3, [cp.EM_STR[bfm]] + to_list({}, cp.NUM_CATS))
+						row0 += 1
+
 
 def print_usage():
-	print "Usage: \n python parse_results.py rf/inst"
+	print "Usage: \n python parse_results.py rf/inst_value/inst_address"
 	exit(1)
 
 ###############################################################################
@@ -300,11 +354,11 @@ def print_usage():
 def main():
 	if len(sys.argv) != 2: 
 		print_usage()
-	inj_type = sys.argv[1] # inst or rf
+	inj_type = sys.argv[1] # inst_value or inst_address or rf
 			
 	parse_results_apps(inj_type) # parse sassifi results into local data structures
 	# populate instruction fractions
-	if inj_type == "inst":
+	if inj_type == "inst_value" or inj_type == "inst_address":
 		populate_inst_fraction()
 
 	if pkgutil.find_loader('xlsxwriter') is not None:
@@ -315,9 +369,10 @@ def main():
 		global workbook
 		workbook = xlsxwriter.Workbook(workbook_name)
 
-		if inj_type == "inst":
+		if inj_type == "inst_value" or inj_type == "inst_address":
 			print_inst_fractions_worksheet()
 		print_detailed_sassifi_results_worksheet(sys.argv[1])
+		print_detailed_sassifi_kernel_results_worksheet(sys.argv[1])
 		print_stats_worksheet(sys.argv[1])
 
 		workbook.close()
@@ -327,7 +382,7 @@ def main():
 		global fname_prefix 
 		fname_prefix = sp.logs_base_dir + "results/results_" + inj_type + "_" + str(sp.NUM_INJECTIONS) + "_"
 
-		if inj_type == "inst":
+		if inj_type == "inst_value" or inj_type == "inst_address":
 			print_inst_fractions_txt()
 		print_detailed_sassifi_results_txt(sys.argv[1])
 		print_stats_txt(sys.argv[1])

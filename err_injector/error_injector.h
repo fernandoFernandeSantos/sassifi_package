@@ -1,5 +1,4 @@
-/*********************************************************************************** \
-* Copyright (c) 2015, NVIDIA CORPORATION. All rights reserved.
+/* Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
@@ -24,7 +23,7 @@
 * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-\***********************************************************************************/
+*/
 
 #ifndef __SASSIFI_STRUCTS___
 #define __SASSIFI_STRUCTS___
@@ -39,7 +38,8 @@
 
 // Injection mode 
 #define RF_INJECTIONS 0
-#define INST_INJECTIONS 1
+#define INST_VALUE_INJECTIONS 1
+#define INST_ADDRESS_INJECTIONS 2
 
 // Kernel name should be less than 200 characters
 #define MAX_KNAME_SIZE 200
@@ -69,25 +69,28 @@ enum BFM {
 // Arch state error injection sites instruction group IDs
 // SASSIFI-user-guide summarizes these groups
 enum INST_TYPE {
-	IADD_IMUL_OP = 0, 
+	GPR = 0, 
+	CC, 
+	PR, 
+	STORE_OP, 
+	IADD_IMUL_OP, 
 	FADD_FMUL_OP, 
+	DADD_DMUL_OP, 
 	MAD_OP, 
-	FMA_OP, 
+	FFMA_OP, 
+	DFMA_OP, 
 	SETP_OP, 
 	LDS_OP, 
 	LD_OP, 
 	MISC_OP, 
-	GPR, 
-	CC, 
-	PR, 
-	STORE_VAL, 
 	NUM_INST_TYPES
 };
 
 const char *instCatName[NUM_INST_TYPES] = {
-	"IADD_IMUL_OP", "FADD_FMUL_OP", "MAD_OP", 
-	"FMA_OP", "SETP_OP", "LDS_OP", "LD_OP",
-	"MISC_OP", "GPR", "CC", "PR", "STORE_VAL"
+	"GPR", "CC", "PR", "STORE_OP", 
+	"IADD_IMUL_OP", "FADD_FMUL_OP", "DADD_DMUL_OP", "MAD_OP", 
+	"FMA_OP", "DMA_OP", "SETP_OP", "LDS_OP", "LD_OP",
+	"MISC_OP"
 };
 
 // Instruction groupings
@@ -104,7 +107,8 @@ __device__ int get_op_category (int op) {
 		 case SASSI_OP_IADD32I: return IADD_IMUL_OP;
 
 		 case SASSI_OP_DADD:
-		 case SASSI_OP_DMUL:
+		 case SASSI_OP_DMUL: return DADD_DMUL_OP;
+
 		 case SASSI_OP_FADD:
 		 case SASSI_OP_FMUL:
 		 case SASSI_OP_FMUL32I:
@@ -115,9 +119,10 @@ __device__ int get_op_category (int op) {
 		 case SASSI_OP_IMAD32I:
 		 case SASSI_OP_IMADSP: return MAD_OP;
 
-		 case SASSI_OP_DFMA:
+		 case SASSI_OP_DFMA: return DFMA_OP;
+
 		 case SASSI_OP_FFMA:
-		 case SASSI_OP_FFMA32I: return FMA_OP;
+		 case SASSI_OP_FFMA32I: return FFMA_OP;
 
 		 case SASSI_OP_PSETP:
 		 case SASSI_OP_ISETP:
@@ -152,7 +157,10 @@ std::string profileFilename = "sassifi-inst-counts.txt";
 std::string injInputFilename = "sassifi-injection-seeds.txt";
 
 //////////////////////////////////////////////////////////////////////
-// Data structures for recording/storing infomration
+// Data structures for recording/storing information:
+// These data structures/helper functions are used to record infomration 
+// in the sassi_before handler and then used later in the 
+// sassi_after handler
 //////////////////////////////////////////////////////////////////////
 
 // Data structure to store 128-bit values
@@ -163,24 +171,56 @@ typedef struct uint128 {
 // Data structure to record memory infomration 
 typedef struct mem_info {
 	int64_t address;
-	int32_t bitwidth;
+	int32_t bitwidth; //bits
 	uint128_t value;
 } mem_info_t;
 
 __managed__ mem_info_t mem_info_d;
 
-
-__device__ uint64_t get_recorded_memory_value() {
-	return mem_info_d.value.values[0]; 
+__device__ void clear_mem_info() {
+	mem_info_d.address = -1;
+	mem_info_d.bitwidth = -1;
+	mem_info_d.value.values[0] = 0;
+	mem_info_d.value.values[1] = 0;
 }
 
-__device__ uint128_t get_recorded_memory_value128() {
-	return mem_info_d.value;
+// read value from memory based on the bidwidth (in bits here)
+__device__ uint128_t read_memory_value(int64_t address, int32_t bitwidth) {
+	uint128_t val; 
+	if (bitwidth == 32) { // most common case
+		val.values[0] = (uint64_t) *((uint32_t*)address);
+	} else if (bitwidth == 8) { 
+		val.values[0] = (uint64_t) *((uint8_t*)address);
+	} else if (bitwidth == 16) { 
+		val.values[0] = (uint64_t) *((uint16_t*)address);
+	} else if (bitwidth == 64) {
+		val.values[0] = *((uint64_t*)address);
+	} else if (bitwidth >= 128) {
+		val.values[0] =	(*((uint128_t*)address)).values[0];
+		val.values[1] =	(*((uint128_t*)address)).values[1];
+	}
+	return val;
 }
 
-// record memory value based on the bidwidth
+// write value to memory based on the bidwidth (in bits here)
+__device__ void write_memory_value(int64_t address, uint128_t val, int32_t bitwidth) {
+	if (bitwidth == 32) { // most common case
+		*((uint32_t*)address) = (uint32_t)val.values[0];
+	} else if (bitwidth == 8) { 
+		*((uint8_t*)address) = (uint8_t)val.values[0];
+	} else if (bitwidth == 16) { 
+		*((uint16_t*)address) = (uint16_t)val.values[0];
+	} else if (bitwidth == 64) {
+		*((uint64_t*)address) = (uint64_t)val.values[0];
+	} else if (bitwidth >= 128) {
+		((uint128_t*)address)->values[0] = val.values[0];
+		((uint128_t*)address)->values[1] = val.values[1];
+	}
+}
+
+// record memory value based on the bidwidth (in bits here)
 __device__ void record_memory_info(int64_t address, int32_t bitwidth) {
-	mem_info_d.bitwidth = bitwidth; // GetWidth returns bytes 
+	mem_info_d.bitwidth = bitwidth; 
 	mem_info_d.address = address; 
 
 	mem_info_d.value.values[0] = 0;
@@ -195,9 +235,26 @@ __device__ void record_memory_info(int64_t address, int32_t bitwidth) {
 		mem_info_d.value.values[0] = (uint64_t) *((uint16_t*)address);
 	} else if (bitwidth == 64) {
 		mem_info_d.value.values[0] = *((uint64_t*)address);
-	} else if (bitwidth == 128) {
+	} else if (bitwidth >= 128) {
 		mem_info_d.value.values[0] =	(*((uint128_t*)address)).values[0];
 		mem_info_d.value.values[1] =	(*((uint128_t*)address)).values[1];
+	}
+}
+
+// Data structure to record register infomration 
+typedef struct reg_info {
+	int32_t address;
+	SASSIRegisterParams::GPRRegValue value;
+} reg_info_t;
+
+__managed__ reg_info_t tmp_store_reg_info_d;
+
+__managed__ reg_info_t reg_info_d[MAX_REGS_PERINST];
+
+__device__ void clear_register_info() {
+	for (int i=0; i<MAX_REGS_PERINST; i++) {
+		reg_info_d[i].address = -1;
+		reg_info_d[i].value.asInt = -1;
 	}
 }
 
@@ -273,16 +330,26 @@ std::string  get_profile_format() {
 
 // Counters that we keep on the device.
 __managed__ unsigned long long injCounterAllInsts; // single counter for all instructions
-__managed__ unsigned long long injCountersInstType[NUM_INST_TYPES]; // count instruction based on different instruction types as well as whether they write to GPR, CC, PR or STORE_VAL
+__managed__ unsigned long long injCountersInstType[NUM_INST_TYPES]; // count instruction based on different instruction types as well as whether they write to GPR, CC, PR or STORE_OP
 __managed__ unsigned long long opCounters[SASSI_NUM_OPCODES]; // count instruction based on opcode
 __managed__ unsigned long long opWillNotExecuteCount; // counter for instructions that will not execute 
 
 __device__ inline void profile_instructions(SASSICoreParams* cp, SASSIMemoryParams* mp, SASSIRegisterParams* rp) {
 
 	atomicAdd(&injCountersInstType[GPR], (unsigned long long)has_dest_GPR(rp)); 
-	atomicAdd(&injCountersInstType[CC], (unsigned long long)has_dest_CC(rp)); 
-	atomicAdd(&injCountersInstType[PR], (unsigned long long)has_dest_PR(rp)); 
-	atomicAdd(&injCountersInstType[STORE_VAL], (unsigned long long)is_store_inst(cp, mp)); 
+
+	if (has_dest_CC(rp)) {
+		//atomicAdd(&injCountersInstType[CC], (unsigned long long)has_dest_CC(rp)); 
+		atomicAdd(&injCountersInstType[CC], 1LL); 
+	}
+	if (has_dest_PR(rp)) { 
+		//atomicAdd(&injCountersInstType[PR], (unsigned long long)has_dest_PR(rp)); 
+		atomicAdd(&injCountersInstType[PR], 1LL); 
+	}
+	if (is_store_inst(cp, mp)) {
+		// atomicAdd(&injCountersInstType[STORE_OP], (unsigned long long)is_store_inst(cp, mp)); 
+		atomicAdd(&injCountersInstType[STORE_OP], 1LL); 
+	}
 
 	int op = cp->GetOpcode();
 	atomicAdd(&opCounters[op], 1LL);
@@ -293,7 +360,6 @@ __device__ inline void profile_instructions(SASSICoreParams* cp, SASSIMemoryPara
 __device__ inline void profile_will_not_execute_instructions() {
 	atomicAdd(&opWillNotExecuteCount, 1LL);
 }
-
 
 void reset_profiling_counters() {
 	injCounterAllInsts = 0; 

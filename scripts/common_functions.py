@@ -1,5 +1,5 @@
-################################################################################### 
-# Copyright (c) 2015, NVIDIA CORPORATION. All rights reserved.
+#########################################################################
+# Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,7 +24,7 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################
+#########################################################################
 
 import sys, re, string, os, operator, math, datetime, random
 import common_params as cp
@@ -47,7 +47,7 @@ def read_inst_counts(app_dir, app):
 
 	return countList 
 
-# Sample format from sassifi-inst-counts.txt - kName:kernelCount:IADD_IMUL_OP:FADD_FMUL_OP:MAD_OP:FMA_OP:SETP_OP:LDS_OP:LD_OP:MISC_OP:GPR:CC:PR:STORE_VAL:opWillNotExecuteCount::ATOMS:B2R:BAR:BFE:BFI:BPT:BRA:BRK:BRX:CAL:CAS:CCTL:CCTLL:CCTLT:CONT:CS2R:CSET:CSETP:DADD:DEPBAR:DFMA:DMNMX:DMUL:DSET:DSETP:EXIT:F2F:F2I:FADD:FADD32I:FCHK:FCMP:FFMA:FFMA32I:FLO:FMNMX:FMUL:FMUL32I:FSET:FSETP:FSWZ:FSWZADD:I2F:I2I:IADD:IADD3:IADD32I:ICMP:IMAD:IMAD32I:IMADSP:IMNMX:IMUL:IMUL32I:ISAD:ISCADD:ISCADD32I:ISET:ISETP:JCAL:JMX:LD:LDC:LDG:LDL:LDLK:LDS:LDSLK:LDS_LDU:LDU:LD_LDU:LEA:LEPC:LONGJMP:LOP:LOP3:LOP32I:MEMBAR:MOV:MUFU:NOP:P2R:PBK:PCNT:PEXIT:PLONGJMP:POPC:PRET:PRMT:PSET:PSETP:R2B:R2P:RED:RET:RRO:S2R:SEL:SHF:SHFL:SHL:SHR:SSY:ST:STG:STL:STS:STSCUL:STSUL:STUL:SUATOM:SUBFM:SUCLAMP:SUEAU:SULD:SULDGA:SULEA:SUQ:SURED:SUST:SUSTGA:SYNC:TEX:TEXDEPBAR:TEXS:TLD:TLD4:TLD4S:TLDS:TXQ:UNMAPPED:USER_DEFINED:VMNMX:VOTE:XMAD
+# Sample format from sassifi-inst-counts.txt - kName:kernelCount:GPR:CC:PR:STORE_OP:IADD_IMUL_OP:FADD_FMUL_OP:DADD_DMUL_OP:MAD_OP:FFMA_OP:DFMA_OP:SETP_OP:LDS_OP:LD_OP:MISC_OP:opWillNotExecuteCount::ATOMS:B2R:BAR:BFE:BFI:BPT:BRA:BRK:BRX:CAL:CAS:CCTL:CCTLL:CCTLT:CONT:CS2R:CSET:CSETP:DADD:DEPBAR:DFMA:DMNMX:DMUL:DSET:DSETP:EXIT:F2F:F2I:FADD:FADD32I:FCHK:FCMP:FFMA:FFMA32I:FLO:FMNMX:FMUL:FMUL32I:FSET:FSETP:FSWZ:FSWZADD:I2F:I2I:IADD:IADD3:IADD32I:ICMP:IMAD:IMAD32I:IMADSP:IMNMX:IMUL:IMUL32I:ISAD:ISCADD:ISCADD32I:ISET:ISETP:JCAL:JMX:LD:LDC:LDG:LDL:LDLK:LDS:LDSLK:LDS_LDU:LDU:LD_LDU:LEA:LEPC:LONGJMP:LOP:LOP3:LOP32I:MEMBAR:MOV:MUFU:NOP:P2R:PBK:PCNT:PEXIT:PLONGJMP:POPC:PRET:PRMT:PSET:PSETP:R2B:R2P:RED:RET:RRO:S2R:SEL:SHF:SHFL:SHL:SHR:SSY:ST:STG:STL:STS:STSCUL:STSUL:STUL:SUATOM:SUBFM:SUCLAMP:SUEAU:SULD:SULDGA:SULEA:SUQ:SURED:SUST:SUSTGA:SYNC:TEX:TEXDEPBAR:TEXS:TLD:TLD4:TLD4S:TLDS:TXQ:UNMAPPED:USER_DEFINED:VMNMX:VOTE:XMAD
 def get_inst_count_format():
 	ret_str = "kName:kernelCount"
 	for s in cp.IGID_STR:
@@ -68,17 +68,21 @@ def get_total_counts(countList):
 	return total_icounts
 
 # return total number of instructions in the countList 
-def get_total_insts(countList):
+def get_total_insts(countList, with_will_not_execute):
 	total = 0
 	for l in countList:
-		for i in range(cp.NUM_INST_TYPES+3, len(countList[0])): # 3: 1 for kname, 1 for kcount and 1 for WILL NOT EXECUTE instruction count
+		# 3: 1 for kname, 1 for kcount and 1 for WILL NOT EXECUTE instruction count
+		# 2: 1 for kname, 1 for kcount 
+		start = cp.NUM_INST_TYPES+2 if with_will_not_execute else cp.NUM_INST_TYPES+3
+		for i in range(start, len(countList[0])): 
 			total += int(l[i])
 	return total
 
-def get_rf_injection_site_info(countList, inj_num):
+def get_rf_injection_site_info(countList, inj_num, with_will_not_execute):
 	start = 0
 	for item in countList:
-		total = sum(int(item[i]) for i in range(cp.NUM_INST_TYPES+3, len(countList[0]))) # total number of instructions in this kernel
+		st = cp.NUM_INST_TYPES+2 if with_will_not_execute else cp.NUM_INST_TYPES+3
+		total = sum(int(item[i]) for i in range(st, len(countList[0]))) # total number of instructions in this kernel
 		if start <= inj_num < start + total:
 			return [item[0], item[1], inj_num-start] # return [kname, kcount, inj_num in this kernel]
 		start += total

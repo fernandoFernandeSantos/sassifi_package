@@ -4,7 +4,8 @@ include ../../env.mk
 # Decide which libraries you want to compile.
 export LIBS := 	libprofiler.a \
 		librfinjector.a \
-		libinstinjector.a 
+		libinstvalueinjector.a \
+		libinstaddressinjector.a 
 
 NVCC = $(CUDA_HOME)/bin/nvcc
 CUPTI = $(CUDA_HOME)/extras/CUPTI
@@ -37,10 +38,27 @@ INJ_DEBUG_HEAVY=0
 
 # Flags used by the build commands below
 RF_INJECTIONS=0
-INST_INJECTIONS=1
+INST_VALUE_INJECTIONS=1
+INST_ADDRESS_INJECTIONS=2
+
+FLAGS = -ccbin $(CCBIN) -std=c++11 \
+		--compiler-options -Wall \
+		-O3 $(GENCODE) \
+		-lineinfo -c -rdc=true  \
+		--maxrregcount=16 \
+		--compiler-options -Wall \
+		-DEMPTY_HANDLER=$(EMPTY_HANDLER) \
+		-DDUMMY_INJECTION=$(DUMMY_INJECTION) \
+		-DTIMING=$(TIMING) \
+		-DINJ_DEBUG_LIGHT=$(INJ_DEBUG_LIGHT) \
+		-DINJ_DEBUG_HEAVY=$(INJ_DEBUG_HEAVY) \
+		-I$(CUPTI)/include/ \
+		-I$(INSTALL_DIR)/utils/ \
+		-I$(SASSI_HOME)/include/ \
+
 
 ########################################
-# build rules: try "make -j3"
+# build rules: try "make -j4"
 ########################################
 
 install: $(INSTALLED_LIBS)
@@ -50,58 +68,19 @@ $(INSTALL_DIR)/lib/lib%.a: %.o
 	ranlib $@
 
 profiler.o: profiler.cu
-	$(NVCC) -ccbin $(CCBIN) -std=c++11 \
-		--compiler-options -Wall \
-		-O3 $(GENCODE) \
-		-lineinfo -c -rdc=true -o $@ $^ \
-		--maxrregcount=16 \
-		--compiler-options -Wall \
-		-DEMPTY_HANDLER=$(EMPTY_HANDLER) \
-		-DTIMING=$(TIMING) \
-		-DINJ_DEBUG_LIGHT=$(INJ_DEBUG_LIGHT) \
-		-DINJ_DEBUG_HEAVY=$(INJ_DEBUG_HEAVY) \
-		-I$(CUPTI)/include/ \
-		-I$(INSTALL_DIR)/utils/ \
-		-I$(SASSI_HOME)/include/ \
-		-D_FORCE_INLINES
+	$(NVCC) $(FLAGS) -o $@ $^ 
 
 rfinjector.o: injector.cu 
-	$(NVCC) -ccbin $(CCBIN) -std=c++11 \
-		--compiler-options -Wall \
-		-O3 $(GENCODE) \
-		-lineinfo -c -rdc=true -o $@ $^ \
-		--maxrregcount=16 \
-		--compiler-options -Wall \
-		-DEMPTY_HANDLER=$(EMPTY_HANDLER) \
-		-DDUMMY_INJECTION=$(DUMMY_INJECTION) \
-		-DTIMING=$(TIMING) \
-		-DINJ_DEBUG_LIGHT=$(INJ_DEBUG_LIGHT) \
-		-DINJ_DEBUG_HEAVY=$(INJ_DEBUG_HEAVY) \
-		-DINJ_MODE=$(RF_INJECTIONS) \
-		-DCC_DEBUG=$(CC_DEBUG) \
-		-I$(CUPTI)/include/ \
-		-I$(INSTALL_DIR)/utils/ \
-		-I$(SASSI_HOME)/include/ \
-		-D_FORCE_INLINES
+	$(NVCC) $(FLAGS) -o $@ $^ \
+		-DINJ_MODE=$(RF_INJECTIONS)
 
-instinjector.o: injector.cu
-	$(NVCC) -ccbin $(CCBIN) -std=c++11 \
-		--compiler-options -Wall \
-		-O3 $(GENCODE) \
-		-lineinfo -c -rdc=true -o $@ $^ \
-		--maxrregcount=16 \
-		--compiler-options -Wall \
-		-DEMPTY_HANDLER=$(EMPTY_HANDLER) \
-		-DDUMMY_INJECTION=$(DUMMY_INJECTION) \
-		-DTIMING=$(TIMING) \
-		-DINJ_DEBUG_LIGHT=$(INJ_DEBUG_LIGHT) \
-		-DINJ_DEBUG_HEAVY=$(INJ_DEBUG_HEAVY) \
-		-DINJ_MODE=$(INST_INJECTIONS) \
-		-DCC_DEBUG=$(CC_DEBUG) \
-		-I$(CUPTI)/include/ \
-		-I$(INSTALL_DIR)/utils/ \
-		-I$(SASSI_HOME)/include/ \
-		-D_FORCE_INLINES
+instvalueinjector.o: injector.cu
+	$(NVCC) $(FLAGS) -o $@ $^ \
+		-DINJ_MODE=$(INST_VALUE_INJECTIONS)
+
+instaddressinjector.o: injector.cu
+	$(NVCC) $(FLAGS) -o $@ $^ \
+		-DINJ_MODE=$(INST_ADDRESS_INJECTIONS)
 
 clean:
 	$(RM) $(INSTALLED_LIBS) *.o *.a *~ 
