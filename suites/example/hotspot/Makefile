@@ -42,19 +42,41 @@ BEFORE_REG_MEM_INFO = -Xptxas --sassi-before-args="reg-info\,mem-info"
 
 BRANCH_AROUND = -Xptxas --sassi-iff-true-predicate-handler-call
 
+
+#~ old sassifi 
+#~ ifeq (${OPTION},profiler)
+#~ EXTRA_NVCC_FLAGS = $(BEFORE_ALL) $(BEFORE_REG_MEM_INFO)
+#~ EXTRA_LINK_FLAGS = -L$(INST_LIB_DIR) -lprofiler $(CUPTI)
+#~ endif
+#~ 
+#~ ifeq (${OPTION},inst_injector)
+#~ EXTRA_NVCC_FLAGS = $(AFTER_REG_MEM) $(AFTER_REG_MEM_INFO) $(BRANCH_AROUND) 
+#~ EXTRA_LINK_FLAGS = -L$(INST_LIB_DIR) -linstinjector $(CUPTI)
+#~ endif
+ #~ 
+#~ ifeq (${OPTION},rf_injector)
+#~ EXTRA_NVCC_FLAGS = $(BEFORE_ALL) $(BEFORE_REG_MEM_INFO) 
+#~ EXTRA_LINK_FLAGS = -L$(INST_LIB_DIR) -lrfinjector $(CUPTI)
+#~ endif
+
 ifeq (${OPTION},profiler)
 EXTRA_NVCC_FLAGS = $(BEFORE_ALL) $(BEFORE_REG_MEM_INFO)
-EXTRA_LINK_FLAGS = -L$(INST_LIB_DIR) -lprofiler $(CUPTI)
+EXTRA_LINK_FLAGS =  -L$(INST_LIB_DIR) -lprofiler $(CUPTI)
 endif
 
-ifeq (${OPTION},inst_injector)
+ifeq (${OPTION},inst_value_injector)
 EXTRA_NVCC_FLAGS = $(AFTER_REG_MEM) $(AFTER_REG_MEM_INFO) $(BRANCH_AROUND) 
-EXTRA_LINK_FLAGS = -L$(INST_LIB_DIR) -linstinjector $(CUPTI)
+EXTRA_LINK_FLAGS =  -L$(INST_LIB_DIR) -linstvalueinjector $(CUPTI)
+endif
+
+ifeq (${OPTION},inst_address_injector)
+EXTRA_NVCC_FLAGS = $(AFTER_REG_MEM) $(AFTER_REG_MEM_INFO) $(BRANCH_AROUND) $(BEFORE_REG_MEM) $(BEFORE_REG_MEM_INFO)
+EXTRA_LINK_FLAGS =  -L$(INST_LIB_DIR) -linstaddressinjector $(CUPTI)
 endif
  
 ifeq (${OPTION},rf_injector)
 EXTRA_NVCC_FLAGS = $(BEFORE_ALL) $(BEFORE_REG_MEM_INFO) 
-EXTRA_LINK_FLAGS = -L$(INST_LIB_DIR) -lrfinjector $(CUPTI)
+EXTRA_LINK_FLAGS =  -L$(INST_LIB_DIR) -lrfinjector $(CUPTI)
 endif
 
 LOGHELPER_INC=../include/
@@ -64,6 +86,9 @@ LOGHELPER_LIB=../include/
 #LINK_FLAGS = -std=c++11 -g -lcudart -lcudadevrt -lm 
 NVCC_FLAGS =  $(logs) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
 LINK_FLAGS = -std=c++11 $(GENCODE) -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
+
+
+LD_LIB=LD_LIBRARY_PATH=/usr/local/sassi7/lib64/
 
 all: clean $(TARGET) install
 
@@ -75,13 +100,13 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 golden:
-	./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
+	$(LD_LIB) ./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
 
 test:
-	./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 
+	$(LD_LIB) ./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 
 
 generate:
-	./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 -generate
+	$(LD_LIB) ./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 -generate
 
 clean:
 	rm -f *.o *~ hotspot

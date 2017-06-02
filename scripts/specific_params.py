@@ -29,7 +29,8 @@
 
 import os, sys, cPickle
 import common_params as p
-
+#Fernando's parameters
+import parameters as par
 #########################################################################
 # Number of injections per app, per instruction group (IGID), per bit-flip
 # model (BFM)
@@ -44,11 +45,13 @@ import common_params as p
 # campaign. This is essentially the maximum number of injections one can run
 # per instruction group (IGID) and bit-flip model (BFM).
 # 
-NUM_INJECTIONS = 644
+#~ NUM_INJECTIONS = 644
+NUM_INJECTIONS = par.NUM_INJECTIONS_P
 
 # Specify how many injections you want to perform per IGID and BFM combination. 
 # Only the first THRESHOLD_JOBS will be selected from the generated NUM_INJECTIONS.
-THRESHOLD_JOBS = 10 # test
+#~ THRESHOLD_JOBS = 1 # test
+THRESHOLD_JOBS = par.THRESHOLD_JOBS_P
 
 # THRESHOLD_JOBS sould be <= NUM_INJECTIONS
 assert THRESHOLD_JOBS <= NUM_INJECTIONS
@@ -100,9 +103,10 @@ inst_address_igid_bfm_map = {
 # app_name: [suite name, binary name, expected runtime in secs on the target PC]
 #########################################################################
 
-apps = {
-	'simple_add': ['example', 'simple_add', 2],
-}
+#~ apps = {
+	#~ 'simple_add': ['example', 'simple_add', 2],
+#~ }
+apps = par.apps_p
 
 #########################################################################
 # Separate list of apps and error models for parsing because one may want to
@@ -152,15 +156,16 @@ set_paths()
 #########################################################################
 
 num_regs = {
-	'simple_add': {
-		'_Z10simple_addi': 6, 
-		}
+	#~ 'simple_add': {
+		#~ '_Z10simple_addi': 6, 
+		#~ }
 }
 
 # update dictionaries for different applications here
 def set_num_regs(): 
 	# update the path to the kerne_regcount.p file if it is stored in a different location
-	app = "simple_add"
+	#~ app = "simple_add"
+	app = par.benchmark
 	num_regs[app] = cPickle.load(open(suites_base_dir + apps[app][0] + "/" + app + "/" + app + "_kernel_regcount.p", "rb"))
 
 set_num_regs()
@@ -181,5 +186,5 @@ special_sdc_check_log = "special_check.log"
 #########################################################################
 # Number of gpus to use for error injection runs
 #########################################################################
-NUM_GPUS = 2
+NUM_GPUS = 1
 

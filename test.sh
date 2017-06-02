@@ -24,6 +24,8 @@ set -e
 # Uncomment for verbose output
 # set -x
 
+
+
 ################################################
 # Step 1: Set environment variables
 ################################################
@@ -60,13 +62,22 @@ benchmark=$2
 
 if [ -d "suites/example/$benchmark" ] ; then
     printf "Okay, it will run for $benchmark\n"
+    export BENCHMARK=$benchmark
+    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_$inst_rf.csv" ] ; then
+		if [ "$inst_rf"  == "all" ] ; then
+			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_address.csv
+			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_value.csv
+			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_rf.csv
+
+		else
+			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_${inst}_rf.csv
+		fi
+
+    fi
 else
     printf "$benchmark not found\n"
     exit -1;
 fi
-
-
-
 
 ################################################
 # Step 4.a: Build the app without instrumentation.
@@ -74,7 +85,7 @@ fi
 ################################################
 printf "\nStep 4.1: Collect golden stdout.txt and stderr.txt files"
 cd suites/example/$benchmark/
-make 2> stderr.txt
+make LOGS=1 2> stderr.txt
 make golden
 
 # process the stderr.txt file created during compilation to extract number of

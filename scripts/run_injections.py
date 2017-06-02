@@ -122,7 +122,7 @@ def run_multiple_injections_igid(app, inj_mode, igid, where_to_run):
 			#_Z24bpnn_adjust_weights_cudaPfiS_iS_S_ 0 1297034 0.877316323856 0.214340876321
 			if len(line.split()) >= 5: 
 				[kname, kcount, iid, opid, bid] = line.split() # obtains params for this injection
-				if cp.verbose: print "\n%d: app=%s, Kernel=%s, kcount=%s, igid=%d, bfm=%d, instID=%s, opID=%s, bitLocation=%s" %(total_jobs, app, kname, kcount, igid, bfm, iid, opid, bid)
+				if cp.verbose: print "\n%d: app=%s, Kernel=%s, kcount=%s, igid=%s, bfm=%s, instID=%s, opID=%s, bitLocation=%s" %(total_jobs, app, kname, str(kcount), str(igid), str(bfm), iid, opid, bid)
 				cmd = "%s %s/scripts/run_one_injection.py %s %s %s %s %s %s %s %s %s" %(cp.PYTHON_P, sp.SASSIFI_HOME, inj_mode, str(igid), str(bfm), app, kname, kcount, iid, opid, bid)
 				if where_to_run == "cluster":
 					check_and_submit_cluster(cmd)
@@ -131,10 +131,38 @@ def run_multiple_injections_igid(app, inj_mode, igid, where_to_run):
 				else:
 					os.system(cmd)
 				if cp.verbose: print "done injection run "
+			
+				#for later process
+				check_sdc_fernando(app, kname, kcount, igid, bfm, iid, opid, bid, inj_mode)
 			else:
 				print "Line doesn't have enough params:%s" %line
 			print_heart_beat(total_jobs)
 
+###############################################################################
+#generic sdc verification
+###############################################################################
+def check_sdc_fernando(app, kname, kcount, igid, bfm, iid, opid, bid, inj_type):
+	fault_model = open(sp.SASSIFI_HOME + "logs_sdcs_"+str(app) + "_" + str(inj_type) + ".csv", "a")
+    #########################################################
+	proc = subprocess.Popen("ls -Art /var/radiation-benchmarks/log/ | tail -n 1", stdout=subprocess.PIPE, shell=True)
+	(out, err) = proc.communicate()             
+	has_sdc = 0
+	has_end = 1
+        sdc_caught = 2
+	string_file = open(("/var/radiation-benchmarks/log/" + str(out).rstrip())).read()
+	if "SDC" in string_file:
+		has_sdc = 1
+	if "END" not in string_file:
+		has_end = 0
+	if "DETECTED" in string_file:
+		sdc_caught = 1
+	if "MISSED" in string_file:
+		sdc_caught = 0
+	#########################################################
+	#Kernel=%s, kcount=%s, igid=%s, bfm=%s, instID=%s, opID=%s, bitLocation=%s
+	string_result = str([out.rstrip() , has_sdc, kname, kcount, igid, bfm, iid, opid, bid, has_end, sdc_caught]).translate(None, '[]\'')
+	fault_model.write(string_result + "\n")
+	fault_model.close()
 
 ###############################################################################
 # wrapper function to call either RF injections or instruction level injections

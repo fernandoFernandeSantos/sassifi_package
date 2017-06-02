@@ -31,8 +31,11 @@ PYTHON_P = "python2.7"
 
 TIMEOUT_THRESHOLD = 10 # 10X usual runtime 
 
+
+#Fernando's parameters
+import parameters as par
 #verbose = True
-verbose = False
+verbose = par.verbose_p
 
 #######################################################################
 # Three injection modes
