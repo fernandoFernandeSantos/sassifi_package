@@ -9,8 +9,7 @@ SUITE_NAME = example
 OPTION = none
 
 #gencode must be set to compute arch and sm
-GENCODE = -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50 \
-      -gencode arch=compute_53,code=sm_53
+GENCODE = -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50
 
 # INST_LIB_DIR is where instlibs dir is located
 INST_LIB_DIR = /home/carol/SASSIFI/SASSI/instlibs/lib/
