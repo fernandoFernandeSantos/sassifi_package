@@ -12,7 +12,7 @@ export CCBIN ?= /usr/bin/
 # code SETTING DOES NOT HAVE THE "sm" PREFIX, YOUR INSTRUMENTATION
 # WILL NOT WORK!
 export GENCODE ?= -gencode arch=compute_35,code=sm_35 \
-		  -gencode arch=compute_50,code=sm_50
+		  -gencode arch=compute_50,code=sm_50 -gencode arch=compute_52,code=sm_52
 
 # You might want to debug an instrumentation handler.  If so, 
 # uncomment the line below.  Be aware that CUPTI and cuda-gdb do 

@@ -9,7 +9,8 @@ SUITE_NAME = example
 OPTION = none
 
 #gencode must be set to compute arch and sm
-GENCODE = -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50
+GENCODE = -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50 \
+		-gencode arch=compute_52,code=sm_52
 
 # INST_LIB_DIR is where instlibs dir is located
 INST_LIB_DIR = /home/carol/SASSIFI/SASSI/instlibs/lib/
@@ -28,8 +29,8 @@ NVCC = $(CUDA_BIN_DIR)/nvcc
 # The C/CPP compiler you want to use, and associated flags.
 CC = gcc
 CXX = g++
-CFLAGS = -O3
-CXXFLAGS = -O3
+CFLAGS = -O3 
+CXXFLAGS = -O3 
 export CCDIR = /usr/local/gcc-4.8.4/
 export PATH := $(CCDIR)/bin/:$(PATH)
 export LD_LIBRARY_PATH := $(CCDIR)/lib64:$(LD_LIBRARY_PATH):$(CUDA_LIB_DIR):$(CUPTI_LIB_DIR)
