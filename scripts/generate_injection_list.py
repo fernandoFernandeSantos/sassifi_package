@@ -30,6 +30,7 @@ import sys, re, string, os, operator, math, datetime, random
 import common_params as cp
 import specific_params as sp
 import common_functions as cf
+import parameters as par
 
 MAX_INJ = sp.NUM_INJECTIONS
 verbose = False
@@ -61,7 +62,15 @@ def write_injection_list_file(app, inj_mode, igid, bfm, num_injections, total_co
             [inj_kname, inj_kcount, inj_icount] = cf.get_injection_site_info(countList, injection_num,
                                                                              igid)  # convert injection index to [kname, kernel count, inst index]
             inj_op_id_seed = random.random()
-        inj_bid_seed = random.random()
+
+
+        # Edited from the original SASSIIFI
+        # this improvement will allow to chose the
+        # upper and lower bounds of bit flips
+        # edited by Fernando Fernandes
+        # inj_bid_seed = random.random()
+        inj_bid_seed = random.uniform(par.lower_bound, par.upper_bound)
+
         selected_str = inj_kname + " " + str(inj_kcount) + " " + str(inj_icount) + " " + str(
             inj_op_id_seed) + " " + str(inj_bid_seed) + " "
         if verbose:

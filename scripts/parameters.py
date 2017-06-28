@@ -34,6 +34,14 @@ THRESHOLD_JOBS_P = 1
 NUM_GPUS_P = 1
 
 
+#########################################################################
+# upper and lower bounds of bit flip index
+# for example if you want flip only the less significant 16 bits
+# set upper_bound = 0.5 and lower_bound = 0.0
+#########################################################################
+upper_bound = 0.5
+lower_bound = 0.0
+
 
 #~ num_regs_p = {
     #~ 'lava': {"_Z15kernel_gpu_cuda7par_str7dim_strP7box_strP11FOUR_VECTORPdS4_":58},
