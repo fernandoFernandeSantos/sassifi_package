@@ -77,7 +77,8 @@ endif
 
 # to activate our log helper library
 ifeq (${LOGS}, 1)
-LOGHELPER_INC=../include/
-LOGHELPER_LIB=../include/
 LOG_FLAGS=-DLOGS=1
 endif
+
+LOGHELPER_INC=../include/
+LOGHELPER_LIB=../include/
