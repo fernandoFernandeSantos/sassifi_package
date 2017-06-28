@@ -64,14 +64,14 @@ if [ -d "suites/example/$benchmark" ] ; then
     printf "Okay, it will run for $benchmark\n"
     export BENCHMARK=$benchmark
     if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_$inst_rf.csv" ] ; then
-		if [ "$inst_rf"  == "all" ] ; then
-			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_address.csv
-			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_value.csv
-			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_rf.csv
+        if [ "$inst_rf"  == "all" ] ; then
+            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_address.csv
+            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_value.csv
+            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_rf.csv
 
-		else
-			echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_${inst}_rf.csv
-		fi
+        else
+            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_${inst}_rf.csv
+        fi
 
     fi
 else
@@ -110,11 +110,11 @@ make test
 ################################################
 printf "\nStep 6: Prepare application for error injection"
 if [ $inst_rf == "all" ] ; then
-    make OPTION=inst_value_injector
-    make OPTION=inst_address_injector
-    make OPTION=rf_injector
+    make OPTION=inst_value_injector LOGS=1
+    make OPTION=inst_address_injector LOGS=1
+    make OPTION=rf_injector LOGS=1
 else
-    make OPTION=$inst_rf\_injector
+    make OPTION=$inst_rf\_injector LOGS=1
 fi
 
 ################################################

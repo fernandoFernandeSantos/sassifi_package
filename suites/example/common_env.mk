@@ -1,14 +1,21 @@
-#Makefile rules common for all radiation-benchmarks
+#Makefile common rules for all radiation-benchmarks
 #Created by Fernando
 
+#this is for our log helper library
 LOGS?=0
 
+#sassifi default variables
 SUITE_NAME = example
-
 OPTION = none
 
-GENCODE = -gencode arch=compute_35,code=sm_35
+#gencode must be set to compute arch and sm
+GENCODE = -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50 \
+      -gencode arch=compute_53,code=sm_53 -gencode=arch=compute_60,code=sm_60
+
+# INST_LIB_DIR is where instlibs dir is located
 INST_LIB_DIR = /home/carol/SASSIFI/SASSI/instlibs/lib/
+
+#REGRESSION_HOME is where sassifi_package is located
 REGRESSION_HOME = /home/carol/SASSIFI/sassifi_package/
 
 # SASSI/CUDA
@@ -67,6 +74,8 @@ EXTRA_NVCC_FLAGS = $(BEFORE_ALL) $(BEFORE_REG_MEM_INFO)
 EXTRA_LINK_FLAGS =  -L$(INST_LIB_DIR) -lrfinjector $(CUPTI)
 endif
 
+
+# to activate our log helper library
 ifeq (${LOGS}, 1)
 LOGHELPER_INC=../include/
 LOGHELPER_LIB=../include/
