@@ -24,7 +24,7 @@ golden:
 	./$(TARGET) -size=1048576 -input=mergesort_input_134217728 -gold=mergesort_gold_1048576 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
 
 generate:
-	./$(TARGET) -size=1048576 -input=mergesort_input_134217728 -gold=mergesort_gold_1048576 -iterations=1
+	./$(TARGET) -generate -size=1048576 -input=mergesort_input_134217728 -gold=mergesort_gold_1048576 -iterations=1
 
 
 clean:
