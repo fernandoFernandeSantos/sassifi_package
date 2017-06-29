@@ -42,7 +42,10 @@
  */
 #include <stdio.h>
 #include <math.h>
+//extern "C" {
 #include "log_helper.h"
+//}
+
 
 #define THREADSX 16
 #define THREADSY 16

@@ -21,11 +21,11 @@ install:
 test:
 
 $(TARGET): $(OBJS)
-	$(CXX) $(COMMON) $^ -o $@  $(LDFLAGS) $(LDFLAGS) $(CFLAGS) -L$(CUDA_LIB_DIR) -lcudadevrt -lcudart -lcuda -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda $(LOG_FLAGS) $(LINK_FLAGS)
+	$(NVCC) $(COMMON) $^ -o $@  $(LDFLAGS) $(LDFLAGS) $(CFLAGS) -L$(CUDA_LIB_DIR) -lcudadevrt -lcudart -lcuda -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda $(LOG_FLAGS) $(LINK_FLAGS)
 	
 
 $(SOURCEDIR)%.o: %.cpp
-	$(CXX) $(COMMON) -c $^  -o $@  $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) \
+	$(NVCC) $(COMMON) -c $^  -o $@  $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) \
 		-lcudadevrt -lcudart -lcuda $(LDFLAGS) $(CFLAGS)  -L$(CUDA_LIB_DIR) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda $(LOG_FLAGS)\
 		 $(LINK_FLAGS)
 	
