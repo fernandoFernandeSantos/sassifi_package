@@ -15,15 +15,17 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 test:
-		./nw 2048 10 input_2048 gold_2048 1
+	./nw 2048 10 input_2048 gold_2048 1
 
 golden:
-		./nw 2048 10 input_2048 gold_2048 1 > golden_stdout.txt 2>golden_stderr.txt
+	./nw 2048 10 input_2048 gold_2048 1 > golden_stdout.txt 2>golden_stderr.txt
 
-generate:
+generate: 
+	./nw_generate 2048 10
+	
+nw_generate: clean 
 	$(NVCC)  $(DEBUG_FLAGS) needle_generate.cu -o $(TARGET)_generate -std=c++11 
-	./nw_generate 2048 10 input_2048
-
+	
 clean:
-	rm -f *.o *~ $(TARGET)
+	rm -f *.o *~ $(TARGET) $(TARGET)_generate
 

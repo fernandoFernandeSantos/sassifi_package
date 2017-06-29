@@ -2,6 +2,8 @@ include ../common_env.mk
 
 TARGET = lud
 
+SIZE=2048
+
 NVCC_FLAGS =  $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
 LINK_FLAGS = -std=c++11 $(GENCODE) -lcublas  -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
 #-lcublas_device
@@ -23,6 +25,9 @@ test:
 
 generate:
 	./$(TARGET) -matrix_size=$(SIZE) -reps=1 -generate -generategold
+	
+lud_generate:
+	$(NVCC) -o lud lud.cu lud_kernel.cu $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 clean:
 	rm -f *.o *~ lud

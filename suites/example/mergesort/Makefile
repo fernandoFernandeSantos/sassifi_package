@@ -26,6 +26,8 @@ golden:
 generate:
 	./$(TARGET) -generate -size=1048576 -input=mergesort_input_134217728 -gold=mergesort_gold_1048576 -iterations=1
 
+mergesort_generate:
+	$(NVCC) -o mergesort bitonic.cu main.cpp mergeSort.cu mergeSort_host.cpp mergeSort_validate.cpp  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 clean:
 	rm -f *.o *~ $(TARGET)

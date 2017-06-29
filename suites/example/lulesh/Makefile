@@ -17,12 +17,6 @@ allocator.o: allocator.cu vector.h
 lulesh.o: lulesh.cu util.h vector.h allocator.h
 	$(NVCC) $(LINKFLAGS) $(LOG_FLAGS) $(FLAGS) lulesh.cu -I ./  $(INC_SILO) -c -o lulesh.o   $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
-#lulesh-comms.o: lulesh-comms.cu
-#	$(NVCC) $(FLAGS) lulesh-comms.cu -I ./ -c -o lulesh-comms.o  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
-
-#lulesh-comms-gpu.o: lulesh-comms-gpu.cu
-#	$(NVCC) $(FLAGS) lulesh-comms-gpu.cu -I ./ -c -o lulesh-comms-gpu.o  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
-
 install:
 	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
@@ -36,6 +30,10 @@ golden:
 test:
 	 ./$(TARGET) -s 50 -i 1 -g 0 gold_50
 
+
+lulesh_generate: clean allocator.o lulesh.o
+	#lulesh-comms-gpu.o lulesh-comms.o lulesh-comms.o lulesh-comms-gpu.o
+	$(NVCC) $(LOG_FLAGS) allocator.o lulesh.o  -o $(TARGET)  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 clean:
 	rm -f *.o *~ $(TARGET)

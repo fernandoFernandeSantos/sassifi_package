@@ -18,7 +18,9 @@ install:
 	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
-test:
+accl_generate: $(OBJS_GEN)
+	 $(NVCC) $(COMMON) $^ -o $@  $(LDFLAGS) $(LDFLAGS) $(CFLAGS) -L$(CUDA_LIB_DIR) -lcudadevrt -lcudart -lcuda -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda $(LOG_FLAGS) $(LINK_FLAGS)
+
 
 $(TARGET): $(OBJS)
 	$(NVCC) $(COMMON) $^ -o $@  $(LDFLAGS) $(LDFLAGS) $(CFLAGS) -L$(CUDA_LIB_DIR) -lcudadevrt -lcudart -lcuda -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda $(LOG_FLAGS) $(LINK_FLAGS)
@@ -44,4 +46,4 @@ golden: accl
 	./accl 2 1 2Frames.pgm GOLD_2Frames 1 -verbose > golden_stdout.txt 2> golden_stderr.txt
 	
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) *.o

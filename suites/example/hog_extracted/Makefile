@@ -2,10 +2,14 @@ include ../common_env.mk
 
 TARGET = hog_extracted
 HOG_EXT_DIR=.
+GOLD=gold_gen
 
 ALL_CV_FLAGS=-L/usr/local/lib -lopencv_core -lopencv_imgproc -lopencv_highgui  -lopencv_objdetect
+ALL_GOLD_GEN=-I/usr/local/include/opencv -I/usr/local/include  -L/usr/local/lib -L/usr/local/cuda-7.0/lib64 -lopencv_calib3d -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_gpu -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_nonfree -lopencv_objdetect -lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videostab -lcufft -lcublas -lnpps -lnppi -lnppc -lcudart -lrt -lpthread -lm -ldl  
 
-NVCC_FLAGS =  $(logs) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
+DATASET=/home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt
+
+NVCC_FLAGS =  $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
 LINK_FLAGS = -std=c++11 $(GENCODE) -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS) 
 
 all: clean $(TARGET) install
@@ -26,15 +30,21 @@ $(TARGET):
 							$(ALL_CV_FLAGS) $(CFLAGS) $(LOG_FLAGS) $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 
+hog_extracted_generate: $(HOG_EXT_DIR)/GoldGenerator.cpp
+	$(CXX) $(HOG_EXT_DIR)/GoldGenerator.cpp -Wall  -o3 -lopencv_core -I$(LOGHELPER_INC) $(ALL_GOLD_GEN) -o $(HOG_EXT_DIR)/$(GOLD) -L/usr/local/lib -L/usr/local/cuda-7.0/lib64 -I/usr/local/cuda-7.0/include
+
 
 golden:
-	./$(TARGET) /home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt --iterations 1 > golden_stdout.txt 2>golden_stderr.txt
+	./$(TARGET) $(DATASET) --iterations 1 > golden_stdout.txt 2>golden_stderr.txt
 
 test:
-	./$(TARGET) /home/carol/radiation-benchmarks/data/networks_img_list/caltech.pedestrians.critical.1K.txt --iterations 1
+	./$(TARGET) $(DATASET) --iterations 1
 
+
+generate:
+	./$(GOLD) $(DATASET) --hit_threshold 0.9 --gr_threshold 1 --nlevels 100
 
 
 clean:
-	rm -f *.o *~ $(TARGET)
+	rm -f *.o *~ $(TARGET) $(GOLD)
 

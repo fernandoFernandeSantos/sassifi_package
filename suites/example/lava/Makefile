@@ -15,13 +15,16 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 test:
-	./lava -boxes=10 -input_distances=input_distances_10 -input_charges=input_charges_10 -output_gold=GOLD -iterations=1 -streams=1
+	./$(TARGET) -boxes=10 -input_distances=input_distances_10 -input_charges=input_charges_10 -output_gold=GOLD -iterations=1 -streams=1
 
 golden:
-	./lava -boxes=10 -input_distances=input_distances_10 -input_charges=input_charges_10 -output_gold=GOLD -iterations=1 -streams=1 > golden_stdout.txt 2> golden_stderr.txt
+	./$(TARGET) -boxes=10 -input_distances=input_distances_10 -input_charges=input_charges_10 -output_gold=GOLD -iterations=1 -streams=1 > golden_stdout.txt 2> golden_stderr.txt
 
 generate: ./lava
-	./lava -boxes=10 -generate -output_gold=GOLD -iterations=1 -streams=1
+	./$(TARGET) -boxes=10 -generate -output_gold=GOLD -iterations=1 -streams=1
+	
+lava_generate:
+	$(NVCC) -o $(TARGET) lava.cu $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 clean:
 	rm -f *.o *~ lava

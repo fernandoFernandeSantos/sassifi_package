@@ -22,6 +22,9 @@ test:
 
 generate:
 	./quicksort -size=1048576 -input=quicksort_input_134217728 -gold=quicksort_gold_1048576 -generate -iterations=1
+	
+quicksort_generate: clean
+	$(NVCC) -o $(TARGET) cdpAdvancedQuicksort.cu cdpBitonicSort.cu  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 clean:
 	rm -f *.o *~ $(TARGET)
