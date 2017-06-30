@@ -11,7 +11,7 @@ LINK_FLAGS = -std=c++11  -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
 
 LINE=$(DEVICE_OBJS) $(LINK_OBJS) $(CPP_SOURCES) ../include/log_helper.c -I$(LOGHELPER_INC) -L/usr/local/cuda/lib64 -lcudart -lcuda -lcudadevrt -lpthread -fopenmp
 
-all: $(TARGET) install
+all: clean $(TARGET) install
 
 
 install:
