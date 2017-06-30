@@ -20,6 +20,7 @@ do
 	make -C ${BASE_DIR}/${i} test
 	make -C ${BASE_DIR}/${i} golden
 
+	./test.sh all ${i}
 done;
 
 #next step
