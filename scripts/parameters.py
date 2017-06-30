@@ -21,7 +21,7 @@ apps_p = {
 NUM_INJECTIONS_P = 1000
 
 #print information
-verbose_p = True
+verbose_p = False
 
 # Specify how many injections you want to perform per IGID and BFM combination. 
 # Only the first THRESHOLD_JOBS will be selected from the generated NUM_INJECTIONS.

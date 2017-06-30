@@ -5,6 +5,9 @@ set -e
 
 BASE_DIR=/home/carol/SASSIFI/sassifi_package/suites/example
 
+#first build include dir loghelper
+make -C ${BASE_DIR}/include/ cuda
+
 for i in accl hog_extracted hotspot lava lud lulesh mergesort nw quicksort;
 do
 	echo "###############################################################"
