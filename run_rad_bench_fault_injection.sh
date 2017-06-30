@@ -10,22 +10,24 @@ make -C ${BASE_DIR}/include/ cuda
 
 for i in accl hog_extracted hotspot lava lud lulesh mergesort nw quicksort;
 do
-	echo "###############################################################"
-	echo "#################DOING FOR $i##################################"
-	echo "###############################################################"
-	
-	make -C ${BASE_DIR}/${i} clean
-	make -C ${BASE_DIR}/${i} ${i}_generate
-	make -C ${BASE_DIR}/${i} generate
-	
-	make -C ${BASE_DIR}/${i} clean
-	make -C ${BASE_DIR}/${i} ${i} LOGS=1
-	make -C ${BASE_DIR}/${i} test
-	make -C ${BASE_DIR}/${i} golden
+    echo "###############################################################"
+    echo "                     DOING FOR $i"
+    echo "###############################################################"
 
-	./test.sh all ${i}
+    make -C ${BASE_DIR}/${i} clean
+    make -C ${BASE_DIR}/${i} ${i}_generate
+    make -C ${BASE_DIR}/${i} generate
+
+    make -C ${BASE_DIR}/${i} clean
+    make -C ${BASE_DIR}/${i} ${i} LOGS=1
+    make -C ${BASE_DIR}/${i} test
+    make -C ${BASE_DIR}/${i} golden
+
+    for j in rf inst_address inst_value;
+    do
+        ./test.sh ${j} ${i}
+    done;
 done;
 
-#next step
-	
-	
+
+
