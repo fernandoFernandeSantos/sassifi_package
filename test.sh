@@ -3,27 +3,13 @@
 # stop after first error
 set -e
 
-#~ printf "Steps 1, 2, 3, 4(b), 4(c), and 7(a) mentioned in \"Setting up and running SASSIFI\" section in sassi-user-guide should be completed before proceeding further. Are these steps completed? [y/n]: "
-#~ read answer
-
-#~ if [ "$answer" != "y" ]; then
-  #~ printf "\nCannot proceed further\n"
-    #~ exit -1;
-#~ fi
-
-#~ printf "Which mode do you want to run SASSIFI in? [inst_value/inst_address/rf/all] (default is inst_value): "
-#~ read inst_rf
-
-#~ if [ "$inst_rf" == "inst_value" ] || [ "$inst_rf" == "inst_address" ] || [ "$inst_rf" == "rf" ] || [ "$inst_rf" == "all" ] ; then
-  #~ printf "Okay, $inst_rf\n"
-#~ else
-    #~ inst_rf="inst_value"
-  #~ printf "Proceeding with the default option, $inst_rf\n"
-#~ fi
-
 # Uncomment for verbose output
 # set -x
 
+# How many injections per type
+INST_V=1
+INST_A=1
+REGS_F=1
 
 
 ################################################
@@ -44,9 +30,7 @@ fi
 
 
 ################################################
-################################################
 #EDITED BY FERNANDO
-################################################
 ################################################
 #first parameter is the error model
 inst_rf=$1
@@ -62,22 +46,46 @@ benchmark=$2
 
 if [ -d "suites/example/$benchmark" ] ; then
     printf "Okay, it will run for $benchmark\n"
-    export BENCHMARK=$benchmark
-    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_$inst_rf.csv" ] ; then
-        if [ "$inst_rf"  == "all" ] ; then
-            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_address.csv
-            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_value.csv
+    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_rf.csv" ] ; then
             echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_rf.csv
+    fi
 
-        else
-            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_${inst}_rf.csv
-        fi
+    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_inst_value.csv" ] ; then
+      echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_value.csv
+    fi
 
+    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_inst_address.csv" ] ; then
+            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_address.csv
     fi
 else
     printf "$benchmark not found\n"
     exit -1;
 fi
+
+################################################
+#Set enviroment vars that will be used by
+#python scripts
+################################################
+export BENCHMARK=$benchmark
+
+if [ "$inst_rf" == "inst_value" ] ; then
+
+export THRESHOLD_JOBS_ENV_VAR=$INST_V
+
+fi
+
+if [ "$inst_rf" == "inst_address" ] ; then
+
+export THRESHOLD_JOBS_ENV_VAR=$INST_A
+
+fi
+
+if [ "$inst_rf" == "rf" ] ; then
+
+export THRESHOLD_JOBS_ENV_VAR=$REGS_F
+
+fi
+
 
 ################################################
 # Step 4.a: Build the app without instrumentation.
