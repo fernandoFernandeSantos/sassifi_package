@@ -29,7 +29,7 @@ NVCC = $(CUDA_BIN_DIR)/nvcc
 CC = gcc
 CXX = g++
 CFLAGS = -O3 
-CXXFLAGS = -O3 
+CXXFLAGS = -O3 -D_FORCE_INLINES 
 export CCDIR = /usr/local/gcc-4.8.4/
 export PATH := $(CCDIR)/bin/:$(PATH)
 export LD_LIBRARY_PATH := $(CCDIR)/lib64:$(LD_LIBRARY_PATH):$(CUDA_LIB_DIR):$(CUPTI_LIB_DIR)
@@ -81,3 +81,5 @@ endif
 
 LOGHELPER_INC=../include/
 LOGHELPER_LIB=../include/
+
+EXTRA_NVCC_FLAGS+=-D_FORCE_INLINES
