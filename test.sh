@@ -7,16 +7,16 @@ set -e
 # set -x
 
 # How many injections per type
-INST_V=1
-INST_A=1
-REGS_F=1
+INST_V=14
+INST_A=250
+REGS_F=500
 
 
 ################################################
 # Step 1: Set environment variables
 ################################################
 printf "\nStep 1: Setting environment variables\n"
-if [ `hostname -s` == "carol" ]; then
+if [ `hostname -s` == "carol-k402" ]; then
     export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package/
     export SASSI_SRC=/home/carol/SASSIFI/SASSI/
     export INST_LIB_DIR=$SASSI_SRC/instlibs/lib/
@@ -44,23 +44,23 @@ fi
 #second parameter is the benchmark
 benchmark=$2
 
-if [ -d "suites/example/$benchmark" ] ; then
-    printf "Okay, it will run for $benchmark\n"
-    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_rf.csv" ] ; then
-            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_rf.csv
-    fi
-
-    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_inst_value.csv" ] ; then
-      echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_value.csv
-    fi
-
-    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_inst_address.csv" ] ; then
-            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_address.csv
-    fi
-else
-    printf "$benchmark not found\n"
-    exit -1;
-fi
+#if [ -d "suites/example/$benchmark" ] ; then
+#    printf "Okay, it will run for $benchmark\n"
+#    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_rf.csv" ] ; then
+#            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_rf.csv
+#    fi
+#
+#   if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_inst_value.csv" ] ; then
+#    echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_value.csv
+#    fi
+#
+#    if [ ! -f "$SASSIFI_HOMElogs_sdcs_$benchmark_inst_address.csv" ] ; then
+#            echo "log_file,has_sdc,inj_kname,inj_kcount,inj_igid,inj_fault_model,inj_inst_id,inj_destination_id,inj_bit_location,finished,hardened" > ${SASSIFI_HOME}logs_sdcs_${benchmark}_inst_address.csv
+#    fi
+#else
+#    printf "$benchmark not found\n"
+#    exit -1;
+#fi
 
 ################################################
 #Set enviroment vars that will be used by
