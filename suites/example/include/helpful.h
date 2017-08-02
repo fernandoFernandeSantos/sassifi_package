@@ -10,9 +10,11 @@
 #include <sys/time.h>
 
 #define GOLD_LINE_SIZE 6
-#ifdef CXX
-using namespace std;
 
+#ifdef __cplusplus
+
+#include <sstream>
+using namespace std;
 
 void dump_output(int iteration_num, string directory, bool corrupted,
 		vector<vector<int> > data) {
@@ -51,16 +53,16 @@ void dump_output(int iteration_num, string directory, bool corrupted,
 		sprintf(filename, "%s/graph%05d_corrupted_%s.data", directory.c_str(),
 				iteration_num, str_file_time);
 	else
-		sprintf(filename, "%s/graph%05d_%s.data", directory.c_str(), iteration_num,
-				str_file_time);
+		sprintf(filename, "%s/graph%05d_%s.data", directory.c_str(),
+				iteration_num, str_file_time);
 	ofstream fp;
 	fp.open(filename);
 	if (fp.is_open()) {
 		for (unsigned i = 0; i < data.size(); i++) {
 			vector<int> values = data[i];
-			for(unsigned j = 0; j < values.size(); j++){
+			for (unsigned j = 0; j < values.size(); j++) {
 				fp << values[j];
-				if(j != (values.size() - 1))
+				if (j != (values.size() - 1))
 					fp << ',';
 			}
 			fp << endl;
@@ -73,7 +75,7 @@ void dump_output(int iteration_num, string directory, bool corrupted,
 #endif
 		}
 	} else {
-			printf("Could not open %s in save_corrupted_output()\n", filename);
+		printf("Could not open %s in save_corrupted_output()\n", filename);
 	}
 }
 
@@ -87,20 +89,20 @@ vector<string> &split(const string &s, char delim, vector<string> &elems) {
 }
 
 vector<string> split(const string &s, char delim) {
-	std::vector<string> elems;
+	std::vector < string > elems;
 	split(s, delim, elems);
 	return elems;
 }
 
-bool set_countains(vector<int> check, vector< vector<int> > src){
+bool set_countains(vector<int> check, vector<vector<int> > src) {
 	unsigned char cont = 0;
-	for(size_t i = 0; i < src.size(); i++){
+	for (size_t i = 0; i < src.size(); i++) {
 		vector<int> temp = src[i];
-		for(size_t j = 0; j < temp.size(); j++){
-			if(temp[j] == check[j])
+		for (size_t j = 0; j < temp.size(); j++) {
+			if (temp[j] == check[j])
 				cont++;
 		}
-		if(cont == temp.size())
+		if (cont == temp.size())
 			return false;
 		cont = 0;
 	}
