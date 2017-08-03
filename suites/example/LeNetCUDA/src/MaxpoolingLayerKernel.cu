@@ -84,9 +84,7 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 						+ (w_ + x);
 				if (max_pixel < input_[tmp]) {
 					max_pixel = input_[tmp];
-//					max_loc[index] = get_max_loc_pair(index, tmp);
-					max_loc[index].first = index;
-					max_loc[index].second = tmp;
+					max_loc[index] = get_max_loc_pair(index, tmp);
 				}
 			}
 		}
