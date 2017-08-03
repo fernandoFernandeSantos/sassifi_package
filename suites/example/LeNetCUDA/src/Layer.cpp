@@ -135,10 +135,10 @@ void Layer::back_prop_L1() {}
 void Layer::back_prop_L2() {}
 
 void Layer::print_layer_weights(int layer_num){
-	std::cout << "\n Printing Layer: " <<  layer_num << std::endl ;
-	float_t weightsSize = this->W_.size();
-        for (int i = 0; i < weightsSize; i++) {
-                std::cout << this->W_[i] << ", ";
-        }
-	std::cout << "---";
+//	std::cout << "\n Printing Layer: " <<  layer_num << std::endl ;
+//	float_t weightsSize = this->W_.size();
+//        for (int i = 0; i < weightsSize; i++) {
+//                std::cout << this->W_[i] << ", ";
+//        }
+//	std::cout << "---";
 }
