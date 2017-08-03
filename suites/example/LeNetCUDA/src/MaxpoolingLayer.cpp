@@ -115,9 +115,9 @@ void MaxpoolingLayer::forward() {
 	try {
 
 // execute the code on the device
-		float_t *input = this->input_.data();
-		float_t *output = this->output_.data();
-		Pair *max_loc_buf = this->max_loc.data();
+		float_t *input = this->input_.getDeviceData();
+		float_t *output = this->output_.getDeviceData();
+		Pair *max_loc_buf = this->max_loc.getDeviceData();
 		size_t out_width = this->out_width_;
 		size_t out_height = this->out_height_;
 		size_t out_depth = this->out_depth_;

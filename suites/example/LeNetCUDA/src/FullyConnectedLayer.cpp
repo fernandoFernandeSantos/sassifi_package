@@ -14,10 +14,10 @@
 void FullyConnectedLayer::forward() {
 	this->v_output = this->W_;
 
-	float *output_ = this->output_.data();
-	float *input_ = this->input_.data();
-	float *b_ = this->b_.data();
-	float *W_ = this->W_.data();
+	float *output_ = this->output_.getDeviceData();
+	float *input_ = this->input_.getDeviceData();
+	float *b_ = this->b_.getDeviceData();
+	float *W_ = this->W_.getDeviceData();
 //	float *v_output = this->v_output.data();
 	int out_depth_ = this->out_depth_;
 	int in_depth_ = this->in_depth_;
