@@ -47,7 +47,7 @@ public:
 	DeviceVector<T>& operator=(const DeviceVector<T>& other);
 
 	//overload only for host side
-//	T& operator[](int i);
+	T& operator[](int i);
 	T* getDeviceData();
 	T* getHostData();
 	size_t size();
