@@ -27,13 +27,13 @@ public:
 
 private:
 
-//	inline size_t getOutIndex(size_t out, size_t h_, size_t w_);
-//
-//	inline vec_host getInforKernel(size_t in, size_t h_, size_t w_);
-//
-//	inline vec_host getW_(size_t in, size_t out);
-//
-//	inline int getb_(size_t out, size_t h_, size_t w_);
+	inline size_t getOutIndex(size_t out, size_t h_, size_t w_);
+
+	inline vec_host getInforKernel(size_t in, size_t h_, size_t w_);
+
+	inline vec_host getW_(size_t in, size_t out);
+
+	inline int getb_(size_t out, size_t h_, size_t w_);
 
 
 
