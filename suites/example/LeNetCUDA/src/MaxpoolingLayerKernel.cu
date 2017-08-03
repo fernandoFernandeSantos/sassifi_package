@@ -80,7 +80,7 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 		for (size_t x = 0; x < MAXPOOL_SIZE; x++) {
 //#pragma unroll
 			for (size_t y = 0; y < MAXPOOL_SIZE; y++) {
-				tmp = (out * in_width_ * in_height) + ((h_ + y) * in_width_)
+				tmp = (out * in_width * in_height) + ((h_ + y) * in_width)
 						+ (w_ + x);
 				if (max_pixel < input_[tmp]) {
 					max_pixel = input_[tmp];
