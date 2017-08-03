@@ -117,8 +117,7 @@ LayersGold load_gold_layers(int img, int layer_size) {
 
 			loaded[i].resize(v_size);
 
-			fread(loaded[i].getHostData(), sizeof(float), v_size, fout);
-			loaded[i].copyHostToDevice();
+			fread(loaded[i].data(), sizeof(float), v_size, fout);
 
 		} else {
 			error("FAILED TO OPEN FILE " + path);
