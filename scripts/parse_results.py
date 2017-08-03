@@ -254,7 +254,7 @@ def print_stats_txt(typ):
 					if bfm in num_injections_app_table[app][igid]:
 						f.write("\t".join([cp.EM_STR[bfm], str(num_injections_app_table[app][igid][bfm]), str(runtime_app_table[app][igid][bfm]),  str(runtime_app_nt_table[app][igid][bfm])]) + "\n")
 					else:
-						f.write("\t".join([cp.EM_STR[bfm], "0", "0"] + "\n"))
+						f.write("\t".join([str(cp.EM_STR[bfm]), "0", "0"]) + "\n")
 	f.close()
 
 

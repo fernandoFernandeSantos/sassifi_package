@@ -25,7 +25,7 @@ verbose_p = False
 
 # Specify how many injections you want to perform per IGID and BFM combination.
 # Only the first THRESHOLD_JOBS will be selected from the generated NUM_INJECTIONS.
-THRESHOLD_JOBS_P = 1
+THRESHOLD_JOBS_P = int(os.environ['THRESHOLD_JOBS_ENV_VAR'])
 
 
 #########################################################################
@@ -39,7 +39,7 @@ NUM_GPUS_P = 1
 # for example if you want flip only the less significant 16 bits
 # set upper_bound = 0.5 and lower_bound = 0.0
 #########################################################################
-upper_bound = 0.5
+upper_bound = 0.25
 lower_bound = 0.0
 
 
