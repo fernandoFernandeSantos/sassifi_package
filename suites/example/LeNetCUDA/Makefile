@@ -82,7 +82,7 @@ $(OBJDIR)%.o: %.cpp $(DEPS)
 $(OBJDIR)%.o: %.cu $(DEPS)
 	$(NVCC) $(ARCH) $(COMMON) $(OPTS) -c $< -o $@ $(ALL_FLAGS)
 
-
+DATA_DIR=/home/carol/radiation-benchmarks/data/lenet
 
 debug:
 	#$(NVCC) $(ARCH) $(COMMON) $(OPTS) src/debug.cu -o debug
@@ -91,25 +91,28 @@ debug:
 
 #usage: ./leNetCUDA <train\classify\gold_gen\rad_test> <dataset> <labels> <weights>
 #[gold input/output] [sample_count] [save layers] [iterations]
-
 train:
-	./$(TARGET) train train-images-idx3-ubyte train-labels-idx1-ubyte ./lenet.weights
+	./$(EXEC) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte $(DATA_DIR)/lenet_base.weights
 
 train_l1:
-	./$(TARGET) train train-images-idx3-ubyte train-labels-idx1-ubyte ./lenet.weights L1
+	./$(EXEC) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte $(DATA_DIR)/lenet_L1.weights L1
 
 train_l2:
-	./$(TARGET) train train-images-idx3-ubyte train-labels-idx1-ubyte ./lenet.weights L2
+	./$(EXEC) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte ./lenet_L2.weights L2
 
 test:
-	./$(TARGET) classify t10k-images-idx3-ubyte t10k-labels-idx1-ubyte ./lenet.weights
+	./$(EXEC) rad_test $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
+	$(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 1 1
 
 
 generate:
-	./$(TARGET) gold_gen t10k-images-idx3-ubyte t10k-labels-idx1-ubyte ./lenet.weights gold_test 2 1 1
+	./$(EXEC) gold_gen $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
+	 $(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 1 1
 
-test_rad:
-	./$(TARGET) rad_test t10k-images-idx3-ubyte t10k-labels-idx1-ubyte ./lenet.weights gold_test 2 1 1
+
+golden:
+	./$(EXEC) rad_test $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
+	$(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 1 1 > golden_stdout.txt 2>golden_stderr.txt
 
 
 download_input:
