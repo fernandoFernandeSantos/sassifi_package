@@ -24,7 +24,7 @@ __device__ inline Pair get_max_loc_pair(size_t first, size_t second) {
 	return ret;
 }
 
-__device__ inline float max_in_cuda(float_t *input_, Pair *max_loc,
+__device__ float max_in_cuda(float_t *input_, Pair *max_loc,
 		size_t in_width_, size_t in_height_, size_t in_index, size_t h_,
 		size_t w_, size_t out_index) {
 	float_t max_pixel = 0;
