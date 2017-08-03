@@ -39,7 +39,7 @@ public:
 
 	//like std::vector
 	void resize(size_t siz);
-	T* data();
+	T* data(int direction);
 
 	void clear();
 
@@ -68,7 +68,7 @@ inline void DeviceVector<T>::alloc_memory() {
 //	CudaSafeCall(
 //			cudaMallocManaged(&this->device_data, sizeof(T) * this->v_size));
 	CudaSafeCall(cudaMalloc(&this->device_data, sizeof(T) * this->v_size));
-	this->host_data = malloc(sizeof(T) * this->v_size);
+	this->host_data = (T*) malloc(sizeof(T) * this->v_size);
 	if (this->host_data == nullptr) {
 		std::cout << "Error on allocating host data\n";
 		exit(-1);
@@ -199,11 +199,19 @@ void DeviceVector<T>::resize(size_t siz) {
 }
 
 template<class T>
-T* DeviceVector<T>::data() {
+T* DeviceVector<T>::data(int direction) {
 #ifdef DEBUG_LIGHT
 	std::cout << "data() \n";
 #endif
+	if (direction == 0){
+		CudaSafeCall(cudaMemcpy(this->host_data, this->device_data, sizeof(T) * size_cont,
+						cudaMemcpyDeviceToHost));
+		return this->host_data;
+	}
+	CudaSafeCall(cudaMemcpy(this->device_data, this->host_data, sizeof(T) * size_cont,
+					cudaMemcpyHostToDevice));
 	return this->device_data;
+
 }
 
 template<class T>
