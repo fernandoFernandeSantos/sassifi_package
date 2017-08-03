@@ -250,6 +250,7 @@ void DeviceVector<T>::memcopy(T* src, size_t size_cont, int type) {
 		CudaSafeCall(
 				cudaMemcpy(this->device_data, src, sizeof(T) * size_cont,
 						cudaMemcpyHostToDevice));
+		memcpy(this->host_data, src, sizeof(T) * size_cont);
 	}
 }
 
