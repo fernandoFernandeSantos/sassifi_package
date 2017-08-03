@@ -293,7 +293,7 @@ void DeviceVector<T>::copyDeviceToHost() {
 template<class T>
 void DeviceVector<T>::copyHostToDevice() {
 	CudaSafeCall(
-			cudaMemcpy(this->device_data, src, sizeof(T) * size_cont,
+			cudaMemcpy(this->device_data, this->host_data, sizeof(T) * this->v_size,
 					cudaMemcpyHostToDevice));
 }
 
