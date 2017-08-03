@@ -8,40 +8,38 @@
 #include "cudaUtil.h"
 #include "MaxpoolingLayerKernel.h"
 
-
 #define MAXPOOL_SIZE 2
 
-__device__    inline size_t get_out_index(size_t out_width, size_t out_height,
+__device__     inline size_t get_out_index(size_t out_width, size_t out_height,
 		size_t out, size_t h_, size_t w_) {
 	return out * out_width * out_height + h_ / 2 * out_width + (w_ / 2);
 }
 
-
-__device__ inline Pair get_max_loc_pair(size_t first, size_t second) {
+__device__  inline Pair get_max_loc_pair(size_t first, size_t second) {
 	Pair ret;
 	ret.first = first;
 	ret.second = second;
 	return ret;
 }
 
-__device__ float max_in_cuda(float_t *input_, Pair *max_loc,
+__device__ inline float max_in_cuda(float_t *input_, Pair *max_loc,
 		size_t in_width_, size_t in_height_, size_t in_index, size_t h_,
 		size_t w_, size_t out_index) {
 	float_t max_pixel = 0;
 	size_t tmp;
 
-//#pragma unroll
-//	for (size_t x = 0; x < MAXPOOL_SIZE; x++) {
-//#pragma unroll
-//		for (size_t y = 0; y < MAXPOOL_SIZE; y++) {
-//			tmp = (in_index * in_width_ * in_height_) + ((h_ + y) * in_width_)
-//					+ (w_ + x);
-//			if (max_pixel < input_[tmp]) {
-//				max_pixel = input_[tmp];
-//				max_loc[out_index] = get_max_loc_pair(out_index, tmp);
-//			}
-//		}
-//	}
+#pragma unroll
+	for (size_t x = 0; x < MAXPOOL_SIZE; x++) {
+#pragma unroll
+		for (size_t y = 0; y < MAXPOOL_SIZE; y++) {
+			tmp = (in_index * in_width_ * in_height_) + ((h_ + y) * in_width_)
+					+ (w_ + x);
+			if (max_pixel < input_[tmp]) {
+				max_pixel = input_[tmp];
+				max_loc[out_index] = get_max_loc_pair(out_index, tmp);
+			}
+		}
+	}
 	return max_pixel;
 }
 
@@ -72,12 +70,11 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 	if ((out < out_depth_) && (h_ < in_height) && (w_ < in_width) && !(h_ % 2)
 			&& !(w_ % 2)) {
 		size_t index = get_out_index(out_width, out_height, out, h_, w_);
-//		output_[index] = max_in_cuda(input_, max_loc, in_width, in_height, out, h_,
-//				w_, index);
+//		output_[index] =
+		max_in_cuda(input_, max_loc, in_width, in_height, out, h_, w_, index);
 
 	}
 }
-
 
 void call_forward_maxpool_layer_gpu(float_t *input, float_t *output,
 		Pair *max_loc, size_t out_width, size_t out_height, size_t out_depth,
@@ -105,7 +102,8 @@ __global__ void backpropagation_maxpool(Pair *max_loc, float *g_, float *g_next,
 	}
 }
 
-void call_backpropagation_maxpool(Pair *max_loc, float *g_, float *g_next, size_t max_size) {
+void call_backpropagation_maxpool(Pair *max_loc, float *g_, float *g_next,
+		size_t max_size) {
 	dim3 blocks, threads;
 	cuda_gridsize(&threads, &blocks, max_size);
 
