@@ -227,16 +227,13 @@ size_t DeviceVector<T>::size() {
 	return this->v_size;
 }
 
-//template<class T>
-//T& DeviceVector<T>::operator [](int i) {
-//#ifdef DEBUG_LIGHT
-//	std::cout << "operator [] \n";
-//#endif
-//	CudaSafeCall(
-//			cudaMemcpy(this->host_data, this->device_data,
-//					sizeof(T) * this->v_size, cudaMemcpyDeviceToHost));
-//	return this->host_data[i];
-//}
+template<class T>
+T& DeviceVector<T>::operator [](int i) {
+#ifdef DEBUG_LIGHT
+	std::cout << "operator [] \n";
+#endif
+	return this->host_data[i];
+}
 
 template<class T>
 void DeviceVector<T>::memcopy(T* src, size_t size_cont, int type) {
