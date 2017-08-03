@@ -117,7 +117,8 @@ LayersGold load_gold_layers(int img, int layer_size) {
 
 			loaded[i].resize(v_size);
 
-			fread(loaded[i].data(), sizeof(float), v_size, fout);
+			fread(loaded[i].getHostData(), sizeof(float), v_size, fout);
+			loaded[i].copyHostToDevice();
 
 		} else {
 			error("FAILED TO OPEN FILE " + path);
@@ -138,7 +139,9 @@ void save_gold_layers(LayersFound layers, int img) {
 		if (fout != NULL) {
 			size_t v_size = v->size();
 			fwrite(&v_size, sizeof(size_t), 1, fout);
-			fwrite(v->data(), sizeof(float), v->size(), fout);
+
+			v->copyDeviceToHost();
+			fwrite(v->getHostData(), sizeof(float), v->size(), fout);
 			fclose(fout);
 		} else {
 			error("FAILED TO OPEN FILE " + path);
@@ -191,8 +194,10 @@ void compare_and_save_layers(LayersGold gold, LayersFound found, int iteration,
 			if (output_layer != NULL) {
 				size_t v_size = f.size();
 
+
+				f.copyDeviceToHost();
 				fwrite(&v_size, sizeof(size_t), 1, output_layer);
-				fwrite(f.data(), sizeof(float),f.size(),
+				fwrite(f.getHostData(), sizeof(float),f.size(),
 						output_layer);
 
 				fclose(output_layer);
