@@ -173,7 +173,7 @@ DeviceVector<T>& DeviceVector<T>::operator=(const std::vector<T>& other) {
 #ifdef DEBUG_LIGHT
 	std::cout << "operator=(const std::vector<T>& other) \n";
 #endif
-	if (this->data() != other.data()) { // self-assignment check expected
+	if (this->host_data != other.data()) { // self-assignment check expected
 		T *data = (T*) other.data();
 		size_t siz = other.size();
 
