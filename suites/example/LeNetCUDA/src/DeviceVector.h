@@ -18,11 +18,12 @@
 template<class T> class DeviceVector {
 private:
 	T *device_data = nullptr;
+	T *host_data = nullptr; // only for fault injection
 	bool allocated = false;
 
 	size_t v_size;
 
-	inline void memcopy(T* src, size_t size_count);
+	inline void memcopy(T* src, size_t size_count, int type = 0);
 	inline void free_memory();
 	inline void alloc_memory();
 
@@ -32,7 +33,7 @@ public:
 	DeviceVector(const DeviceVector<T>& copy);
 
 	//this constructor will copy the data to gpu
-	DeviceVector(T *data, size_t siz);
+//	DeviceVector(T *data, size_t siz);
 
 	virtual ~DeviceVector();
 
@@ -58,13 +59,20 @@ template<class T>
 inline void DeviceVector<T>::free_memory() {
 	CudaCheckError();
 	CudaSafeCall(cudaFree(this->device_data));
+	free(this->host_data);
 	this->allocated = false;
 }
 
 template<class T>
 inline void DeviceVector<T>::alloc_memory() {
-	CudaSafeCall(
-			cudaMallocManaged(&this->device_data, sizeof(T) * this->v_size));
+//	CudaSafeCall(
+//			cudaMallocManaged(&this->device_data, sizeof(T) * this->v_size));
+	CudaSafeCall(cudaMalloc(&this->device_data, sizeof(T) * this->v_size));
+	this->host_data = malloc(sizeof(T) * this->v_size);
+	if (this->host_data == nullptr) {
+		std::cout << "Error on allocating host data\n";
+		exit(-1);
+	}
 	CudaCheckError();
 	this->allocated = true;
 }
@@ -101,6 +109,7 @@ DeviceVector<T>::DeviceVector() {
 	std::cout << "DeviceVector()\n";
 #endif
 	this->device_data = nullptr;
+	this->host_data = nullptr;
 	this->v_size = 0;
 	this->allocated = false;
 }
@@ -114,24 +123,25 @@ DeviceVector<T>::~DeviceVector() {
 		this->free_memory();
 		CudaCheckError();
 		this->device_data = nullptr;
+		this->host_data = nullptr;
 		this->v_size = 0;
 		this->allocated = false;
 	}
 }
-
-template<class T>
-DeviceVector<T>::DeviceVector(T *data, size_t siz) {
-#ifdef DEBUG_LIGHT
-	std::cout << "DeviceVector(T *data, size_t siz)\n";
-#endif
-	if (this->allocated) {
-		this->free_memory();
-	}
-
-	this->v_size = siz;
-	this->alloc_memory();
-	this->memcopy(data, siz);
-}
+//
+//template<class T>
+//DeviceVector<T>::DeviceVector(T *data, size_t siz) {
+//#ifdef DEBUG_LIGHT
+//	std::cout << "DeviceVector(T *data, size_t siz)\n";
+//#endif
+//	if (this->allocated) {
+//		this->free_memory();
+//	}
+//
+//	this->v_size = siz;
+//	this->alloc_memory();
+//	this->memcopy(data, siz);
+//}
 
 template<class T>
 DeviceVector<T>& DeviceVector<T>::operator=(const DeviceVector<T>& other) {
@@ -168,7 +178,7 @@ DeviceVector<T>& DeviceVector<T>::operator=(const std::vector<T>& other) {
 
 		this->v_size = siz;
 		this->alloc_memory();
-		this->memcopy(data, siz);
+		this->memcopy(data, siz, 1);
 	}
 	return *this;
 }
@@ -209,16 +219,27 @@ T& DeviceVector<T>::operator [](int i) {
 #ifdef DEBUG_LIGHT
 	std::cout << "operator [] \n";
 #endif
-	return this->device_data[i];
+	CudaSafeCall(
+			cudaMemcpy(this->host_data, this->device_data,
+					sizeof(T) * this->v_size, cudaMemcpyDeviceToHost));
+	return this->host_data[i];
 }
 
 template<class T>
-void DeviceVector<T>::memcopy(T* src, size_t size_cont) {
+void DeviceVector<T>::memcopy(T* src, size_t size_cont, int type) {
 #ifdef DEBUG_LIGHT
 	std::cout << "memcopy(T* src, size_t size_cont)\n";
 #endif
-	memcpy(this->device_data, src, sizeof(T) * size_cont);
-	CudaCheckError();
+	if (type == 0) { //device to device
+		CudaSafeCall(
+				cudaMemcpy(this->device_data, src, sizeof(T) * size_cont,
+						cudaMemcpyDeviceToDevice));
+//	memcpy(this->device_data, src, sizeof(T) * size_cont);
+		CudaCheckError();
+	} else if (type == 1) {
+		CudaSafeCall(cudaMemcpy(this->device_data, src, sizeof(T) * size_cont,
+				cudaMemcpyHostToDevice));
+	}
 }
 
 template<class T>
@@ -226,13 +247,15 @@ void DeviceVector<T>::clear() {
 #ifdef DEBUG_LIGHT
 	std::cout << "clear()\n";
 #endif
-	memset(this->device_data, 0, sizeof(T) * this->v_size);
+	CudaSafeCall(cudaMemset(this->device_data, 0, sizeof(T) * this->v_size));
+	memset(this->host_data, 0, sizeof(T) * this->v_size);
 	CudaCheckError();
 }
 
 template<class T>
 void DeviceVector<T>::fill(T data) {
-	memset(this->device_data, data, sizeof(T) * this->v_size);
+	CudaSafeCall(cudaMemset(this->device_data, data, sizeof(T) * this->v_size));
+	memset(this->host_data, data, sizeof(T) * this->v_size);
 	CudaCheckError();
 }
 #endif /* DEVICEVECTOR_H_ */
