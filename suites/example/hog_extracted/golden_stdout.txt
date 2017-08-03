@@ -1,1 +1,0 @@
-error: can't open gold0 file: /home/carol/radiation-benchmarks/data/histogram_ori_gradients/data_histogram_ori_gradients_pedestrians.jpg.data

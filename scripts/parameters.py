@@ -39,7 +39,11 @@ NUM_GPUS_P = 1
 # for example if you want flip only the less significant 16 bits
 # set upper_bound = 0.5 and lower_bound = 0.0
 #########################################################################
+<<<<<<< HEAD
 upper_bound = 0.25
+=======
+upper_bound = 1.0
+>>>>>>> f23f90a8167792923c1343608e6e6b14f8ee7c97
 lower_bound = 0.0
 
 
