@@ -69,13 +69,13 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 //		for (size_t h_ = 0; h_ < in_height_; h_ += 2) {
 //			for (size_t w_ = 0; w_ < in_width_; w_ += 2) {
 
-//	if ((out < out_depth_) && (h_ < in_height) && (w_ < in_width) && !(h_ % 2)
-//			&& !(w_ % 2)) {
-//		size_t index = get_out_index(out_width, out_height, out, h_, w_);
+	if ((out < out_depth_) && (h_ < in_height) && (w_ < in_width) && !(h_ % 2)
+			&& !(w_ % 2)) {
+		size_t index = get_out_index(out_width, out_height, out, h_, w_);
 //		output_[index] = max_in_(input_, max_loc, in_width, in_height, out, h_,
 //				w_, index);
-//
-//	}
+
+	}
 }
 
 
