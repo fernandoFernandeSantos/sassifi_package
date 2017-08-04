@@ -19,12 +19,12 @@ MaxpoolingLayer::MaxpoolingLayer(size_t in_width, size_t in_height,
 			this->out_depth_ * this->out_width_ * this->out_height_);
 
 	//it is used instead unordered map on GPU
-	Pair t;
-	t.first = MAX;
-	t.second = MAX;
-	//this trick guarantee that I use DeviceVector or std::vector
-	this->max_loc = DeviceVector<Pair>(
-			this->out_depth_ * this->in_height_ * this->in_width_);
+//	Pair t;
+//	t.first = MAX;
+//	t.second = MAX;
+//	//this trick guarantee that I use DeviceVector or std::vector
+//	this->max_loc = DeviceVector<Pair>(
+//			this->out_depth_ * this->in_height_ * this->in_width_);
 //	this->max_loc.fill(MAX);
 
 }
