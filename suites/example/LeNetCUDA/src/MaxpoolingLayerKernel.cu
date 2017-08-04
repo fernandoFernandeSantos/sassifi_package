@@ -58,7 +58,7 @@ __device__            inline size_t get_out_index(size_t out_width, size_t out_h
 //__global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 //		float_t *output_, size_t out_width, size_t out_height,
 //		size_t out_depth_, size_t in_height, size_t in_width) {
-__global__ void forward_maxpool_layer_kernel(float_t *input_, float_t *output_,
+__global__ void forward_maxpool_layer_kernel(float *input_, float *output_,
 		size_t out_width, size_t out_height, size_t out_depth_,
 		size_t in_height, size_t in_width) {
 
@@ -93,13 +93,12 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, float_t *output_,
 				}
 			}
 		}
-		if (h_ * w_ * out == 0)
-			output_[0] = max_pixel;
+		output_[index] = max_pixel;
 //		atomicExch(output_ + index, max_pixel);
 	}
 }
 
-void call_forward_maxpool_layer_gpu(float_t *input, float_t *output,
+void call_forward_maxpool_layer_gpu(float *input, float *output,
 		Pair *max_loc, size_t out_width, size_t out_height, size_t out_depth,
 		size_t in_height, size_t in_width, size_t out_size) {
 
