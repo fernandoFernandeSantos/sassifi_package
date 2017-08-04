@@ -109,7 +109,7 @@ void call_foward_parallel(float* input_buf, float* weight_buf, float* b_buf,
 	forward_parallel<<<blocks, threads>>>(input_buf, weight_buf, b_buf,
 			output_buf, in_width, in_height, in_depth, out_width, out_height,
 			out_depth, kernel_size);
-//	CudaCheckError();
+	CudaCheckError();
 
 }
 

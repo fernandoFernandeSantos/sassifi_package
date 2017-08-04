@@ -31,9 +31,7 @@ public:
 #ifdef GPU
 	template<typename T> void write_layer_vec(DeviceVector<T> v, FILE *of) {
 		this->write_layer_var<size_t>(v.size(), of);
-		v.copyDeviceToHost();
-
-		fwrite(v.getHostData(), sizeof(T), v.size(), of);
+		fwrite(v.data(), sizeof(T), v.size(), of);
 
 //		cudaError_t ret = cudaDeviceSynchronize();
 //		CUDA_CHECK_RETURN(ret);
@@ -43,9 +41,8 @@ public:
 		size_t siz = this->load_layer_var<size_t>(in);
 
 		DeviceVector<T> v(siz);
+		fread(v.data(), sizeof(T), siz, in);
 
-		fread(v.getHostData(), sizeof(T), siz, in);
-		v.copyHostToDevice();
 //		cudaError_t ret = cudaDeviceSynchronize();
 //		CUDA_CHECK_RETURN(ret);
 		return v;

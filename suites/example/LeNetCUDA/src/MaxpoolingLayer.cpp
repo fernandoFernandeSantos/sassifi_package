@@ -11,6 +11,8 @@
 #include "MaxpoolingLayerKernel.h"
 #endif
 
+
+
 MaxpoolingLayer::MaxpoolingLayer(size_t in_width, size_t in_height,
 		size_t in_depth) :
 		Layer(in_width, in_height, in_depth, in_width / 2, in_height / 2,
@@ -19,18 +21,20 @@ MaxpoolingLayer::MaxpoolingLayer(size_t in_width, size_t in_height,
 			this->out_depth_ * this->out_width_ * this->out_height_);
 
 	//it is used instead unordered map on GPU
-//	Pair t;
-//	t.first = MAX;
-//	t.second = MAX;
-//	//this trick guarantee that I use DeviceVector or std::vector
-//	this->max_loc = DeviceVector<Pair>(
-//			this->out_depth_ * this->in_height_ * this->in_width_);
-//	this->max_loc.fill(MAX);
+	Pair t;
+	t.first = MAX;
+	t.second = MAX;
+	//this trick guarantee that I use DeviceVector or std::vector
+	this->max_loc = std::vector < Pair
+			> (this->out_depth_ * this->in_height_ * this->in_width_, t);
 
 }
+
 
 void MaxpoolingLayer::init_weight() {
 }
+
+
 
 inline Pair MaxpoolingLayer::get_max_loc_pair(size_t first, size_t second) {
 	Pair ret;
@@ -70,7 +74,7 @@ void MaxpoolingLayer::back_prop() {
 	g_.clear();
 	g_.resize(in_width_ * in_height_ * in_depth_);
 
-	for (size_t i = 0; i < this->max_loc.size(); i++) {
+	for (size_t i = 0; i < this->max_loc.size(); i++){
 		auto pair = this->max_loc[i];
 		if (pair.first != MAX) {
 			g_[pair.second] = this->next->g_[pair.first];
@@ -111,18 +115,18 @@ void MaxpoolingLayer::forward() {
 	try {
 
 // execute the code on the device
-		float_t *input = this->input_.getDeviceData();
-		float_t *output = this->output_.getDeviceData();
-		Pair *max_loc_buf = this->max_loc.getDeviceData();
+		float_t *input = this->input_.data();
+		float_t *output = this->output_.data();
+		Pair *max_loc_buf = this->max_loc.data();
 		size_t out_width = this->out_width_;
 		size_t out_height = this->out_height_;
 		size_t out_depth = this->out_depth_;
 		size_t in_height = this->in_height_;
 		size_t in_width = this->in_width_;
 
-		std::cout << "Outsize " << this->output_.size() << "\n";
 		call_forward_maxpool_layer_gpu(input, output, max_loc_buf, out_width,
-				out_height, out_depth, in_height, in_width, this->output_.size());
+				out_height, out_depth, in_height, in_width);
+
 
 //		printf("---------\n");
 //
@@ -132,17 +136,17 @@ void MaxpoolingLayer::forward() {
 //		}
 //		printf("]\n");
 
-//	printf("input_cpu = [");
-//	for (int i = 0; i < this->input_.size(); i++) {
-//		printf("%f, ", this->input_[i]);
-//	}
-//	printf("]\n");
-//
-//	printf("output_cpu = [ ");
-//	for (int i = 0; i < this->output_.size(); i++) {
-//		printf("%f, ", this->output_[i]);
-//	}
-//	printf("]\n");
+	//	printf("input_cpu = [");
+	//	for (int i = 0; i < this->input_.size(); i++) {
+	//		printf("%f, ", this->input_[i]);
+	//	}
+	//	printf("]\n");
+	//
+	//	printf("output_cpu = [ ");
+	//	for (int i = 0; i < this->output_.size(); i++) {
+	//		printf("%f, ", this->output_[i]);
+	//	}
+	//	printf("]\n");
 //		exit(-1);
 
 	} catch (std::exception& e) {
@@ -168,6 +172,7 @@ void MaxpoolingLayer::forward() {
 //
 //}
 #else
+
 
 void MaxpoolingLayer::forward() {
 	for (size_t out = 0; out < out_depth_; out++) {

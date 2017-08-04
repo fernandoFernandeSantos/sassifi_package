@@ -12,7 +12,7 @@
 
 void call_forward_maxpool_layer_gpu(float_t *input, float_t *output,
 		Pair *max_loc, size_t out_width, size_t out_height, size_t out_depth,
-		size_t in_height, size_t in_width, size_t out_size) ;
+		size_t in_height, size_t in_width) ;
 
 void call_backpropagation_maxpool(Pair *max_loc, float *g_, float *g_next, size_t max_size);
 

@@ -241,12 +241,10 @@ void ConvNet::add_layer(Layer* layer) {
 }
 
 #ifdef GPU
-size_t ConvNet::max_iter(DeviceVector<float> vgpu) {
-	vgpu.copyDeviceToHost();
-	float *v = vgpu.getHostData();
+size_t ConvNet::max_iter(DeviceVector<float> v) {
 	size_t i = 0;
 	float_t max = v[0];
-	for (size_t j = 1; j < vgpu.size(); j++) {
+	for (size_t j = 1; j < v.size(); j++) {
 		if (v[j] > max) {
 			max = v[j];
 			i = j;

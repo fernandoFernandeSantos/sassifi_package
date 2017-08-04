@@ -38,7 +38,10 @@ void call_forward_output_layer(float *err, float *exp_y_vec, float *input_,
 			reduce_output, output_, in_depth_, exp_y);
 
 	CudaCheckError();
-
+	*err = 0;
+	for (int i = 0; i < in_depth_; i++) {
+		*err += reduce_output[i];
+	}
 }
 
 __global__ void backprop_output_layer_kernel(float *exp_y_vec, float *input_,

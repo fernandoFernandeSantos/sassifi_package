@@ -168,10 +168,10 @@ void ConvolutionalLayer::forward() {
 	this->output_.clear();
 	try {
 		// execute the code on the device
-		float *i_buf = this->input_.getDeviceData();
-		float *w_buf = this->W_.getDeviceData();
-		float *b_buf = this->b_.getDeviceData();
-		float *o_buf = this->output_.getDeviceData();
+		float *i_buf = this->input_.data();
+		float *w_buf = this->W_.data();
+		float *b_buf = this->b_.data();
+		float *o_buf = this->output_.data();
 
 		call_foward_parallel(i_buf, w_buf, b_buf, o_buf, this->in_width_, this->in_height_, this->in_depth_, this->out_width_, this->out_height_, this->out_depth_, this->kernel_size_);
 
