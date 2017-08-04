@@ -84,7 +84,9 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 						+ (w_ + x);
 				if (max_pixel < input_[tmp]) {
 					max_pixel = input_[tmp];
-					max_loc[index] = get_max_loc_pair(index, tmp);
+//					max_loc[index] = get_max_loc_pair(index, tmp);
+//					first[index] = index;
+//					second[index] = tmp;
 				}
 			}
 		}
@@ -100,8 +102,18 @@ void call_forward_maxpool_layer_gpu(float_t *input, float_t *output,
 
 	cuda_gridsize(&threads, &blocks, in_width * out_depth, in_height);
 
+//	size_t *first, *second;
+//	CudaSafeCall(cudaMalloc(&first, sizeof(size_t) * max_loc_size));
+//	CudaSafeCall(cudaMalloc(&second, sizeof(size_t) * max_loc_size));
+//	size_t *first_host = (size_t*) malloc(sizeof(size_t) * max_loc_size);
+//	size_t *second_host = (size_t*) malloc(sizeof(size_t) * max_loc_size);
+//	memset()
+
 	forward_maxpool_layer_kernel<<<blocks, threads>>>(input, max_loc, output,
 			out_width, out_height, out_depth, in_height, in_width);
+
+
+
 	CudaCheckError();
 
 }
