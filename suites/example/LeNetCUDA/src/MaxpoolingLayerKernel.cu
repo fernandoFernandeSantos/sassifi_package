@@ -90,7 +90,7 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 				}
 			}
 		}
-//		output_[index] = max_pixel;
+		output_[index] = max_pixel;
 	}
 }
 
