@@ -93,7 +93,8 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, float_t *output_,
 				}
 			}
 		}
-		output_[index] = max_pixel;
+//		output_[index] = max_pixel;
+		atomicExch(output_ + index, max_pixel);
 	}
 }
 
