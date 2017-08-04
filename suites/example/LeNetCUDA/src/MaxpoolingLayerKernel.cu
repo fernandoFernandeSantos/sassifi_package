@@ -86,15 +86,15 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, float_t *output_,
 				tmp = (out * in_width * in_height) + ((h_ + y) * in_width)
 						+ (w_ + x);
 				if (max_pixel < input_[tmp]) {
-					max_pixel = input_[tmp];
+//					max_pixel = input_[tmp];
 //					max_loc[index] = get_max_loc_pair(index, tmp);
 //					first[index] = index;
 //					second[index] = tmp;
 				}
 			}
 		}
-//		output_[index] = max_pixel;
-		atomicExch(output_ + index, max_pixel);
+		output_[index] = max_pixel;
+//		atomicExch(output_ + index, max_pixel);
 	}
 }
 
