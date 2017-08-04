@@ -15,33 +15,33 @@ __device__            inline size_t get_out_index(size_t out_width, size_t out_h
 	return out * out_width * out_height + h_ / 2 * out_width + (w_ / 2);
 }
 
-__device__         inline Pair get_max_loc_pair(size_t first, size_t second) {
-	Pair ret;
-	ret.first = first;
-	ret.second = second;
-	return ret;
-}
-
-__device__ inline float max_in_cuda(float_t *input_, Pair *max_loc,
-		size_t in_width_, size_t in_height, size_t out, size_t h_, size_t w_,
-		size_t index) {
-	float_t max_pixel = 0;
-	size_t tmp;
-
-#pragma unroll
-	for (size_t x = 0; x < MAXPOOL_SIZE; x++) {
-#pragma unroll
-		for (size_t y = 0; y < MAXPOOL_SIZE; y++) {
-			tmp = (out * in_width_ * in_height) + ((h_ + y) * in_width_)
-					+ (w_ + x);
-			if (max_pixel < input_[tmp]) {
-				max_pixel = input_[tmp];
-				max_loc[index] = get_max_loc_pair(index, tmp);
-			}
-		}
-	}
-	return max_pixel;
-}
+//__device__         inline Pair get_max_loc_pair(size_t first, size_t second) {
+//	Pair ret;
+//	ret.first = first;
+//	ret.second = second;
+//	return ret;
+//}
+//
+//__device__ inline float max_in_cuda(float_t *input_, Pair *max_loc,
+//		size_t in_width_, size_t in_height, size_t out, size_t h_, size_t w_,
+//		size_t index) {
+//	float_t max_pixel = 0;
+//	size_t tmp;
+//
+//#pragma unroll
+//	for (size_t x = 0; x < MAXPOOL_SIZE; x++) {
+//#pragma unroll
+//		for (size_t y = 0; y < MAXPOOL_SIZE; y++) {
+//			tmp = (out * in_width_ * in_height) + ((h_ + y) * in_width_)
+//					+ (w_ + x);
+//			if (max_pixel < input_[tmp]) {
+//				max_pixel = input_[tmp];
+//				max_loc[index] = get_max_loc_pair(index, tmp);
+//			}
+//		}
+//	}
+//	return max_pixel;
+//}
 
 /**
  * void MaxpoolingLayer::forward_cpu() {
@@ -86,7 +86,7 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, float_t *output_,
 				tmp = (out * in_width * in_height) + ((h_ + y) * in_width)
 						+ (w_ + x);
 				if (max_pixel < input_[tmp]) {
-//					max_pixel = input_[tmp];
+					max_pixel = input_[tmp];
 //					max_loc[index] = get_max_loc_pair(index, tmp);
 //					first[index] = index;
 //					second[index] = tmp;
