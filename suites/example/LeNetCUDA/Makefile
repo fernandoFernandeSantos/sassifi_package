@@ -92,26 +92,26 @@ debug:
 #usage: ./leNetCUDA <train\classify\gold_gen\rad_test> <dataset> <labels> <weights>
 #[gold input/output] [sample_count] [save layers] [iterations]
 train:
-	./$(EXEC) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte $(DATA_DIR)/lenet_base.weights
+	./$(TARGET) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte $(DATA_DIR)/lenet_base.weights
 
 train_l1:
-	./$(EXEC) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte $(DATA_DIR)/lenet_L1.weights L1
+	./$(TARGET) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte $(DATA_DIR)/lenet_L1.weights L1
 
 train_l2:
-	./$(EXEC) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte ./lenet_L2.weights L2
+	./$(TARGET) train $(DATA_DIR)/train-images-idx3-ubyte $(DATA_DIR)/train-labels-idx1-ubyte ./lenet_L2.weights L2
 
 test:
-	./$(EXEC) rad_test $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
+	./$(TARGET) rad_test $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
 	$(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 1 1
 
 
 generate:
-	./$(EXEC) gold_gen $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
+	./$(TARGET) gold_gen $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
 	 $(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 1 1
 
 
 golden:
-	./$(EXEC) rad_test $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
+	./$(TARGET) rad_test $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte \
 	$(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 1 1 > golden_stdout.txt 2>golden_stderr.txt
 
 
