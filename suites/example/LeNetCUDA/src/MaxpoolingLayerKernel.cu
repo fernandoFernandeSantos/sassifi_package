@@ -90,7 +90,7 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 				}
 			}
 		}
-		printf("index %d\n", index);
+		if (index >= 1176)	printf("index %d\n", index);
 		//output_[index] = max_pixel;
 	}
 }
