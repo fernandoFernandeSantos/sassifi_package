@@ -120,7 +120,7 @@ void MaxpoolingLayer::forward() {
 		size_t in_height = this->in_height_;
 		size_t in_width = this->in_width_;
 
-		std::cout << "Outsize " << this->output.size() << "\n";
+		std::cout << "Outsize " << this->output_.size() << "\n";
 		call_forward_maxpool_layer_gpu(input, output, max_loc_buf, out_width,
 				out_height, out_depth, in_height, in_width);
 
