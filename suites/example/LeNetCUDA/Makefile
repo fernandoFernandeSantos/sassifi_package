@@ -34,8 +34,8 @@ OPTS= -g
 endif
 
 ifeq ($(LOGS), 1)
-LOGHELPERINC=-I../../include/
-LOGHELPERLIB=-L../../include/ -lLogHelper
+LOGHELPERINC=-I../include/
+LOGHELPERLIB=-L../include/ -lLogHelper
 CFLAGS+= -DLOGS
 endif
 
