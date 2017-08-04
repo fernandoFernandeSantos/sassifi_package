@@ -62,7 +62,7 @@ DEPS = $(wildcard src/*.h) Makefile
 ############################################################################################
 #-------------------------------------------------------------------------------------------
 #-rdc=true
-NVCC_FLAGS += -rdc=true  -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) $(GENCODE) --compiler-options -Wall -Wextras
+NVCC_FLAGS += -rdc=true  -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) $(GENCODE) --compiler-options -Wall
 LINK_FLAGS =  -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
 
 LD_LIB=LD_LIBRARY_PATH=/usr/local/sassi7/lib64/
