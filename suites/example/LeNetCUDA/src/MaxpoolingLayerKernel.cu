@@ -10,12 +10,12 @@
 
 #define MAXPOOL_SIZE 2
 
-__device__           inline size_t get_out_index(size_t out_width, size_t out_height,
+__device__            inline size_t get_out_index(size_t out_width, size_t out_height,
 		size_t out, size_t h_, size_t w_) {
 	return out * out_width * out_height + h_ / 2 * out_width + (w_ / 2);
 }
 
-__device__        inline Pair get_max_loc_pair(size_t first, size_t second) {
+__device__         inline Pair get_max_loc_pair(size_t first, size_t second) {
 	Pair ret;
 	ret.first = first;
 	ret.second = second;
@@ -55,9 +55,12 @@ __device__ inline float max_in_cuda(float_t *input_, Pair *max_loc,
  }
  }
  */
-__global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
-		float_t *output_, size_t out_width, size_t out_height,
-		size_t out_depth_, size_t in_height, size_t in_width) {
+//__global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
+//		float_t *output_, size_t out_width, size_t out_height,
+//		size_t out_depth_, size_t in_height, size_t in_width) {
+__global__ void forward_maxpool_layer_kernel(float_t *input_, float_t *output_,
+		size_t out_width, size_t out_height, size_t out_depth_,
+		size_t in_height, size_t in_width) {
 
 	int h_ = blockIdx.y * blockDim.y + threadIdx.y;
 	int w_ = (blockIdx.x * blockDim.x + threadIdx.x) / out_depth_;
@@ -90,7 +93,8 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, Pair *max_loc,
 				}
 			}
 		}
-		if (index >= 1176)	printf("index %d\n", index);
+		if (index >= 1176)
+			printf("index %d\n", index);
 		//output_[index] = max_pixel;
 	}
 }
@@ -110,10 +114,8 @@ void call_forward_maxpool_layer_gpu(float_t *input, float_t *output,
 //	size_t *second_host = (size_t*) malloc(sizeof(size_t) * max_loc_size);
 //	memset()
 
-	forward_maxpool_layer_kernel<<<blocks, threads>>>(input, max_loc, output,
+	forward_maxpool_layer_kernel<<<blocks, threads>>>(input, output,
 			out_width, out_height, out_depth, in_height, in_width);
-
-
 
 	CudaCheckError();
 
