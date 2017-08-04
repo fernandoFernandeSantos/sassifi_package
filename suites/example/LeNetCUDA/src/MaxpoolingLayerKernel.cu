@@ -99,20 +99,22 @@ __global__ void forward_maxpool_layer_kernel(float_t *input_, float_t *output_,
 
 void call_forward_maxpool_layer_gpu(float_t *input, float_t *output,
 		Pair *max_loc, size_t out_width, size_t out_height, size_t out_depth,
-		size_t in_height, size_t in_width) {
+		size_t in_height, size_t in_width, size_t out_size) {
 
 	dim3 blocks, threads;
 
 	cuda_gridsize(&threads, &blocks, in_width * out_depth, in_height);
 
 //	size_t *first, *second;
-//	CudaSafeCall(cudaMalloc(&first, sizeof(size_t) * max_loc_size));
+	float *output_in;
+	printf("sizeof float_t %d %d\n", sizeof(float_t), sizeof(float));
+	CudaSafeCall(cudaMalloc(&output_in, sizeof(float) * out_size));
 //	CudaSafeCall(cudaMalloc(&second, sizeof(size_t) * max_loc_size));
 //	size_t *first_host = (size_t*) malloc(sizeof(size_t) * max_loc_size);
 //	size_t *second_host = (size_t*) malloc(sizeof(size_t) * max_loc_size);
 //	memset()
 
-	forward_maxpool_layer_kernel<<<blocks, threads>>>(input, output,
+	forward_maxpool_layer_kernel<<<blocks, threads>>>(input, output_in,
 			out_width, out_height, out_depth, in_height, in_width);
 
 	CudaCheckError();
