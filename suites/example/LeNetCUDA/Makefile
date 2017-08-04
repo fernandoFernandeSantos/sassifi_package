@@ -116,6 +116,7 @@ golden:
 	$(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 1 1 > golden_stdout.txt 2>golden_stderr.txt
 
 LeNetCUDA_generate: all
+LeNetCUDA: all
 
 download_input:
 	wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
