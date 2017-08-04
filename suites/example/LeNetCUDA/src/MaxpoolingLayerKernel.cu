@@ -117,7 +117,7 @@ void call_forward_maxpool_layer_gpu(float *input, float *output,
 
 	forward_maxpool_layer_kernel<<<blocks, threads>>>(input, output_in,
 			out_width, out_height, out_depth, in_height, in_width);
-
+	printf("passou depois\n");
 //	CudaCheckError();
 
 }
