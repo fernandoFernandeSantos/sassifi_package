@@ -100,7 +100,7 @@ ALL_FLAGS=$(NVCC_FLAGS) $(LINK_FLAGS)
 #-------------------------------------------------------------------------------------------
 ############################################################################################
 
-
+RAD_DIR=/home/carol/radiation-benchmarks
 
 all: obj backup results $(EXEC)
 
@@ -137,5 +137,6 @@ test:
 	./darknet test_radiation -d temp.csv -n 1 -s 1 -a 0
 
 generate:
-	./darknet test_radiation  -c cfg/yolo.cfg -w ../../../data/darknet/yolo_v2.weights -g 1 -d temp.csv -s 1 -l test.txt -a 0
+	./darknet test_radiation  -c cfg/yolo.cfg -w $(RAD_DIR)/data/darknet/yolo_v2.weights \
+	-g 1 -d temp.csv -s 1 -l $(RAD_DIR)/test.txt -a 0
 
