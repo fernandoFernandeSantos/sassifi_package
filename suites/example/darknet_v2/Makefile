@@ -20,7 +20,7 @@ GEN_IMG?=0 #if you want to generate images on gold generator execution
 # ARCH=  -gencode arch=compute_52,code=compute_52
 
 VPATH=./src/
-EXEC=darknet
+TARGET=darknet
 OBJDIR=./obj/
 
 CC=gcc
@@ -102,9 +102,9 @@ ALL_FLAGS=$(NVCC_FLAGS) $(LINK_FLAGS)
 
 RAD_DIR=/home/carol/radiation-benchmarks
 
-all: obj backup results $(EXEC)
+all: clean obj backup results $(TARGET) install
 
-$(EXEC): $(OBJS)
+$(TARGET): $(OBJS)
 	$(NVCC) $^ $(NVCC_FLAGS) $(LOGHELPERLIB) $(LOGHELPERINC) $(LINK_FLAGS) -o $@  -lstdc++ 
 
 $(OBJDIR)%.o: %.c $(DEPS)
@@ -127,7 +127,7 @@ results:
 .PHONY: clean
 
 clean:
-	rm -rf $(OBJS) $(EXEC)
+	rm -rf $(OBJS) $(TARGET)
 
 
 test_pure_yolo:
@@ -149,4 +149,7 @@ generate:
 darknet_v2_generate: all
 darknet_v2: all
 
+install:
+	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
+	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
