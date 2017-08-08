@@ -143,7 +143,7 @@ generate:
 	./darknet test_radiation  -c $(RAD_DIR)/src/cuda/darknet_v2/cfg/yolo.cfg \
 								  -w $(RAD_DIR)/data/darknet/yolo_v2.weights \
 								  -g 1 -d $(RAD_DIR)/data/darknet/fault_injection.csv -s 1 -l   \
-								  $(RAD_DIR)/fault_injection.txt -a 0
+								  $(RAD_DIR)/data/networks_img_list/fault_injection.txt -a 0
 
 
 darknet_v2_generate: all
