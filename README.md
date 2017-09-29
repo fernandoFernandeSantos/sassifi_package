@@ -1,3 +1,5 @@
+##THIS repo is a copy from https://github.com/NVlabs/sassifi.git
+
 # SASSIFI: An Architecture-level Fault Injection Tool for GPU Application Resilience Evaluations
 
 SASSIFI provides an automated framework to perform error injection campaigns for GPU application resilience evaluation.  SASSIFI builds on top of [SASSI](https://github.com/NVlabs/SASSI), which is a low-level assembly-language instrumentation tool that provides the ability to instrument instructions in the low-level GPU assembly language (SASS).  SASSIFI can be used to perform many types of resilience evaluation studies. Our ISPASS 2017 paper explains the tool in detail and presents a few case studies. 
