@@ -22,13 +22,13 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 golden:
-	$(LD_LIB) ./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
+	./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
 
 test:
-	$(LD_LIB) ./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1
+	./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1
 
 generate:
-	$(LD_LIB) ./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 -generate
+	./hotspot -size=1024 -sim_time=1 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 -generate
 
 clean:
 	rm -f *.o *~ hotspot
