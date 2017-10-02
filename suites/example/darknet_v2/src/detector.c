@@ -10,7 +10,6 @@
 
 #include "args.h"
 
-#define MAX_ABFT_TYPES 3
 #include "log_processing.h"
 
 //my_second
@@ -687,6 +686,9 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile,
 		for (j = 0; j < l.w * l.h * l.n; ++j)
 			probs[j] = calloc(l.classes + 1, sizeof(float *));
 
+		printf("valor w * h * n %d valor side * side * n %d\n", l.w * l.h * l.n,
+				l.side * l.side * l.n);
+
 		float *X = sized.data;
 		time = clock();
 		network_predict(net, X);
@@ -728,7 +730,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile,
  */
 image *load_all_images_sized(image *img_array, int net_w, int net_h,
 		int list_size) {
-//		image sized = letterbox_image(im, net.w, net.h);
+//      image sized = letterbox_image(im, net.w, net.h);
 	int i;
 	image *ret = (image*) malloc(sizeof(image) * list_size);
 	for (i = 0; i < list_size; i++) {
@@ -738,7 +740,7 @@ image *load_all_images_sized(image *img_array, int net_w, int net_h,
 }
 
 image *load_all_images(detection det) {
-//	image im = load_image_color(input, 0, 0);
+//  image im = load_image_color(input, 0, 0);
 	int i;
 	image *ret = (image*) malloc(sizeof(image) * det.plist_size);
 	for (i = 0; i < det.plist_size; i++) {
@@ -748,7 +750,7 @@ image *load_all_images(detection det) {
 }
 
 void free_all_images(image *array, int list_size) {
-	//			free_image(im);
+	//          free_image(im);
 	int i;
 	for (i = 0; i < list_size; i++) {
 		free_image(array[i]);
@@ -763,7 +765,7 @@ void free_all_images(image *array, int list_size) {
 void test_detector_radiation(Args *args) {
 	//load all information from the goldfile
 	detection gold = load_gold(args);
-
+	gold.network_name = "darknet_v2";
 	printf("\nArgs inside detector_radiation\n");
 	print_args(*args);
 
@@ -792,14 +794,40 @@ void test_detector_radiation(Args *args) {
 	const image *im_array_sized = load_all_images_sized(im_array, net.w, net.h,
 			gold.plist_size);
 
-//	set abft
-	if (args->abft && args->abft < MAX_ABFT_TYPES) {
-		printf("passou no if\n\n");
+	//if abft is set these parameters will also be set
+	error_return max_pool_errors;
+	init_error_return(&max_pool_errors);
+	//  set abft
+	if (args->abft >= 0 && args->abft < MAX_ABFT_TYPES) {
 #ifdef GPU
-		set_abft(args->abft);
+		switch (args->abft) {
+			case 1:
+			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
+			exit(-1);
+			break;
+			case 2:
+			set_abft_smartpool(args->abft);
+			break;
+			case 3:
+			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
+			exit(-1);
+			break;
+			case 4:
+			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
+			exit(-1);
+			break;
+			case 5:
+			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
+			exit(-1);
+			break;
+			default:
+			printf("No ABFT was set\n");
+			break;
+		}
 #endif
 	}
-//	alloc once and clear at each iteration
+
+//  alloc once and clear at each iteration
 	layer l = net.layers[net.n - 1];
 	box *boxes = calloc(l.w * l.h * l.n, sizeof(box));
 	float **probs = calloc(l.w * l.h * l.n, sizeof(float *));
@@ -830,13 +858,20 @@ void test_detector_radiation(Args *args) {
 
 			end_iteration_app();
 			time = mysecond() - time;
-//		here we test if any error happened
-//			if shit happened we log
+//      here we test if any error happened
+//          if shit happened we log
 			double time_cmp = mysecond();
-//			void compare(prob_array gold, float **f_probs, box *f_boxes, int num,
-//					int classes, int img, int save_layer, network net, int test_iteration)
+//          void compare(prob_array gold, float **f_probs, box *f_boxes, int num,
+//                  int classes, int img, int save_layer, network net, int test_iteration)
+
+#ifdef GPU
+			//before compare copy maxpool err detection values
+			//smart pooling
+			if (args->abft == 2)
+			get_and_reset_error_detected_values(max_pool_errors);
+#endif
 			compare(&gold, probs, boxes, l.w * l.h * l.n, l.classes, it,
-					args->save_layers, i);
+					args->save_layers, i, args->img_list_path, max_pool_errors);
 			time_cmp = mysecond() - time_cmp;
 
 			printf(
@@ -865,6 +900,11 @@ void test_detector_radiation(Args *args) {
 	free_all_images(im_array, gold.plist_size);
 	free_all_images(im_array_sized, gold.plist_size);
 
+	//free smartpool errors
+	free_error_return(&max_pool_errors);
+#ifdef GPU
+	free_err_detected();
+#endif
 }
 
 void test_detector_generate(Args *args) {
@@ -895,8 +935,8 @@ void test_detector_generate(Args *args) {
 	int classes = l.classes;
 	FILE *output_file = fopen(args->gold_inout, "w+");
 	if (output_file) {
-//		writing all parameters for test execution
-//		thresh hier_tresh img_list_size img_list_path config_file config_data model weights total classes
+//      writing all parameters for test execution
+//      thresh hier_tresh img_list_size img_list_path config_file config_data model weights total classes
 
 		fprintf(output_file, "%f;%f;%d;%s;%s;%s;%s;%s;%d;%d;\n", args->thresh,
 				args->hier_thresh, img_list_size, args->img_list_path,
@@ -906,6 +946,7 @@ void test_detector_generate(Args *args) {
 		fprintf(stderr, "GOLD OPENING ERROR");
 		exit(-1);
 	}
+	printf("total %d and other %d\n", l.side * l.side * l.n, l.h * l.n * l.w);
 
 	//---------------------------------------
 
@@ -913,6 +954,7 @@ void test_detector_generate(Args *args) {
 	float nms = .4;
 
 	detection gold_to_save;
+	gold_to_save.network_name = "darknet_v2";
 	if (args->save_layers)
 		alloc_gold_layers_arrays(&gold_to_save, &net);
 
@@ -936,19 +978,19 @@ void test_detector_generate(Args *args) {
 		if (nms)
 			do_nms_obj(boxes, probs, l.w * l.h * l.n, l.classes, nms);
 
-//		must do the same thing that draw_detections
-//		but the output will be a gold file (old draw_detections)
-//		first write a filename
+//      must do the same thing that draw_detections
+//      but the output will be a gold file (old draw_detections)
+//      first write a filename
 		fprintf(output_file, "%s;%d;%d;%d;\n", img_list[it], im.h, im.w, im.c);
-//		after writes all detection information
-//		each box is described as class number, left, top, right, bottom, prob (confidence)
-//		save_gold(FILE *fp, char *img, int num, int classes, float **probs,
-//				box *boxes)
+//      after writes all detection information
+//      each box is described as class number, left, top, right, bottom, prob (confidence)
+//      save_gold(FILE *fp, char *img, int num, int classes, float **probs,
+//              box *boxes)
 		save_gold(output_file, img_list[it], l.w * l.h * l.n, l.classes, probs,
 				boxes);
 
 		if (args->save_layers)
-			save_layer(&gold_to_save, it, 0, "gold", 1);
+			save_layer(&gold_to_save, it, 0, "gold", 1, args->img_list_path);
 
 #ifdef GEN_IMG
 		draw_detections(im, l.w * l.h * l.n, args->thresh, boxes, probs, names,

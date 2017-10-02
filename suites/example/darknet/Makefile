@@ -138,47 +138,34 @@ OBJ=gemm.o utils.o cuda.o deconvolutional_layer.o convolutional_layer.o list.o i
 	 captcha.o route_layer.o writing.o box.o nightmare.o normalization_layer.o avgpool_layer.o coco.o dice.o \
 	 yolo.o detector.o layer.o compare.o classifier.o local_layer.o swag.o shortcut_layer.o activation_layer.o \
 	 rnn_layer.o gru_layer.o rnn.o rnn_vid.o crnn_layer.o demo.o tag.o cifar.o go.o batchnorm_layer.o art.o \
-	 region_layer.o reorg_layer.o super.o voxel.o log_processing.o args.o
+	 region_layer.o reorg_layer.o super.o voxel.o args.o log_processing.o abft_host.o
 	 
 ifeq ($(GPU), 1)
 LDFLAGS+= -lstdc++
 OBJ+=convolutional_kernels.o deconvolutional_kernels.o activation_kernels.o im2col_kernels.o \
 	col2im_kernels.o blas_kernels.o crop_layer_kernels.o dropout_layer_kernels.o maxpool_layer_kernels.o \
-	softmax_layer_kernels.o network_kernels.o avgpool_layer_kernels.o
+	softmax_layer_kernels.o network_kernels.o avgpool_layer_kernels.o abft.o maxpool_layer_hardened_kernels.o
 endif
 
-#abft = 1 is dumb abft
-#abft = 2 is fast abft
-#LOG_LINK+= -Xcompiler "-DABFT=1"
-BUILD_ABFT=abft
-ABFT_SRC=src/abft.cu
-#CFLAGS += -DABFT=1
-BUILD_ABFT_OBJ=$(OBJDIR)abft.o
- 
-#$(NVCC) -I$(CUDAINCLUDE) $(NVCCFLAGS)  -dlink $(OBJDIR)abft_temp.o  -lcudadevrt -o $(OBJDIR)abft.o   $(ARCH)  
 
 NVCCFLAGS= -Xcompiler "-L/usr/local/sassi7/lib64 -lcuda -lcurand  -lcudart" -Xcompiler '-fPIC' -Xcompiler '-lm' -D_FORCE_INLINES
 
 OBJS = $(addprefix $(OBJDIR), $(OBJ))
 DEPS = $(wildcard src/*.h) Makefile
 
-all: clean build_logs $(TARGET) install
-
-abft: src/abft.cu
-	$(NVCC)  -I$(CUDAINCLUDE) $(NVCCFLAGS) -c -O3 -dc src/abft.cu -o $(OBJDIR)abft.o $(NVCCFLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
-	#-rdc=true $(ARCH)  -lcudadevrt 
-	
+all: clean  $(TARGET) install
 
 $(TARGET): $(OBJS) 
-	$(NVCC) $(COMMON) $(BUILD_ABFT_OBJ) $(OBJDIR)log_helper.o $^  -o $@  -lcudadevrt -lcudart -lcuda $(LDFLAGS) $(CFLAGS)  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
+	$(NVCC) $(COMMON) $(BUILD_ABFT_OBJ) $^  -o $@  -lcudadevrt -lcudart -lcuda $(LDFLAGS) $(CFLAGS)  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 	
 $(OBJDIR)%.o: %.c $(DEPS) 
 	$(NVCC) $(COMMON) $(CFLAGS) -c $< -o $@ $(LDFLAGS) $(CFLAGS) $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
-build_logs: $(LOG_CU)
-	$(NVCC)  -c $(LOG_CU) -o $(OBJDIR)log_helper.o 
+$(OBJDIR)%.o: %.cpp $(DEPS) 
+	$(NVCC) $(COMMON) $(CFLAGS) -c $< -o $@ $(LDFLAGS) $(CFLAGS) -I../../include/ $(CXXFLAGS) -std=c++11
 
-$(OBJDIR)%.o: %.cu $(DEPS) $(BUILD_ABFT)  build_logs
+
+$(OBJDIR)%.o: %.cu $(DEPS) $(BUILD_ABFT)
 	$(NVCC) $(ARCH) $(COMMON) $(CFLAGS) -c $< -o $@  $(LDFLAGS) $(CFLAGS) $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
 
 

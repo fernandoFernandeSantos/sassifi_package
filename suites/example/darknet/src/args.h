@@ -11,6 +11,9 @@
 #include <unistd.h> //acess F_OK
 #include <stdio.h> //printf
 #include <stdlib.h> //atol
+
+#define MAX_ABFT_TYPES 5
+
 /**
  * -e - execution_type = <yolo/classifier/imagenet...>
  * -m - execution_model = <test/train/valid>
@@ -27,7 +30,6 @@ typedef struct arguments {
 	char *weights;
 //  char *input_data_path;
 	long int iterations;
-	char *gold_output;
 	int generate_flag;
 	//if yolo test
 	char *test_filename;
@@ -40,9 +42,14 @@ typedef struct arguments {
 	char *base_result_out;
 
 	int gpu_index;
-	char *gold_input;
+	char *gold_inout;
 	int save_layers;
 	int abft;
+
+	char *cfg_data;
+	char *model;
+	float hier_thresh;
+
 } Args;
 
 void args_init_and_setnull(Args *arg);
