@@ -55,6 +55,7 @@ FLAGS = -ccbin $(CCBIN) -std=c++11 \
 		-I$(CUPTI)/include/ \
 		-I$(INSTALL_DIR)/utils/ \
 		-I$(SASSI_HOME)/include/ \
+		-D_FORCE_INLINES
 
 
 ########################################

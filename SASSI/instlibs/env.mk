@@ -4,7 +4,7 @@ export SASSI_HOME ?= /usr/local/sassi7/
 
 # Point this toward a C++-11 capable compiler (not the compiler
 # itself, just its location).
-export CCBIN ?= /usr/bin/
+export CCBIN ?= /usr/bin/gcc-4.9
 
 # Set this to target your specific GPU.  Note some libries use 
 # CUDA features that are only supported for > compute_30.
