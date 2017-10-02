@@ -7,9 +7,9 @@ set -e
 # set -x
 
 # How many injections per type
-INST_V=14
-INST_A=250
-REGS_F=500
+INST_V=1 #14
+INST_A=1 #250
+REGS_F=1 #500
 
 
 ################################################
