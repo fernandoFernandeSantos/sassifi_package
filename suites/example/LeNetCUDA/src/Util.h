@@ -26,11 +26,11 @@
 #include <math.h>
 #include "boost/random.hpp"
 
-#define MAX ULONG_MAX
+#define MAX 99999 //ULONG_MAX
 
 #ifdef GPU
 #include "DeviceVector.h"
-float_t dot(DeviceVector<float> x, DeviceVector<float> w);
+float_t dot(const DeviceVector<float>& x, const  DeviceVector<float>& w);
 #endif
 
 

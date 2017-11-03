@@ -31,18 +31,30 @@ public:
 #ifdef GPU
 	template<typename T> void write_layer_vec(DeviceVector<T> v, FILE *of) {
 		this->write_layer_var<size_t>(v.size(), of);
-		fwrite(v.data(), sizeof(T), v.size(), of);
 
+#ifdef NOTUNIFIEDMEMORY
+		v.pop_vector();
+		fwrite(v.h_data(), sizeof(T), v.size(), of);
+		v.push_vector();
+#else
+		fwrite(v.data(), sizeof(T), v.size(), of);
+#endif
 //		cudaError_t ret = cudaDeviceSynchronize();
 //		CUDA_CHECK_RETURN(ret);
 	}
 
-	template<typename T>  DeviceVector<T> load_layer_vec(FILE *in) {
+	template<typename T> DeviceVector<T> load_layer_vec(FILE *in) {
 		size_t siz = this->load_layer_var<size_t>(in);
 
 		DeviceVector<T> v(siz);
-		fread(v.data(), sizeof(T), siz, in);
 
+#ifdef NOTUNIFIEDMEMORY
+		v.pop_vector();
+		fread(v.h_data(), sizeof(T), siz, in);
+		v.push_vector();
+#else
+		fread(v.data(), sizeof(T), siz, in);
+#endif
 //		cudaError_t ret = cudaDeviceSynchronize();
 //		CUDA_CHECK_RETURN(ret);
 		return v;
@@ -86,12 +98,12 @@ public:
 	float_t getWeightsSum();
 	float_t getSquaredWeightsSum();
 
-	virtual void set_sum_LeNet_squared_weights(float_t sum_Lenet_squared_weights);
+	virtual void set_sum_LeNet_squared_weights(
+			float_t sum_Lenet_squared_weights);
 	virtual void set_sum_LeNet_weights(float_t sum_Lenet_weights);
-	
+
 	//weights values debug
 	void print_layer_weights(int layer_num);
-
 
 	virtual void back_prop_L1();
 	virtual void back_prop_L2();
@@ -112,7 +124,7 @@ public:
 	float_t err;
 	int exp_y;
 
-
+	std::string layer_type;
 	//it is necessary for GPU implementation
 #ifdef GPU
 	DeviceVector<float_t> W_;
