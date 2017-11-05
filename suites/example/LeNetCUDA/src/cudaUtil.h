@@ -24,6 +24,7 @@ inline void __cudaCheckError(const char *file, const int line);
  * the application if the call failed.
  */
 
+
 #define CudaSafeCall( err ) __cudaSafeCall( err, __FILE__, __LINE__ )
 #define CudaCheckError()    __cudaCheckError( __FILE__, __LINE__ )
 

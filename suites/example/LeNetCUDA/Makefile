@@ -6,31 +6,34 @@ EXEC=leNetCUDA
 OBJDIR=./obj/
 
 SRC=./src/
-NVCC=/usr/local/cuda/bin/nvcc
+NVCC=/usr/local/sassi7/bin/nvcc
 CXX=g++
 
 OBJDIR=./obj/
 
 GPU?=0
 LOGS?=0
+TRAINGPU?=$(GPU)
+NOTUSEUNIFIED?=$(GPU)
 
 CUDA_THRUST=
 #-I/usr/local/cuda/include/thrust/
 
-ARCH= -gencode arch=compute_35,code=[sm_35,compute_35] \
-      -gencode arch=compute_50,code=[sm_50,compute_50] \
-      -gencode arch=compute_52,code=[sm_52,compute_52] \
-      -gencode arch=compute_60,code=[sm_60,compute_60] \
-      -gencode arch=compute_62,code=[sm_62,compute_62]
+#ARCH= -gencode arch=compute_35,code=[sm_35,compute_35] \
+ #     -gencode arch=compute_50,code=[sm_50,compute_50] \
+  #    -gencode arch=compute_52,code=[sm_52,compute_52] \
+   #   -gencode arch=compute_60,code=[sm_60,compute_60] \
+    #  -gencode arch=compute_62,code=[sm_62,compute_62]
 
 #for radiation setup
 LOGS?=0
-COMMON=-std=c++11
+COMMON=-std=c++11 
 
 
-CFLAGS= $(COMMON) -Wall -Wextra
+CFLAGS= $(COMMON) -O3
+# -Xcompiler '-Wall -Wextra'
 
-NVCC_FLAGS= -Xcompiler -Ofast
+NVCC_FLAGS= -Xcompiler -O3 -Wno-deprecated-gpu-targets  -ccbin $(CXX)
 #-std=c++11
 
 ifeq ($(DEBUG),1)
@@ -41,12 +44,15 @@ ifeq ($(LOGS), 1)
 LOGHELPER_INC=-I../../include/
 LOGHELPER_LIB=-L../../include/ -lLogHelper
 CFLAGS+= -DLOGS
+else
+LOGHELPER_INC=
+LOGHELPER_LIB=
 endif
 
 
 ifeq ($(GPU), 1)
 ON_GPU= -DGPU
-CFLAGS+=  -I/usr/local/cuda/include -L/usr/local/cuda/lib64 -lcudart
+CFLAGS+=  -I/usr/local/sassi7/include -L/usr/local/sassi7//lib64 -lcudart -lcudadevrt
 	ifeq ($(DEBUG),1)
 		NVCC_FLAGS+= -G
 	endif
@@ -85,9 +91,10 @@ DEPS = $(wildcard src/*.h) Makefile
 #-----------------------------------------------------------------------
 #sassifi
 NVCC_FLAGS +=  -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS)
-LINK_FLAGS += -std=c++11 $(GENCODE) -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
+LINK_FLAGS +=  $(GENCODE) -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
 
 NVCC_FLAGS += $(LINK_FLAGS)
+TARGET=$(EXEC)
 #-----------------------------------------------------------------------
 
 
@@ -97,10 +104,11 @@ DATA_DIR=/home/carol/radiation-benchmarks/data/lenet
 all: clean obj $(EXEC) install
 
 $(EXEC): $(OBJS)
-	$(CXX) $^ $(ON_GPU) -o $@  $(CFLAGS) $(LDFLAGS) $(LOGHELPER_INC) $(LOGHELPER_LIB)
+	$(NVCC) $^  -o $@ $(ON_GPU)  $(CFLAGS) $(LDFLAGS) $(LOGHELPER_INC) $(LOGHELPER_LIB)  $(NVCC_FLAGS) 
+
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
-	$(CXX) $(OPTS) $(ON_GPU) -c $< -o $@  $(HELPFUL) $(LOGHELPER_INC) $(LOGHELPER_LIB) $(CFLAGS) 
+	$(CXX) $(OPTS) -c $< -o $@ $(ON_GPU) $(HELPFUL) $(LOGHELPER_INC) $(LOGHELPER_LIB) $(CFLAGS) 
 
 $(OBJDIR)%.o: %.cu $(DEPS)
 	$(NVCC) $(ARCH) $(COMMON) $(OPTS) $(NVCC_FLAGS) -c $< -o $@
@@ -143,7 +151,12 @@ test_rad:
 	./$(EXEC) rad_test $(DATA_DIR)/t10k-images-idx3-ubyte $(DATA_DIR)/t10k-labels-idx1-ubyte $(DATA_DIR)/lenet_base.weights $(DATA_DIR)/gold_test 2 0 1
 
 
-install:
+LeNetCUDA_generate: all
+LeNetCUDA: all
+
+
+
+install: $(EXEC)
 	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
