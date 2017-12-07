@@ -12,10 +12,12 @@ OPTION = none
 GENCODE = -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50
 
 # INST_LIB_DIR is where instlibs dir is located
-INST_LIB_DIR = /home/carol/SASSIFI/SASSI/instlibs/lib/
+INST_LIB_DIR = $(SASSI_SRC)/instlibs/lib/
+#/home/carol/SASSIFI/SASSI/instlibs/lib/
 
 #REGRESSION_HOME is where sassifi_package is located
-REGRESSION_HOME = /home/carol/SASSIFI/sassifi_package/
+REGRESSION_HOME =  $(SASSIFI_HOME)
+#/home/carol/SASSIFI/sassifi_package/
 
 # SASSI/CUDA
 CUDA_BASE_DIR = /usr/local/sassi7/
@@ -82,4 +84,4 @@ endif
 LOGHELPER_INC=../include/
 LOGHELPER_LIB=../include/
 
-EXTRA_NVCC_FLAGS+=-D_FORCE_INLINES
+#EXTRA_NVCC_FLAGS+=-D_FORCE_INLINES
