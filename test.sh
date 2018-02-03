@@ -16,7 +16,7 @@ REGS_F=1 #500
 # Step 1: Set environment variables
 ################################################
 printf "\nStep 1: Setting environment variables\n"
-if [ `hostname -s` == "carol-k402" ]; then
+if [ `hostname -s` == "carol-k201" ]; then
     export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package/
     export SASSI_SRC=/home/carol/SASSIFI/SASSI/
     export INST_LIB_DIR=$SASSI_SRC/instlibs/lib/
@@ -101,7 +101,7 @@ make golden
 # sm_35) to process the number of registers per kernel for the target
 # architecture you are interested in. We may have compiled the workload for
 # multiple targets.
-python $SASSIFI_HOME/scripts/process_kernel_regcount.py simple_add sm_35 stderr.txt
+python $SASSIFI_HOME/scripts/process_kernel_regcount.py $2 sm_35 stderr.txt
 
 ################################################
 # Step 5: Build the app for profiling and
