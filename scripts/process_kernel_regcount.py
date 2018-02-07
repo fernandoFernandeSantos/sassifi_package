@@ -28,53 +28,55 @@
 
 import sys, cPickle, os
 
-#helper function, if you do not want to use the picke function
+
+# helper function, if you do not want to use the picke function
 def print_dictionary(d):
-	print "{"
-	for key in d:
-		print "\t'" + key + "': " + d[key] + ","
-	print "}"
+    print "{"
+    for key in d:
+        print "\t'" + key + "': " + d[key] + ","
+    print "}"
+
 
 def main():
-	if len(sys.argv) != 4:
-		print "Usage: python extract_reg_numbers.py <application name> <sm version> <stderr file name>"
-		print "Example: python extract_reg_numbers.py simple_add sm_35 stderr"
-		print "It is prefered that you run this script from the application directory and store the pickle file there."
-		sys.exit(-1)
+    if len(sys.argv) != 4:
+        print "Usage: python extract_reg_numbers.py <application name> <sm version> <stderr file name>"
+        print "Example: python extract_reg_numbers.py simple_add sm_35 stderr"
+        print "It is prefered that you run this script from the application directory and store the pickle file there."
+        sys.exit(-1)
 
-	app = sys.argv[1]
-	sm_version = sys.argv[2]
-	input_fname = sys.argv[3]
+    app = sys.argv[1]
+    sm_version = sys.argv[2]
+    input_fname = sys.argv[3]
 
-	f = open(input_fname, "r")
+    f = open(input_fname, "r")
 
-	# dictionary to store the number of allocated registers per static
-	kernel_reg = {}
+    # dictionary to store the number of allocated registers per static
+    kernel_reg = {}
 
-	kname = "" # temporary variable to store the kname
-	check_for_regcount = False 
-	
-	# process the input file created by capturing the stderr while compiling the
-	# application using -Xptxas -v options 
-	for line in f: # for each line in the file
-		if "Compiling entry function" in line:   # if line has this string
-			kname = line.split("'")[1].strip() # extract kernel name 
-			check_for_regcount = True if sm_version in line else False
-		if check_for_regcount and ": Used" in line and "registers, " in line:
-			reg_num = line.split(':')[1].split()[1] # extract register number
-			if kname not in kernel_reg:
-				kernel_reg[kname] = int(reg_num.strip()) # associate the extracted register number with the kernel name
-			else:
-				print "Warning: " + kname + " exists in the kernel_reg dictionary. Skipping this regcount."
-		
-	# print the recorded kernel_reg dictionary
-	pickle_filename = app+"_kernel_regcount.p"
-	cPickle.dump(kernel_reg, open(pickle_filename, "wb"))
-	print "Created the pickle file: " + os.getcwd() + "/" + pickle_filename
-	print "Load it from the specific_params.py file" 
+    kname = ""  # temporary variable to store the kname
+    check_for_regcount = False
 
-	#print_dictionary(kernel_reg)
+    # process the input file created by capturing the stderr while compiling the
+    # application using -Xptxas -v options
+    for line in f:  # for each line in the file
+        if "Compiling entry function" in line:  # if line has this string
+            kname = line.split("'")[1].strip()  # extract kernel name
+            check_for_regcount = True if sm_version in line else False
+        if check_for_regcount and ": Used" in line and "registers, " in line:
+            reg_num = line.split(':')[1].split()[1]  # extract register number
+            if kname not in kernel_reg:
+                kernel_reg[kname] = int(reg_num.strip())  # associate the extracted register number with the kernel name
+            else:
+                print "Warning: " + kname + " exists in the kernel_reg dictionary. Skipping this regcount."
+
+    # print the recorded kernel_reg dictionary
+    pickle_filename = app + "_kernel_regcount.p"
+    cPickle.dump(kernel_reg, open(pickle_filename, "wb"))
+    print "Created the pickle file: " + os.getcwd() + "/" + pickle_filename
+    print "Load it from the specific_params.py file"
+
+
+# print_dictionary(kernel_reg)
 
 if __name__ == "__main__":
-	main()
-
+    main()

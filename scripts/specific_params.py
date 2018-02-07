@@ -29,8 +29,9 @@
 
 import os, sys, cPickle
 import common_params as p
-#Fernando's parameters
+# Fernando's parameters
 import parameters as par
+
 #########################################################################
 # Number of injections per app, per instruction group (IGID), per bit-flip
 # model (BFM)
@@ -45,12 +46,12 @@ import parameters as par
 # campaign. This is essentially the maximum number of injections one can run
 # per instruction group (IGID) and bit-flip model (BFM).
 #
-#~ NUM_INJECTIONS = 644
+# ~ NUM_INJECTIONS = 644
 NUM_INJECTIONS = par.NUM_INJECTIONS_P
 
 # Specify how many injections you want to perform per IGID and BFM combination.
 # Only the first THRESHOLD_JOBS will be selected from the generated NUM_INJECTIONS.
-#~ THRESHOLD_JOBS = 1 # test
+# ~ THRESHOLD_JOBS = 1 # test
 THRESHOLD_JOBS = par.THRESHOLD_JOBS_P
 
 # THRESHOLD_JOBS sould be <= NUM_INJECTIONS
@@ -69,52 +70,50 @@ rf_bfm_list = [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS]
 # Used for instruction output-level value injection runs
 
 inst_value_igid_bfm_map = {
-    p.GPR:          [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.CC:           [p.FLIP_SINGLE_BIT],
-    p.PR:           [p.FLIP_SINGLE_BIT],
-    p.STORE_OP:     [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.CC: [p.FLIP_SINGLE_BIT],
+    p.PR: [p.FLIP_SINGLE_BIT],
+    p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
     p.IADD_IMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
     p.FADD_FMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
     p.DADD_DMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.MAD_OP:       [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.FFMA_OP:      [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.DFMA_OP:      [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.SETP_OP:      [p.FLIP_SINGLE_BIT],
-    p.LDS_OP:       [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.LD_OP:        [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-#  Supported models
-    #~ p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.CC: [p.FLIP_SINGLE_BIT],
-    #~ p.PR: [p.FLIP_SINGLE_BIT],
-    #~ p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.IADD_IMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.FADD_FMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.DADD_DMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.MAD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.FFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.DFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.SETP_OP: [p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
-    #~ p.LDS_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
-    #~ p.LD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    p.MAD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.FFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.DFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.SETP_OP: [p.FLIP_SINGLE_BIT],
+    p.LDS_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.LD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    #  Supported models
+    # ~ p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.CC: [p.FLIP_SINGLE_BIT],
+    # ~ p.PR: [p.FLIP_SINGLE_BIT],
+    # ~ p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.IADD_IMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.FADD_FMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.DADD_DMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.MAD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.FFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.DFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.SETP_OP: [p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    # ~ p.LDS_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+    # ~ p.LD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
 }
 
 # Used for instruction output-level address injection runs
 inst_address_igid_bfm_map = {
-#  Supported models
-   p.GPR:       [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-   p.STORE_OP:  [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    #  Supported models
+    p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
 }
-
-
 
 #########################################################################
 # List of apps
 # app_name: [suite name, binary name, expected runtime in secs on the target PC]
 #########################################################################
 
-#~ apps = {
-    #~ 'simple_add': ['example', 'simple_add', 2],
-#~ }
+# ~ apps = {
+# ~ 'simple_add': ['example', 'simple_add', 2],
+# ~ }
 apps = par.apps_p
 
 #########################################################################
@@ -144,8 +143,10 @@ script_dir = {}
 bin_dir = {}
 app_dir = {}
 app_data_dir = {}
+
+
 def set_paths():
-    merged_apps = apps # merge the two dictionaries
+    merged_apps = apps  # merge the two dictionaries
     merged_apps.update(parse_apps)
 
     for app in merged_apps:
@@ -154,8 +155,9 @@ def set_paths():
         app_log_dir[app] = logs_base_dir + suite_name + "/" + app + "/"
         script_dir[app] = run_script_base_dir + suite_name + "/" + app + "/"
         bin_dir[app] = bin_base_dir + p.rf_inst + "_injector/" + suite_name + "/"
-        app_dir[app] = suites_base_dir +  suite_name + "/" + app + "/"
-        app_data_dir[app] = suites_base_dir +  suite_name + "/data/" # without the app name here!
+        app_dir[app] = suites_base_dir + suite_name + "/" + app + "/"
+        app_data_dir[app] = suites_base_dir + suite_name + "/data/"  # without the app name here!
+
 
 set_paths()
 
@@ -165,17 +167,20 @@ set_paths()
 #########################################################################
 
 num_regs = {
-    #~ 'simple_add': {
-        #~ '_Z10simple_addi': 6,
-        #~ }
+    # ~ 'simple_add': {
+    # ~ '_Z10simple_addi': 6,
+    # ~ }
 }
+
 
 # update dictionaries for different applications here
 def set_num_regs():
     # update the path to the kerne_regcount.p file if it is stored in a different location
-    #~ app = "simple_add"
+    # ~ app = "simple_add"
     app = par.benchmark
-    num_regs[app] = cPickle.load(open(suites_base_dir + apps[app][0] + "/" + app + "/" + app + "_kernel_regcount.p", "rb"))
+    num_regs[app] = cPickle.load(
+        open(suites_base_dir + apps[app][0] + "/" + app + "/" + app + "_kernel_regcount.p", "rb"))
+
 
 set_num_regs()
 
@@ -196,4 +201,3 @@ special_sdc_check_log = "special_check.log"
 # Number of gpus to use for error injection runs
 #########################################################################
 NUM_GPUS = 1
-
