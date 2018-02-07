@@ -101,7 +101,7 @@ make golden
 # sm_35) to process the number of registers per kernel for the target
 # architecture you are interested in. We may have compiled the workload for
 # multiple targets.
-python $SASSIFI_HOME/scripts/process_kernel_regcount.py simple_add sm_35 stderr.txt
+python $SASSIFI_HOME/scripts/process_kernel_regcount.py $benchmark sm_35 stderr.txt
 
 ################################################
 # Step 5: Build the app for profiling and
