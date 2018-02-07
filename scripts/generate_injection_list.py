@@ -63,7 +63,6 @@ def write_injection_list_file(app, inj_mode, igid, bfm, num_injections, total_co
                                                                              igid)  # convert injection index to [kname, kernel count, inst index]
             inj_op_id_seed = random.random()
 
-
         # Edited from the original SASSIIFI
         # this improvement will allow to chose the
         # upper and lower bounds of bit flips
@@ -125,8 +124,8 @@ def main():
         total_count = cf.get_total_insts(countList, True) if inj_mode == cp.RF_MODE else cf.get_total_insts(countList,
                                                                                                             False)
         if total_count == 0:
-            print "Something is not right. Total instruction count = 0\n";
-            sys.exit(-1);
+            print "Something is not right. Total instruction count = 0\n"
+            sys.exit(-1)
 
         gen_lists(app, countList, inj_mode)
         print "Output: Check %s" % (sp.app_log_dir[app] + "/injection-list/")

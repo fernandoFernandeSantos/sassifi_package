@@ -126,15 +126,15 @@ def run_multiple_injections_igid(app, inj_mode, igid, where_to_run):
         for line in inf:  # for each injection site
             total_jobs += 1
             if total_jobs > sp.THRESHOLD_JOBS:
-                break;  # no need to run more jobs
+                break  # no need to run more jobs
 
             # _Z24bpnn_adjust_weights_cudaPfiS_iS_S_ 0 1297034 0.877316323856 0.214340876321
             if len(line.split()) >= 5:
                 [kname, kcount, iid, opid, bid] = line.split()  # obtains params for this injection
                 if cp.verbose: print "\n%d: app=%s, Kernel=%s, kcount=%s, igid=%s, bfm=%s, instID=%s, opID=%s, bitLocation=%s" % (
-                total_jobs, app, kname, str(kcount), str(igid), str(bfm), iid, opid, bid)
+                    total_jobs, app, kname, str(kcount), str(igid), str(bfm), iid, opid, bid)
                 cmd = "%s %s/scripts/run_one_injection.py %s %s %s %s %s %s %s %s %s" % (
-                cp.PYTHON_P, sp.SASSIFI_HOME, inj_mode, str(igid), str(bfm), app, kname, kcount, iid, opid, bid)
+                    cp.PYTHON_P, sp.SASSIFI_HOME, inj_mode, str(igid), str(bfm), app, kname, kcount, iid, opid, bid)
                 if where_to_run == "cluster":
                     check_and_submit_cluster(cmd)
                 elif where_to_run == "multigpu":
