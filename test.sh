@@ -16,13 +16,13 @@ REGS_F=1 #500
 # Step 1: Set environment variables
 ################################################
 printf "\nStep 1: Setting environment variables\n"
-if [ `hostname -s` == "carol-k402" ]; then
-    export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package/
-    export SASSI_SRC=/home/carol/SASSIFI/SASSI/
-    export INST_LIB_DIR=$SASSI_SRC/instlibs/lib/
-    export CCDIR=/usr/
-    export CUDA_BASE_DIR=/usr/local/sassi7/
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_BASE_DIR/lib64/:$CUDA_BASE_DIR/extras/CUPTI/lib64/
+if [ `hostname -s` == "carolk401" ]; then
+    export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package
+    export SASSI_SRC=/home/carol/SASSIFI/SASSI
+    export INST_LIB_DIR=$SASSI_SRC/instlibs/lib
+    export CCDIR=/usr
+    export CUDA_BASE_DIR=/usr/local/sassi7
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_BASE_DIR/lib64/:$CUDA_BASE_DIR/extras/CUPTI/lib64
 else
     printf "\nPlease update SASSIFI_HOME, SASSI_SRC, INST_LIB_DIR, CCDIR, CUDA_BASE_DIR, and LD_LIBRARY_PATH environment variables and modify the hostname string in test.sh to fix this error\n"
     exit -1;
