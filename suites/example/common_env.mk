@@ -12,7 +12,7 @@ OPTION = none
 GENCODE = -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50
 
 # INST_LIB_DIR is where instlibs dir is located
-INST_LIB_DIR = $(SASSI_SRC)/instlibs/lib/
+INST_LIB_DIR = $(SASSI_SRC)/instlibs/lib
 #/home/carol/SASSIFI/SASSI/instlibs/lib/
 
 #REGRESSION_HOME is where sassifi_package is located
@@ -20,7 +20,7 @@ REGRESSION_HOME =  $(SASSIFI_HOME)
 #/home/carol/SASSIFI/sassifi_package/
 
 # SASSI/CUDA
-CUDA_BASE_DIR = /usr/local/sassi7/
+CUDA_BASE_DIR = /usr/local/sassi7
 CUDA_LIB_DIR = $(CUDA_BASE_DIR)/lib64
 CUDA_BIN_DIR = $(CUDA_BASE_DIR)/bin
 CUPTI_LIB_DIR = $(CUDA_BASE_DIR)/extras/CUPTI/lib64
@@ -32,7 +32,7 @@ CC = gcc
 CXX = g++
 CFLAGS = -O3 
 CXXFLAGS = -O3 -D_FORCE_INLINES 
-export CCDIR = /usr/local/gcc-4.8.4/
+export CCDIR = /usr/bin/gcc-4.9
 export PATH := $(CCDIR)/bin/:$(PATH)
 export LD_LIBRARY_PATH := $(CCDIR)/lib64:$(LD_LIBRARY_PATH):$(CUDA_LIB_DIR):$(CUPTI_LIB_DIR)
 
@@ -81,7 +81,7 @@ ifeq (${LOGS}, 1)
 LOG_FLAGS=-DLOGS=1
 endif
 
-LOGHELPER_INC=../include/
-LOGHELPER_LIB=../include/
+LOGHELPER_INC=../include
+LOGHELPER_LIB=../include
 
 #EXTRA_NVCC_FLAGS+=-D_FORCE_INLINES

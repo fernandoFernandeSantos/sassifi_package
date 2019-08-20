@@ -103,5 +103,5 @@ test: $(EXEC)
 			-input_a=$(DEF_A_INPUT) \
 			-input_b=$(DEF_B_INPUT) \
 			-gold=$(DEF_GOLD) \
-			-iterations=1 $(FIDEBUG)
+			-iterations=1 $(FIDEBUG) 
 	

@@ -255,7 +255,7 @@ int compare_small_matrix(const int k, const int stream, bool verbose,
 					error_detail << "stream:" << stream << ",";
 					error_detail << " p: [" << i << ", " << j << "],";
 					error_detail << " r: " << valOutput << ", e: " << valGold;
-					if (verbose && (host_errors < 10))
+					if ((host_errors < 10))
 						std::cout << error_detail.str() << std::endl;
 					host_errors++;
 
@@ -304,8 +304,10 @@ int check_output(std::vector<real_t>& gold, std::vector<real_t>& found,
 
 int main(int argc, char **argv) {
 	Parameters args(argc, argv);
-	std::cout << "Benchmarks parameters" << std::endl;
-	std::cout << args << std::endl;
+	if(args.verbose){
+		std::cout << "Benchmarks parameters" << std::endl;
+		std::cout << args << std::endl;
+	}
 	//================== Init logs
 #ifdef LOGS
 	if (args.generate == false) {
