@@ -7,9 +7,11 @@ set -e
 # set -x
 
 # How many injections per type
-INST_V=1 #14
+INST_V=20 #14
 INST_A=1 #250
 REGS_F=1 #500
+inst_rf=$1
+export BENCHMARK=$benchmark
 
 
 ################################################
@@ -33,7 +35,6 @@ fi
 #EDITED BY FERNANDO
 ################################################
 #first parameter is the error model
-inst_rf=$1
 if [ "$inst_rf" == "inst_value" ] || [ "$inst_rf" == "inst_address" ] || [ "$inst_rf" == "rf" ] || [ "$inst_rf" == "all" ] ; then
   printf "Okay, $inst_rf\n"
 else
@@ -66,7 +67,6 @@ benchmark=$2
 #Set enviroment vars that will be used by
 #python scripts
 ################################################
-export BENCHMARK=$benchmark
 
 if [ "$inst_rf" == "inst_value" ] ; then
 
