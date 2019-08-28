@@ -144,7 +144,7 @@ void launch_kernel(Type<full>* type_,
             type_->output_r, type_->input_a, type_->input_b);
 
     rad::checkFrameworkErrors(cudaPeekAtLastError());
-    rad::checkFrameworkErrors(cudaStreamSynchronize(*stream));
+    rad::checkFrameworkErrors(cudaDeviceSynchronize());
 
 }
 
