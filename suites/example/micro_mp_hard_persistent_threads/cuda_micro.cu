@@ -131,20 +131,20 @@ int check_output_errors(std::vector<full> &R, full OUTPUT_R, bool verbose) {
 }
 
 template<typename full>
-void launch_kernel(Type<full>& type_,
-        rad::DeviceVector<full>& device_vector_full,
-        rad::DeviceVector<Input<full> >& device_defined_input,
-        Parameters& parameters, cudaStream_t& stream) {
+void launch_kernel(Type<full>* type_,
+        rad::DeviceVector<full>* device_vector_full,
+        rad::DeviceVector<Input<full> >* device_defined_input,
+        Parameters* parameters, cudaStream_t* stream) {
     //================== Device computation
 //  MicroBenchmarkKernel_FMA<full> <<<parameters.grid_size,
 //          parameters.block_size, 0, stream>>>(device_vector_full.data(),
 //          device_defined_input.data());
-    MicroBenchmarkKernel_FMA<full> <<<parameters.grid_size,
-            parameters.block_size, 0, stream>>>(device_vector_full.data(),
-            type_.output_r, type_.input_a, type_.input_b);
+    MicroBenchmarkKernel_FMA<full> <<<parameters->grid_size,
+            parameters->block_size, 0, *stream>>>(device_vector_full->data(),
+            type_->output_r, type_->input_a, type_->input_b);
 
     rad::checkFrameworkErrors(cudaPeekAtLastError());
-    rad::checkFrameworkErrors(cudaStreamSynchronize(stream));
+    rad::checkFrameworkErrors(cudaStreamSynchronize(*stream));
 
 }
 
@@ -193,8 +193,8 @@ void test_radiation(Type<full>& type_, Parameters& parameters,
 
     rad::HostPersistentControler pt_control(parameters.grid_size);
 
-    std::thread t1(launch_kernel<full>, std::ref(type_), std::ref(device_vector_full), std::ref(device_defined_input), std::ref(parameters),
-            std::ref(stream));
+    std::thread t1(launch_kernel<full>, &type_, &device_vector_full, &device_defined_input, &parameters,
+            &stream);
 
     for (size_t iteration = 0; iteration < parameters.iterations; iteration++) {
         std::cout << std::flush;
@@ -236,8 +236,8 @@ void test_radiation(Type<full>& type_, Parameters& parameters,
 #endif
 #endif
             pt_control.start_kernel();
-            t1 = std::thread(launch_kernel<full>, std::ref(type_), std::ref(device_vector_full), std::ref(device_defined_input), std::ref(parameters),
-            std::ref(stream));
+            t1 = std::thread(launch_kernel<full>, &type_, &device_vector_full, &device_defined_input, &parameters,
+            &stream);
             //~ launch_kernel(type_, device_vector_full, device_defined_input,
                     //~ parameters, stream);
         }
