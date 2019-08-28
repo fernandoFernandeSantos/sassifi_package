@@ -6,7 +6,7 @@
 #include <string>
 #include <omp.h>
 #include <random>
-#include <cuda_fp16.h>
+//#include <cuda_fp16.h>
 
 #ifdef LOGS
 #include "log_helper.h"
