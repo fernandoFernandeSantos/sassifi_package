@@ -174,8 +174,7 @@ __global__ void matrixMulCUDAPersistent(real_t** c, real_t** a, real_t** b,
 	//printf("ANTES\n");
 	rad::PersistentKernel pk;
 	//printf("FALOU %d\n", pk.keep_working());
-	//while (pk.keep_working()) 
-	{
+	while (pk.keep_working()) {
 		//printf("AQUI\n");
 		pk.wait_for_work();
 		if (pk.is_able_to_process()) {

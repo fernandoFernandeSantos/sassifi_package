@@ -539,7 +539,10 @@ int main(int argc, char **argv) {
 		std::cout << gold[10] << " " << c_host[10] << std::endl;
 		write_to_file(args.gold, c_host);
 	}
-	thread_persistent.join();
+
+	pk.end_kernel();
+	if(thread_persistent.joinable())
+		thread_persistent.join();
 
 #ifdef LOGS
 	if(!args.generate) {
