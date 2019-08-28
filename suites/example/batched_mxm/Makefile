@@ -75,12 +75,12 @@ install:
 clean:
 	rm -rf $(EXEC) $(OBJDIR)/* 
 
-DEF_SIZE=128
+DEF_SIZE=112
 BATCH_SIZE=32
 DEF_A_INPUT=`pwd`/mxm_A_$(DEF_SIZE)_$(BATCH_SIZE).matrix
 DEF_B_INPUT=`pwd`/mxm_B_$(DEF_SIZE)_$(BATCH_SIZE).matrix
 DEF_GOLD=`pwd`/mxm_GOLD_$(DEF_SIZE)_$(BATCH_SIZE).matrix
-KERNELTYPE=0
+KERNELTYPE=1
 
 
 golden: $(EXEC)

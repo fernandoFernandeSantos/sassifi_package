@@ -51,17 +51,18 @@
 #include <iostream> //Output messages
 #include <iomanip>	// random generator
 #include <algorithm>    // std::count_if
-
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE 32
 #endif
+
+#include <thread>
 
 #define GENERATOR_MAXABSVALUE 4.1e+2
 #define GENERATOR_MINABSVALUE 0
 
 struct Parameters {
-	size_t k;
-	size_t n_streams;
+	int k;
+	int n_streams;
 	std::string input_a;
 	std::string input_b;
 	std::string gold;
@@ -99,19 +100,21 @@ struct Parameters {
 			usage(argv);
 			exit(-1);
 		}
-
+		generate = false;
+		fault_injection = false;
+		verbose = false;
 		if (checkCmdLineFlag(argc, (const char **) argv, "size")) {
 			this->k = getCmdLineArgumentInt(argc, (const char **) argv, "size");
 
 			if ((k <= 0) || (k % 16 != 0)) {
 				std::cerr << "Invalid input size given on the command-line: "
 						<< k << std::endl;
-				exit (EXIT_FAILURE);
+				exit(EXIT_FAILURE);
 			}
 
 		} else {
 			usage(argv);
-			exit (EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		if (checkCmdLineFlag(argc, (const char **) argv, "batch")) {
@@ -119,7 +122,7 @@ struct Parameters {
 					"batch");
 			if (this->n_streams < 1) {
 				usage(argv);
-				exit (EXIT_FAILURE);
+				exit(EXIT_FAILURE);
 			}
 		}
 
@@ -189,7 +192,7 @@ void generate_input(std::vector<real_t>& a_vector,
 	std::random_device rd; //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
 	std::uniform_real_distribution<real_t> dis(-GENERATOR_MAXABSVALUE,
-	GENERATOR_MAXABSVALUE);
+			GENERATOR_MAXABSVALUE);
 
 	auto generator = [&dis, &gen]() {
 		return dis(gen);
@@ -304,7 +307,7 @@ int check_output(std::vector<real_t>& gold, std::vector<real_t>& found,
 
 int main(int argc, char **argv) {
 	Parameters args(argc, argv);
-	if(args.verbose){
+	if (args.verbose) {
 		std::cout << "Benchmarks parameters" << std::endl;
 		std::cout << args << std::endl;
 	}
@@ -356,6 +359,8 @@ int main(int argc, char **argv) {
 	//Batched gemm memory size
 	auto num_elements = args.k * args.k * args.n_streams;
 
+	//std::cout << "Memory allocation\n";
+
 	//Host memory allocation
 	std::vector<float> a_host(num_elements);
 	std::vector<float> b_host(num_elements);
@@ -367,14 +372,15 @@ int main(int argc, char **argv) {
 	int blocksize = args.k / BLOCK_SIZE < 1 ? args.k : BLOCK_SIZE;
 	dim3 dim_block(blocksize, blocksize);
 	dim3 dim_grid(gridsize, gridsize);
-
 	//Load or write the values to files
 	if (args.generate) {
+		//std::cout << "generating the inputs\n";
 		//generate input
 		generate_input(a_host, b_host);
 		write_to_file(args.input_a, a_host);
 		write_to_file(args.input_b, b_host);
 	} else {
+		//std::cout << "loading the inputs\n";
 		load_file_data(args.input_a, a_host);
 		load_file_data(args.input_b, b_host);
 		load_file_data(args.gold, gold);
@@ -386,14 +392,17 @@ int main(int argc, char **argv) {
 	}
 
 	//Device memory allocation
+	//std::cout << "device copy\n";
 	rad::DeviceVector<float> a_device = a_host;
+	//std::cout << "after first device copy\n";
 	rad::DeviceVector<float> b_device = b_host;
 	rad::DeviceVector<float> c_device = c_host;
-
+	//std::cout << "all copies made\n";
 	//Raw arrays
 	float* a_dev_ptr = a_device.data();
 	float* b_dev_ptr = b_device.data();
 	float* c_dev_ptr = c_device.data();
+	//std::cout << "raw pointers\n";
 
 	//Streams and handles cannot be copied
 	//Otherwise it is necessary to destroy and realocate streams
@@ -401,19 +410,30 @@ int main(int argc, char **argv) {
 	std::shared_ptr<CublasHandle> cublas_handle;
 
 	//Streams allocation
-	std::vector < std::shared_ptr
-			< CudaStream >> streams(args.n_streams, nullptr);
+	std::vector<std::shared_ptr<CudaStream>>
+	streams(args.n_streams, nullptr);
 
 	//Persistent case
 	rad::HostPersistentControler pk(dim_grid);
 
 	//SETUP for the type kernel
+	streams[0] = std::make_shared<CudaStream>();
+	th_par tmp;
+	tmp.C = c_dev_ptr;
+	tmp.A = a_dev_ptr;
+	tmp.B = b_dev_ptr;
+	tmp.wA = args.k;
+	tmp.wB = args.k;
+	tmp.streams = &streams;
+	tmp.t = args.execution_type;
+	tmp.gridDim = dim_grid;
+	tmp.blockDim = dim_block;
+	tmp.handle = cublas_handle;
+	std::thread thread_persistent;
+
 	switch (args.execution_type) {
 	case PERSISTENT:
-		streams[0] = std::make_shared<CudaStream>();
-
-		matrixMulCUDA(c_dev_ptr, a_dev_ptr, b_dev_ptr, args.k, args.k, streams,
-				args.execution_type, dim_grid, dim_block, cublas_handle);
+		thread_persistent = std::thread(thread_call, &tmp);
 		break;
 	case STATIC:
 		for (auto& st : streams) {
@@ -472,7 +492,8 @@ int main(int argc, char **argv) {
 #endif
 #endif
 				if (args.execution_type == PERSISTENT) {
-					pk.end_kernel();
+//					pk.end_kernel();
+//					thread_persistent.join();
 				}
 				load_file_data(args.input_a, a_host);
 				load_file_data(args.input_b, b_host);
@@ -483,10 +504,12 @@ int main(int argc, char **argv) {
 				c_device = c_host;
 
 				if (args.execution_type == PERSISTENT) {
-					pk.start_kernel();
-					matrixMulCUDA(c_dev_ptr, a_dev_ptr, b_dev_ptr, args.k,
-							args.k, streams, args.execution_type, dim_grid,
-							dim_block, cublas_handle);
+//					pk.start_kernel();
+//					thread_persistent = std::thread(thread_call, &tmp);
+
+					//matrixMulCUDA(c_dev_ptr, a_dev_ptr, b_dev_ptr, args.k,
+					//		args.k, streams, args.execution_type, dim_grid,
+					//		dim_block, cublas_handle);
 				}
 #ifdef LOGS
 #ifdef BUILDPROFILER
@@ -512,11 +535,11 @@ int main(int argc, char **argv) {
 
 	}
 
-
 	if (args.generate) {
 		std::cout << gold[10] << " " << c_host[10] << std::endl;
 		write_to_file(args.gold, c_host);
 	}
+	thread_persistent.join();
 
 #ifdef LOGS
 	if(!args.generate) {

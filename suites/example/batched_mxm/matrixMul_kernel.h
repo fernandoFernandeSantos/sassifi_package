@@ -171,9 +171,12 @@ __global__ void matrixMulCUDANonpersistent(real_t* c, real_t* a, real_t* b,
 template<typename real_t>
 __global__ void matrixMulCUDAPersistent(real_t** c, real_t** a, real_t** b,
 		int wA, int wB, int nStreams) {
+	//printf("ANTES\n");
 	rad::PersistentKernel pk;
-
-	while (pk.keep_working()) {
+	//printf("FALOU %d\n", pk.keep_working());
+	//while (pk.keep_working()) 
+	{
+		//printf("AQUI\n");
 		pk.wait_for_work();
 		if (pk.is_able_to_process()) {
 			for (int i = 0; i < nStreams; i++) {
@@ -193,9 +196,9 @@ __global__ void matrixMulCUDADynamicParallelism(real_t** c, real_t** a,
 	}
 }
 
-void matrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
-		const std::vector<std::shared_ptr<CudaStream>>& streams, KernelType t,
-		dim3 gridDim, dim3 blockDim, std::shared_ptr<CublasHandle>& handle) {
+void matrixMulCUDA(float *C, float *A, float *B, int& wA, int& wB,
+		std::vector<std::shared_ptr<CudaStream>>& streams, KernelType& t,
+		dim3& gridDim, dim3& blockDim, std::shared_ptr<CublasHandle>& handle) {
 	auto streamSize = streams.size();
 
 	static std::vector<float*> a_array(streamSize);
@@ -216,9 +219,11 @@ void matrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 	switch (t) {
 	case PERSISTENT: {
 		//Persistent case
+		//std::cout << "before kernel\n";
 		matrixMulCUDAPersistent<<<gridDim, blockDim, 0, streams[0]->stream>>>(
 				c_array_dev.data(), a_array_dev.data(), b_array_dev.data(), wA,
 				wB, streamSize);
+		//std::cout << "after kernel\n";
 		rad::checkFrameworkErrors(cudaPeekAtLastError());
 		;
 		break;
@@ -267,6 +272,25 @@ void matrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 	}
 
 	}
+}
+
+struct th_par{
+	float *C;
+	float *A;
+	float *B;
+	int wA;
+	int wB;
+	std::vector<std::shared_ptr<CudaStream>>* streams;
+	KernelType t;
+	dim3 gridDim, blockDim;
+	std::shared_ptr<CublasHandle> handle;
+};
+
+void thread_call(th_par* th_ptr){
+	matrixMulCUDA(th_ptr->C, th_ptr->A, th_ptr->B, th_ptr->wA, th_ptr->wB,
+                *th_ptr->streams, th_ptr->t,
+                th_ptr->gridDim, th_ptr->blockDim, th_ptr->handle);
+        rad::checkFrameworkErrors(cudaDeviceSynchronize());
 }
 
 #endif /* MATRIXMUL_KERNEL_H_ */
