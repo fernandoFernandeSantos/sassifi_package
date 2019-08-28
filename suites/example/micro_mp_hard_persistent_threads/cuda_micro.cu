@@ -272,7 +272,9 @@ void test_radiation(Type<full>& type_, Parameters& parameters,
         std::cout << "Worst: " << max_kernel_time << std::endl;
     }
 
+    t1.join();
     rad::checkFrameworkErrors(cudaStreamDestroy(stream));
+
 }
 
 void dmr(Parameters& parameters) {
