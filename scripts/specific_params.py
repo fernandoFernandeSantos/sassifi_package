@@ -65,24 +65,26 @@ assert THRESHOLD_JOBS <= NUM_INJECTIONS
 #    bfm: bit-flip model
 #    igid: instruction group ID
 #########################################################################
-rf_bfm_list = [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS]
+rf_bfm_list = [p.FLIP_SINGLE_BIT]
 
 # Used for instruction output-level value injection runs
 
 inst_value_igid_bfm_map = {
-    p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.CC: [p.FLIP_SINGLE_BIT],
-    p.PR: [p.FLIP_SINGLE_BIT],
-    p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.IADD_IMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.FADD_FMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.DADD_DMUL_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.MAD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.FFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.DFMA_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.SETP_OP: [p.FLIP_SINGLE_BIT],
-    p.LDS_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.LD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    #  Supported models
+    p.GPR: 		[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.CC: 		[p.FLIP_SINGLE_BIT],
+    p.PR: 		[p.FLIP_SINGLE_BIT],
+    p.STORE_OP: 	[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.IADD_IMUL_OP: 	[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.FADD_FMUL_OP: 	[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    # p.DADD_DMUL_OP: 	[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.MAD_OP: 		[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.FFMA_OP: 		[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    # p.DFMA_OP:	[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.SETP_OP: 		[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.LDS_OP: 		[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+    p.LD_OP: 		[p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
+
     #  Supported models
     # ~ p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
     # ~ p.CC: [p.FLIP_SINGLE_BIT],
@@ -97,13 +99,14 @@ inst_value_igid_bfm_map = {
     # ~ p.SETP_OP: [p.FLIP_SINGLE_BIT, p.WARP_FLIP_SINGLE_BIT],
     # ~ p.LDS_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
     # ~ p.LD_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],
+
 }
 
 # Used for instruction output-level address injection runs
 inst_address_igid_bfm_map = {
     #  Supported models
-    p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
-    p.STORE_OP: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS],
+    p.GPR: [p.FLIP_SINGLE_BIT],
+    p.STORE_OP: [p.FLIP_SINGLE_BIT],
 }
 
 #########################################################################

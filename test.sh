@@ -7,19 +7,18 @@ set -e
 # set -x
 
 # How many injections per type
-INST_V=20 #14
-INST_A=1 #250
+INST_V=1000 #14
+INST_A=1000 #250
 REGS_F=1 #500
-inst_rf=$1
-export BENCHMARK=$benchmark
-
+inst_rf=inst_address
+benchmark=batched_mxm
 
 ################################################
 # Step 1: Set environment variables
 ################################################
 printf "\nStep 1: Setting environment variables\n"
-if [ `hostname -s` == "carolk401" ]; then
-    export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package
+if [ `hostname -s` == "gpuserver" ]; then
+    export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package/
     export SASSI_SRC=/home/carol/SASSIFI/SASSI
     export INST_LIB_DIR=$SASSI_SRC/instlibs/lib
     export CCDIR=/usr
@@ -43,7 +42,7 @@ else
 fi
 
 #second parameter is the benchmark
-benchmark=$2
+export BENCHMARK=$benchmark
 
 #if [ -d "suites/example/$benchmark" ] ; then
 #    printf "Okay, it will run for $benchmark\n"
