@@ -1,13 +1,18 @@
-CXX=g++
+include ../common_env.mk
+
+CXX=g++-4.8 
+
 CXXFLAGS= -std=c++11 -o3  -fPIC -pthread 
 EXEC=cuda_lava
+
+RAD_DIR=/home/carol/radiation-benchmarks
 
 LOGS=1
 BUILDPROFILER=0
 OPERATIONNUM=1
 PRECISION=double
 DMR=dmrmixed
-DATA_DIR=../../../data/lava
+DATA_DIR=$(RAD_DIR)/data/lava
 DEF_SIZE=23
 STREAMS=1
 CHARGES_INPUT=$(DATA_DIR)/lava_$(PRECISION)_charges_$(DEF_SIZE)
@@ -16,15 +21,15 @@ GOLD=$(DATA_DIR)/lava_$(PRECISION)_gold_$(DEF_SIZE)
 
 
 VPATH=./src
-CUDAPATH=/usr/local/cuda
+CUDAPATH=/usr/local/sassi7
 NVCC=$(CUDAPATH)/bin/nvcc
-NVCCFLAGS= -std=c++11 -O3 -Xptxas -v
+NVCCFLAGS= -std=c++11 -O3 -Xptxas -v 
 
 ARCH= -gencode arch=compute_35,code=[sm_35,compute_35] #Kepler
-ARCH+= -gencode arch=compute_70,code=[sm_70,compute_70] #Titan V
+#ARCH+= -gencode arch=compute_70,code=[sm_70,compute_70] #Titan V
 #ARCH+= -gencode arch=compute_72,code=[sm_72,compute_72] #XavierV
 #-I$(CUDAPATH)/samples/common/inc 
-INCLUDE= -I./src -I$(CUDAPATH)/include -I../../include -I../common
+INCLUDE= -I./src -I$(CUDAPATH)/include -I$(RAD_DIR)/src/include -I$(RAD_DIR)/src/cuda/common
 
 OBJDIR=./obj/
 OBJ= setup_double.o  setup_float.o Parameters.o cuda_lava.o 
@@ -38,7 +43,7 @@ endif
 ifeq ($(LOGS), 1)
 CXXFLAGS+= -DLOGS
 NVCCFLAGS+= -DLOGS
-LDFLAGS+= -L../../include  -lLogHelper
+LDFLAGS+= -L../include  -lLogHelper
 endif
 
 ifeq ($(BUILDPROFILER), 1)
@@ -53,23 +58,27 @@ OBJS = $(addprefix $(OBJDIR), $(OBJ))
 DEPS = $(wildcard src/*.h) Makefile
 
 
-all: mkdir $(EXEC)
+all: clean obj $(EXEC) install
 
 
 $(EXEC): $(OBJS)  
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(INCLUDE)
+	$(NVCC) --compiler-options "$(CFLAGS)" $^ -o $@ $(LDFLAGS) $(INCLUDE)  $(EXTRA_NVCC_FLAGS) $(EXTRA_LINK_FLAGS)
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCLUDE)
 	
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC) $(ARCH) $(NVCCFLAGS) -c $< -o $@ $(INCLUDE) 
+	$(NVCC) -ccbin $(CXX) $(ARCH) $(NVCCFLAGS) --compiler-options "-fPIC" -c $< -o $@ $(INCLUDE)   $(EXTRA_NVCC_FLAGS) $(EXTRA_LINK_FLAGS)
 
-mkdir:
+obj:
 	mkdir -p $(OBJDIR)
 
 clean:
 	rm -f $(OBJDIR)* $(EXEC)
+	
+install:
+	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
+	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 	
 generate:
 	./$(EXEC) -boxes $(DEF_SIZE) -generate -streams $(STREAMS) \
@@ -77,29 +86,16 @@ generate:
 				-input_distances $(DISTANCES_INPUT) \
 				-input_charges $(CHARGES_INPUT)	\
 				-output_gold $(GOLD) \
-				-opnum $(OPERATIONNUM) -precision $(PRECISION) -redundancy $(DMR)
+				-opnum $(OPERATIONNUM) -precision $(PRECISION) \
+				-redundancy none -opnum 1
 
 test:
 	./$(EXEC) -boxes $(DEF_SIZE) -streams $(STREAMS) \
-				-iterations 10 -verbose \
+				-iterations 1 -verbose \
 				-input_distances $(DISTANCES_INPUT) \
 				-input_charges $(CHARGES_INPUT) \
 				-output_gold $(GOLD) \
-				-opnum $(OPERATIONNUM) -precision $(PRECISION) -redundancy $(DMR)
+				-opnum $(OPERATIONNUM) -precision $(PRECISION) \
+				-redundancy none -opnum $(OPERATIONNUM)
 				
 
-test_no_dmr:
-	./$(EXEC) -boxes $(DEF_SIZE) -streams $(STREAMS) \
-				-iterations 10 -verbose \
-				-input_distances $(DISTANCES_INPUT) \
-				-input_charges $(CHARGES_INPUT) \
-				-output_gold $(GOLD) \
-				-opnum $(OPERATIONNUM) -precision $(PRECISION) -redundancy none
-	
-test_dmr_till_end:
-	./$(EXEC) -boxes $(DEF_SIZE) -streams $(STREAMS) \
-				-iterations 10 -verbose \
-				-input_distances $(DISTANCES_INPUT) \
-				-input_charges $(CHARGES_INPUT) \
-				-output_gold $(GOLD) -opnum 44444\
-				-opnum $(OPERATIONNUM) -precision $(PRECISION) -redundancy $(DMR)
