@@ -1,23 +1,23 @@
 #!/bin/bash
 
 # stop after first error
-set -e
+#set -e
 
 # Uncomment for verbose output
-# set -x
+set -x
 
 # How many injections per type
-INST_V=1000 #14
-INST_A=1000 #250
-REGS_F=1 #500
-inst_rf=inst_address
-benchmark=batched_mxm
+INST_V=200 #14
+INST_A=10 #250
+REGS_F=10 #500
+inst_rf=inst_value
+benchmark=$1
 
 ################################################
 # Step 1: Set environment variables
 ################################################
 printf "\nStep 1: Setting environment variables\n"
-if [ `hostname -s` == "gpuserver" ]; then
+if [ `hostname -s` == "carolk201" ]; then
     export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package/
     export SASSI_SRC=/home/carol/SASSIFI/SASSI
     export INST_LIB_DIR=$SASSI_SRC/instlibs/lib
@@ -90,7 +90,8 @@ fi
 # Step 4.a: Build the app without instrumentation.
 # Collect golden stdout and stderr files.
 ################################################
-printf "\nStep 4.1: Collect golden stdout.txt and stderr.txt files"
+printf "\nStep 4.1: Collect golden stdout.txt and stderr.txt files\n"
+
 cd suites/example/$benchmark/
 make LOGS=1 2> stderr.txt
 make golden
