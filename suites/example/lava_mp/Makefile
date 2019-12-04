@@ -96,6 +96,6 @@ test:
 				-input_charges $(CHARGES_INPUT) \
 				-output_gold $(GOLD) \
 				-opnum $(OPERATIONNUM) -precision $(PRECISION) \
-				-redundancy none -opnum $(OPERATIONNUM)
+				-redundancy ${DMR} -opnum $(OPERATIONNUM)
 				
 
