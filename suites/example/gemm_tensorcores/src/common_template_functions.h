@@ -23,7 +23,7 @@
 
 #define CHAR_CAST(x) (reinterpret_cast<char*>(x))
 #define GENERATOR_MAXABSVALUE_GEMM 1000
-#define GENERATOR_MINABSVALUE_GEMM 0
+#define GENERATOR_MINABSVALUE_GEMM -GENERATOR_MAXABSVALUE_GEMM
 
 #define GENERATOR_MAXABSVALUE_TENSOR 10
 #define GENERATOR_MINABSVALUE_TENSOR -GENERATOR_MAXABSVALUE_TENSOR
@@ -67,12 +67,21 @@ void write_gold(std::vector<half_t>& a_vector, std::vector<half_t>& b_vector,
 		std::vector<real_t>& c_vector, std::vector<real_t>& d_vector,
 		std::string& a_file_path, std::string& b_file_path,
 		std::string& c_file_path, std::string& d_file_path) {
-	auto result = write_to_file(a_file_path, a_vector);
-	result = result && write_to_file(b_file_path, b_vector);
-	result = result && write_to_file(c_file_path, c_vector);
-	result = result && write_to_file(d_file_path, d_vector);
-	if (result == false) {
-		throw_line("The gold files could not be written\n");
+
+	if (write_to_file(a_file_path, a_vector) == false) {
+		throw_line(a_file_path + " could not be written\n");
+	}
+
+	if (write_to_file(b_file_path, b_vector) == false) {
+		throw_line(b_file_path + " could not be written\n");
+	}
+
+	if (write_to_file(c_file_path, c_vector) == false) {
+		throw_line(c_file_path + " could not be written\n");
+	}
+
+	if (write_to_file(d_file_path, d_vector) == false) {
+		throw_line(d_file_path + " could not be written\n");
 	}
 }
 
@@ -81,12 +90,21 @@ void read_gold(std::vector<half_t>& a_vector, std::vector<half_t>& b_vector,
 		std::vector<real_t>& c_vector, std::vector<real_t>& d_vector,
 		std::string& a_file_path, std::string& b_file_path,
 		std::string& c_file_path, std::string& d_file_path) {
-	auto result = read_from_file(a_file_path, a_vector);
-	result = result && read_from_file(b_file_path, b_vector);
-	result = result && read_from_file(c_file_path, c_vector);
-	result = result && read_from_file(d_file_path, d_vector);
-	if (result == false) {
-		throw_line("Some of the files could not be read\n");
+
+	if (read_from_file(a_file_path, a_vector) == false) {
+		throw_line(a_file_path + " could not be read\n");
+	}
+
+	if (read_from_file(b_file_path, b_vector) == false) {
+		throw_line(b_file_path + " could not be read\n");
+	}
+
+	if (read_from_file(c_file_path, c_vector) == false) {
+		throw_line(c_file_path + " could not be read\n");
+	}
+
+	if (read_from_file(d_file_path, d_vector) == false) {
+		throw_line(d_file_path + " could not be read\n");
 	}
 }
 
@@ -131,8 +149,6 @@ static unsigned long long dmr_errors() {
 	return ret;
 }
 
-
-
 template<typename real_t>
 bool equals(real_t& lhs, real_t& rhs, const uint32_t threshold = 0) {
 	return lhs == rhs;
@@ -165,8 +181,30 @@ static bool equals(float& lhs, double& rhs, const uint32_t threshold) {
 	memcpy(&lhs_data, &lhs, sizeof(uint32_t));
 	memcpy(&rhs_data, &rhs_float, sizeof(uint32_t));
 	auto diff = SUB_ABS(lhs_data, rhs_data);
-	//if(diff > threshold) std::cout << diff << std::endl;
+
 	return (diff <= threshold);
+}
+
+template<class t>
+void debug_mxm(std::vector<t>& a, std::vector<t>& b, std::vector<t> c,
+		std::vector<t>& c_gpu, float alpha, float beta, int n) {
+	for (auto i = 0; i < n; ++i) {
+		for (auto j = 0; j < n; ++j) {
+			t sum = 0;
+			for (auto k = 0; k < n; ++k) {
+				sum += a[i * n + k] * b[k * n + j];
+			}
+			c[i * n + j] = alpha * sum + c[i * n + j] * beta;
+		}
+
+	}
+
+	for (unsigned i = 0; i < c_gpu.size(); i++) {
+		if (fabs(c[i] - c_gpu[i]) > 1.0e-4) {
+			std::cout << "i: " << i << " CPU: " << c[i] << " GPU: " << c_gpu[i]
+					<< std::endl;
+		}
+	}
 }
 
 template<class half_t, class real_t>
@@ -177,25 +215,20 @@ std::pair<int, int> check_output_errors_dmr(std::vector<real_t>& gold,
 	uint32_t memory_errors = 0;
 
 #ifdef OMP
-#pragma omp parallel for shared(host_errors)
+#pragma omp parallel for shared(host_errors, memory_errors)
 #endif
 	for (size_t i = 0; i < gold.size(); i++) {
 		auto gold_value = gold[i];
 		real_t full_precision = real_vector[i];
-		half_t half_precision;
-		bool dmr_equals = true;
+		half_t half_precision = (dmr == true) ? half_vector[i] : real_vector[i];
 
-		if (dmr) {
-			half_precision = half_vector[i];
-			dmr_equals = equals(half_precision, full_precision, threshold);
-//			std::cout << half_precision << " " << full_precision << std::endl;
-		} else {
-			half_precision = full_precision;
-		}
+		//Check if DMR is OK
+		bool dmr_equals = equals(half_precision, full_precision, threshold);
 
+		//Is output corrupted
 		bool is_output_diff = !equals(gold_value, full_precision);
 
-		if (is_output_diff || !dmr_equals) {
+		if (gold_value != full_precision) {
 #ifdef OMP
 #pragma omp critical
 			{
@@ -217,7 +250,9 @@ std::pair<int, int> check_output_errors_dmr(std::vector<real_t>& gold,
 
 			log.log_error(error_detail.str());
 			host_errors++;
-			memory_errors += (is_output_diff && dmr_equals && dmr);
+			if (is_output_diff && dmr_equals && dmr) {
+				memory_errors++;
+			}
 
 #ifdef OMP
 		}

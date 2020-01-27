@@ -22,7 +22,7 @@ void check_relative_error(real_t lhs, real_t rhs) {
 }
 
 __DEVICE_INLINE__
-void check_relative_error(float lhs, double rhs) {
+void relative_error(float lhs, double rhs) {
 	float relative = __fdividef(lhs, float(rhs));
 	if (relative < MIN_PERCENTAGE || relative > MAX_PERCENTAGE) {
 		atomicAdd(&errors, 1);
@@ -30,7 +30,7 @@ void check_relative_error(float lhs, double rhs) {
 }
 
 __DEVICE_INLINE__
-void check_relative_error(float lhs, double rhs, uint32_t threshold) {
+void uint_error(float lhs, double rhs, uint32_t threshold) {
 	float rhs_as_float = float(rhs);
 	uint32_t lhs_data = *((uint32_t*) &lhs);
 	uint32_t rhs_data = *((uint32_t*) &rhs_as_float);
@@ -38,9 +38,17 @@ void check_relative_error(float lhs, double rhs, uint32_t threshold) {
 	uint32_t diff = SUB_ABS(lhs_data, rhs_data);
 
 	if (diff > threshold) {
-		//printf("%u\n", diff);
 		atomicAdd(&errors, 1);
 	}
+}
+
+__DEVICE_INLINE__
+void check_relative_error(float lhs, double rhs, uint32_t threshold) {
+#ifdef BUILDRELATIVEERROR
+	relative_error(lhs, rhs);
+#else
+	uint_error(lhs, rhs, threshold);
+#endif
 }
 
 #endif /* DEVICE_FUNCTIONS_H_ */

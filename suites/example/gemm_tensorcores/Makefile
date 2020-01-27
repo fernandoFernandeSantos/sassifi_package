@@ -6,11 +6,19 @@ DEBUG?=0
 #for radiation setup
 LOGS=1
 OMP?=1
+
+ALPHA=1.0
+BETA=0.0
+SIZE?=4096
+ITERATIONS=1
+PRECISION=float
+CUBLAS=0
+TENSOR_CORES=0
+DMR=none
+BUILDRELATIVEERROR=0
 CHECKBLOCK=1
 
-SIZE?=512 #6384 #8192 #4096 
-ITERATIONS=1
-DMR=mixed
+OUTPUTPREFIX=$(PRECISION)_$(ALPHA)_$(BETA)_$(SIZE)_cublas_$(CUBLAS)_tensor_$(TENSOR_CORES).matrix
 
 # This is what I use, uncomment if you know your arch and want to specify
 ARCH= 	-gencode arch=compute_35,code=[sm_35,compute_35]		# Kepler
@@ -48,7 +56,7 @@ COMMON+= $(STDVERSION)
 ifeq ($(GPU), 1) 
 COMMON+= -DGPU -I$(CUDAPATH)/include/
 CFLAGS+= -DGPU
-LDFLAGS+= -L$(CUDAPATH)/lib64 -lcudart -lcurand
+LDFLAGS+= -L$(CUDAPATH)/lib64 -lcudart -lcurand -lcublas
 endif
 
 ifeq ($(OMP), 1) 
@@ -90,49 +98,42 @@ obj:
 clean:
 	rm -rf $(OBJS) $(TARGET)
 
-ALPHA=0.9
-BETA=0.1
+DIR=/home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores
+
 
 # GEMM options
 generate:
-	./$(TARGET) --size $(SIZE) --generate 1  --precision double --dmr none --alpha $(ALPHA) --beta $(BETA) \
-			--input_a  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_a.matrix  \
-			--input_b  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_b.matrix \
-			--input_c  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_c.matrix  \
-			--gold /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/gold.matrix
-			
-golden:
-	./$(TARGET) --size $(SIZE) --generate 1  --precision double --dmr $(DMR) --alpha $(ALPHA) --beta $(BETA) --opnum $(CHECKBLOCK) \
-			--input_a  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_a.matrix  \
-			--input_b  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_b.matrix \
-			--input_c  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_c.matrix  \
-			--gold /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/gold.matrix  > golden_stdout.txt 2>golden_stderr.txt
-	
-test_gemm_dmr_mixed:
-	./$(TARGET) --size $(SIZE) --generate 0  --precision double --dmr $(DMR) --iterations $(ITERATIONS)
+	./$(TARGET) --size $(SIZE) --generate --verbose \
+                        --precision $(PRECISION) --dmr none \
+                        --alpha $(ALPHA) --beta $(BETA) \
+                        --input_a $(DIR)/a_$(OUTPUTPREFIX) \
+                        --input_b $(DIR)/b_$(OUTPUTPREFIX) \
+                        --input_c $(DIR)/c_$(OUTPUTPREFIX) \
+                        --gold $(DIR)/g_$(OUTPUTPREFIX) $(USECUBLAS) $(USETENSORS)
 
 test:
-	./$(TARGET) --size $(SIZE) --generate 0  --precision double --dmr $(DMR) --iterations $(ITERATIONS) --alpha $(ALPHA) --beta $(BETA) --opnum $(CHECKBLOCK) \
-			--input_a  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_a.matrix  \
-			--input_b  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_b.matrix \
-			--input_c  /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/input_c.matrix  \
-			--gold /home/carol/SASSIFI/sassifi_package/suites/example/gemm_tensorcores/gold.matrix
-	
-test_gemm_non_dmr:
-	./$(TARGET) --size $(SIZE) --generate 0 --verbose 1 --precision double --dmr none --iterations $(ITERATIONS)
+	./$(TARGET) --size $(SIZE) --verbose \
+                        --precision $(PRECISION) --dmr $(DMR) \
+                        --iterations $(ITERATIONS)  \
+                        --alpha $(ALPHA) --beta $(BETA) \
+                        --input_a $(DIR)/a_$(OUTPUTPREFIX) \
+                        --input_b $(DIR)/b_$(OUTPUTPREFIX) \
+                        --input_c $(DIR)/c_$(OUTPUTPREFIX) \
+                        --gold  $(DIR)/g_$(OUTPUTPREFIX)       \
+                        --opnum $(CHECKBLOCK) $(USECUBLAS) $(USETENSORS)
 
 
-# Tensor options
-generate_tensor:
-	./$(TARGET) --size $(SIZE) --generate 1 --verbose 1 --precision half --dmr none --tensor_cores 1
+golden:
+	./$(TARGET) --size $(SIZE) --verbose \
+                        --precision $(PRECISION) --dmr $(DMR) \
+                        --iterations $(ITERATIONS)  \
+                        --alpha $(ALPHA) --beta $(BETA) \
+                        --input_a $(DIR)/a_$(OUTPUTPREFIX) \
+                        --input_b $(DIR)/b_$(OUTPUTPREFIX) \
+                        --input_c $(DIR)/c_$(OUTPUTPREFIX) \
+                        --gold  $(DIR)/g_$(OUTPUTPREFIX)       \
+                        --opnum $(CHECKBLOCK) $(USECUBLAS) $(USETENSORS) > golden_stdout.txt 2>golden_stderr.txt
 
-test_tensor_non_dmr:
-	./$(TARGET) --size $(SIZE) --generate 0 --verbose 1 --precision half --dmr none --tensor_cores 1 --iterations $(ITERATIONS)
-	
-test_tensor_dmr:
-	./$(TARGET) --size $(SIZE) --generate 0 --verbose 1 --precision half --dmr mixed --tensor_cores 1 --iterations $(ITERATIONS)
-	
-	
 install:
 	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/

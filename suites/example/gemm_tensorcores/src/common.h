@@ -30,15 +30,11 @@
 #define ZERO_DOUBLE 1.0e-15
 #endif
 
-// Ninety percent
-#define MIN_PERCENTAGE 0.85f
-
-// Hundred percent
-// I keep 10% in each direction 0.9 to 1.1
-#define MAX_PERCENTAGE 1.15f
+#define MIN_PERCENTAGE 0.99f
+#define MAX_PERCENTAGE 1.01f
 
 //Threshold for one operation
-#define THRESHOLD_1 23
+#define THRESHOLD_1 0x7f
 #define ONE_OP_CHECK 1
 
 //Threshold at the end

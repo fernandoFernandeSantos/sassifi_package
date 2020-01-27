@@ -103,6 +103,8 @@ __global__ void matrix_mult_kernel_dmr( //Kernel hardening
 	check_relative_error(half_val, real_val);
 }
 
+
+
 /**
  * Reduced precision DMR
  */
@@ -110,9 +112,8 @@ template<const uint32_t COUNT, typename half_t, typename real_t>
 __global__ void matrix_mult_kernel_dmr_mixed( //Kernel hardening
 		real_t *A,   //A
 		real_t *B,   //B
-		real_t *C,   //C
-		real_t *D_r, //D
-		half_t *D_h, //D hardening
+		real_t *C_r,   //C
+		half_t *C_h, //D hardening
 		real_t alpha, real_t beta, int wA, int wB, const uint32_t threshold) {
 	// Block index
 	int bx = blockIdx.x;
@@ -189,14 +190,14 @@ __global__ void matrix_mult_kernel_dmr_mixed( //Kernel hardening
 
 	half_t half_alpha = half_t(alpha);
 	half_t half_beta = half_t(beta);
-	half_t half_C = half_t(C[index]);
+	half_t half_C = half_t(C_r[index]);
 
-	real_t real_val = alpha * Csub_real + beta * C[index];
+	real_t real_val = alpha * Csub_real + beta * C_r[index];
 	half_t half_val = half_alpha * Csub_half + half_beta * half_C;
-
-	D_r[index] = real_val;
-	D_h[index] = half_val;
 	check_relative_error(half_val, real_val, threshold);
+
+	C_r[index] = real_val;
+	C_h[index] = half_val;
 }
 
 template<typename real_t>
@@ -204,7 +205,6 @@ __global__ void matrix_mult_kernel_unhardened(	//Kernel without hardening
 		real_t *A,  //A
 		real_t *B,  //B
 		real_t *C,  //C
-		real_t *D,  //D
 		real_t alpha, real_t beta, int wA, int wB) {
 	// Block index
 	int bx = blockIdx.x;
@@ -270,7 +270,13 @@ __global__ void matrix_mult_kernel_unhardened(	//Kernel without hardening
 	// Write the block sub-matrix to device memory;
 	// each thread writes one element
 	const int index = wB * BLOCK_SIZE * by + BLOCK_SIZE * bx + wB * ty + tx;
-	D[index] = alpha * Csub + beta * C[index];
+	C[index] = alpha * Csub + beta * C[index];
+}
+
+template<typename half_t, typename real_t>
+__global__ void compare_two_outputs(half_t* lhs, real_t* rhs, uint32_t threshold) {
+	uint32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+	check_relative_error(lhs[tid], rhs[tid], threshold);
 }
 
 template<typename real_t>
@@ -278,5 +284,4 @@ __global__ void compare_two_outputs(real_t* lhs, real_t* rhs) {
 	uint32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 	check_relative_error(lhs[tid], rhs[tid]);
 }
-
 #endif /* NO_TENSOR_KERNELS_H_ */
