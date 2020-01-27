@@ -7,9 +7,9 @@
 set -x
 
 # How many injections per type
-INST_V=200 #14
+INST_V=1000 #14
 INST_A=10 #250
-REGS_F=10 #500
+REGS_F=10 #1500
 inst_rf=inst_value
 benchmark=$1
 
@@ -17,7 +17,7 @@ benchmark=$1
 # Step 1: Set environment variables
 ################################################
 printf "\nStep 1: Setting environment variables\n"
-if [ `hostname -s` == "carolk201" ]; then
+if [ `hostname -s` == "carolk202" ]; then
     export SASSIFI_HOME=/home/carol/SASSIFI/sassifi_package/
     export SASSI_SRC=/home/carol/SASSIFI/SASSI
     export INST_LIB_DIR=$SASSI_SRC/instlibs/lib
@@ -139,6 +139,9 @@ if [ $inst_rf == "all" ] ; then
 else
     python generate_injection_list.py $inst_rf
 fi
+
+
+rm -f /var/radiation-benchmarks/log/*.log
 
 ################################################
 # Step 8: Run the error injection campaign
