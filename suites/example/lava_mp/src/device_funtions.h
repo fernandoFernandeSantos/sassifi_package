@@ -17,7 +17,7 @@
 #include "common.h"
 #include "block_threshold.h"
 
-__device__ unsigned long long errors;
+__device__ static unsigned long long errors;
 /**
  * EXP
  */

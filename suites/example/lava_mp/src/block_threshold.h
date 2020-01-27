@@ -13,6 +13,6 @@
 
 #define THRESHOLD_PATH "/home/carol/radiation-benchmarks/data/lava/threshold.data"
 
-__device__ uint32_t thresholds[THRESHOLD_SIZE] = { 0 };
+__device__ static uint32_t thresholds[THRESHOLD_SIZE] = { 0 };
 
 #endif /* BLOCK_THRESHOLD_H_ */

@@ -11,9 +11,9 @@ LOGS=1
 BUILDPROFILER=0
 OPERATIONNUM=1
 PRECISION=double
-DMR=dmrmixed
+DMR=none
 DATA_DIR=$(RAD_DIR)/data/lava
-DEF_SIZE=23
+DEF_SIZE=8
 STREAMS=1
 CHARGES_INPUT=$(DATA_DIR)/lava_$(PRECISION)_charges_$(DEF_SIZE)
 DISTANCES_INPUT=$(DATA_DIR)/lava_$(PRECISION)_distances_$(DEF_SIZE)
@@ -23,13 +23,13 @@ GOLD=$(DATA_DIR)/lava_$(PRECISION)_gold_$(DEF_SIZE)
 VPATH=./src
 CUDAPATH=/usr/local/sassi7
 NVCC=$(CUDAPATH)/bin/nvcc
-NVCCFLAGS= -std=c++11 -O3 -Xptxas -v 
+NVCCFLAGS= -std=c++11 -O3 -Xptxas -v  -dc
 
 ARCH= -gencode arch=compute_35,code=[sm_35,compute_35] #Kepler
 #ARCH+= -gencode arch=compute_70,code=[sm_70,compute_70] #Titan V
 #ARCH+= -gencode arch=compute_72,code=[sm_72,compute_72] #XavierV
 #-I$(CUDAPATH)/samples/common/inc 
-INCLUDE= -I./src -I$(CUDAPATH)/include -I$(RAD_DIR)/src/include -I$(RAD_DIR)/src/cuda/common
+INCLUDE= -I./src -I$(CUDAPATH)/include -I../include -I$(RAD_DIR)/src/cuda/common
 
 OBJDIR=./obj/
 OBJ= setup_double.o  setup_float.o Parameters.o cuda_lava.o 
@@ -78,7 +78,7 @@ clean:
 	
 install:
 	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
-	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
+	cp $(EXEC) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 	
 generate:
 	./$(EXEC) -boxes $(DEF_SIZE) -generate -streams $(STREAMS) \
@@ -98,4 +98,12 @@ test:
 				-opnum $(OPERATIONNUM) -precision $(PRECISION) \
 				-redundancy ${DMR} -opnum $(OPERATIONNUM)
 				
-
+golden:
+	./$(EXEC) -boxes $(DEF_SIZE) -streams $(STREAMS) \
+				-iterations 1 -verbose \
+				-input_distances $(DISTANCES_INPUT) \
+				-input_charges $(CHARGES_INPUT) \
+				-output_gold $(GOLD) \
+				-opnum $(OPERATIONNUM) -precision $(PRECISION) \
+				-redundancy ${DMR} -opnum $(OPERATIONNUM) > golden_stdout.txt 2>golden_stderr.txt
+				
