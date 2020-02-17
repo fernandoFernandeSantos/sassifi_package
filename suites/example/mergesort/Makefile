@@ -1,10 +1,13 @@
 include ../common_env.mk
 
+CXX=g++-4.8
 
 TARGET = mergesort
 
+LOGHELPER_INC+= -I/home/carol/radiation-benchmarks/src/cuda/common
+
 NVCC_FLAGS =  $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) \
--Xcompiler " -fopenmp" -Xcompiler "-O3"
+-Xcompiler " -fopenmp" -Xcompiler "-O3" -ccbin $(CXX)
 LINK_FLAGS = -std=c++11 $(GENCODE) -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
 
 all: clean $(TARGET) install
