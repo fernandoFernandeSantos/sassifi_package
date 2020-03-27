@@ -1,13 +1,13 @@
 include ../common_env.mk
 
 CXX=g++-4.8
-CXXFLAGS= -std=c++11 -o3 -fopenmp  -fPIC
+CXXFLAGS= -std=c++11 -o3 -fopenmp 
 EXEC=cudaBFS
 LOGS=1
 BUILDPROFILER=0
 ITERATIONS=10
-GOLD=./gold.data
-INPUT= ../../../data/bfs/graph1MW_6.txt
+GOLD=/home/carol/radiation-benchmarks/gold.data
+INPUT=/home/carol/radiation-benchmarks/data/bfs/graph1MW_6.txt
 
 VPATH=./src/
 
@@ -49,24 +49,28 @@ OBJS = $(addprefix $(OBJDIR), $(OBJ))
 DEPS = $(wildcard src/*.h) Makefile
 
 
-all: mkdir $(EXEC)
+all: clean mkdir $(EXEC) install
 
 
 $(EXEC): $(OBJS)  
-	$(NVCC)  --compiler-options  "$(CXXFLAGS)" $^ -o $@ $(LDFLAGS) $(INCLUDE)
+	$(NVCC) -ccbin $(CXX)  --compiler-options  "$(CXXFLAGS)" $^ -o $@ $(LDFLAGS) $(INCLUDE) $(NVCCFLAGS)
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCLUDE)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCLUDE) 
+
 	
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC)   --compiler-options  "-fPIC" -ccbin $(CXX) $(ARCH) $(NVCCFLAGS) -c $< -o $@ $(INCLUDE)     $(EXTRA_NVCC_FLAGS) $(EXTRA_LINK_FLAGS)
+	$(NVCC)   -ccbin $(CXX) $(ARCH) $(NVCCFLAGS) -c $< -o $@ $(INCLUDE)     $(EXTRA_NVCC_FLAGS) $(EXTRA_LINK_FLAGS)
 
 mkdir:
 	mkdir -p $(OBJDIR)
 
 clean:
 	rm -f $(OBJDIR)* $(EXEC)
-	
+
+install:
+	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
+	cp $(EXEC) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 generate:
 	./$(EXEC) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose --generate

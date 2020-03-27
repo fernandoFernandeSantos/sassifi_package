@@ -1,49 +1,80 @@
 include ../common_env.mk
 
-TARGET = accl
+CXX=g++-4.8
+CXXFLAGS= -std=c++11 -O3 
+EXEC=cudaACCL
+LOGS=1
+BUILDPROFILER=0
+ITERATIONS=10
+SIZE=7
+FRAMES=7
+GOLD=/home/carol/radiation-benchmarks/data/accl/gold_$(SIZE)_$(FRAMES).data
+#../gold_accl/gold_7_7 
+INPUT=/home/carol/radiation-benchmarks/data/accl/7Frames.pgm
 
-OBJS=accl.o accl_main.o
+VPATH=./src/
 
-OBJS_GEN=accl.o accl_generate.o
+CUDAPATH=$(CUDA_BASE_DIR)
+NVCC=$(CUDAPATH)/bin/nvcc 
 
-NVCC_FLAGS = $(GENCODE) $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
-LINK_FLAGS = -std=c++11  -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
+NVCCFLAGS= -std=c++11 -O3 -Xptxas -v -rdc=true -ccbin g++-4.8
 
-LINE=$(DEVICE_OBJS) $(LINK_OBJS) $(CPP_SOURCES) ../include/log_helper.c -I$(LOGHELPER_INC) -L/usr/local/cuda/lib64 -lcudart -lcuda -lcudadevrt -lpthread -fopenmp
+ARCH= -gencode arch=compute_35,code=[sm_35,compute_35] #Kepler
+#ARCH+= -gencode arch=compute_70,code=[sm_70,compute_70] #Titan V
 
-all: clean $(TARGET) install
+INCLUDE= -I./src -I$(CUDAPATH)/include -I$(CUDAPATH)/samples/common/inc -I../include -I/home/carol/radiation-benchmarks/src/cuda/common/include
 
+OBJDIR=./obj/
+GPUOBJ= accl.o_dlink.o
+OBJ= accl.o main.o Parameters.o
+
+
+ifeq ($(DEBUG), 1) 
+CXXFLAGS+=-O0 -g
+NVCCFLAGS+= -g -G
+endif
+
+ifeq ($(LOGS), 1)
+CXXFLAGS+= -DLOGS
+NVCCFLAGS+= -DLOGS
+LDFLAGS+= -L../include  -lLogHelper
+endif
+
+
+LDFLAGS+= -L$(CUDAPATH)/lib64  -lcudart  -lcurand -lcudadevrt  -Wno-deprecated-gpu-targets
+
+OBJS = $(addprefix $(OBJDIR), $(OBJ))
+GPUOBJS = $(addprefix $(OBJDIR), $(GPUOBJ))
+DEPS = $(wildcard src/*.h) Makefile
+
+
+all: clean mkdir $(EXEC) install
 
 install:
 	mkdir -p $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
-	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
+	cp $(EXEC) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
-accl_generate: $(OBJS_GEN)
-	 $(NVCC) $(COMMON) $^ -o $@  $(LDFLAGS) $(LDFLAGS) $(CFLAGS) -L$(CUDA_LIB_DIR) -lcudadevrt -lcudart -lcuda -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper $(LOG_FLAGS) $(LINK_FLAGS)
+$(EXEC): $(OBJS)  
+	$(NVCC)  $(NVCCFLAGS)  $^ -o $@ $(LDFLAGS) $(INCLUDE)
+#	$(NVCC) $(CXXFLAGS) $(GPUOBJS) $^ -o $@ $(LDFLAGS) $(INCLUDE)
 
-
-$(TARGET): $(OBJS)
-	$(NVCC) $(COMMON) $^ -o $@  $(LDFLAGS) $(LDFLAGS) $(CFLAGS) -L$(CUDA_LIB_DIR) -lcudadevrt -lcudart -lcuda -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper $(LOG_FLAGS) $(LINK_FLAGS)
+$(OBJDIR)%.o: %.cpp $(DEPS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCLUDE)
 	
+$(OBJDIR)%.o: %.cu $(DEPS)
+	$(NVCC)  $(ARCH) $(NVCCFLAGS) -c $< -o $@ $(INCLUDE)  $(EXTRA_LINK_FLAGS)   $(EXTRA_NVCC_FLAGS)
+	#$(NVCC) $(ARCH)  -dlink $@ -o $@_dlink.o -lcudadevrt  $(EXTRA_LINK_FLAGS)   $(EXTRA_NVCC_FLAGS)
 
-$(SOURCEDIR)%.o: %.cpp
-	$(NVCC) $(COMMON) -c $^  -o $@  $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) \
-		-lcudadevrt -lcudart -lcuda $(LDFLAGS) $(CFLAGS)  -L$(CUDA_LIB_DIR) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda $(LOG_FLAGS)\
-		 $(LINK_FLAGS)
-	
-$(SOURCEDIR)%.o: %.cu 
-	$(NVCC) $(ARCH) -c $< -o $@  $(LDFLAGS) $(CFLAGS) $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) \
-	$(LINK_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelperCuda $(LOG_FLAGS) 
+mkdir:
+	mkdir -p $(OBJDIR)
+
+clean:
+	rm -f $(OBJDIR)* $(EXEC)
 	
 
 generate:
-	./accl_generate 2 1 2Frames.pgm GOLD_2Frames
+	./$(EXEC) --size $(SIZE) --frames $(FRAMES) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose --generate ;
 
-test: accl
-	./accl 2 1 2Frames.pgm GOLD_2Frames 1 -verbose
-
-golden: accl
-	./accl 2 1 2Frames.pgm GOLD_2Frames 1 -verbose > golden_stdout.txt 2> golden_stderr.txt
+test:
+	./$(EXEC) --size $(SIZE) --frames $(FRAMES) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose;
 	
-clean:
-	rm -f $(OBJS) $(TARGET) *.o
