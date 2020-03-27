@@ -55,7 +55,7 @@ install:
 	cp $(EXEC) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 $(EXEC): $(OBJS)  
-	$(NVCC)  $(NVCCFLAGS)  $^ -o $@ $(LDFLAGS) $(INCLUDE)
+	$(NVCC)  $(NVCCFLAGS)  $^ -o $@ $(LDFLAGS) $(INCLUDE) $(EXTRA_LINK_FLAGS)
 #	$(NVCC) $(CXXFLAGS) $(GPUOBJS) $^ -o $@ $(LDFLAGS) $(INCLUDE)
 
 $(OBJDIR)%.o: %.cpp $(DEPS)

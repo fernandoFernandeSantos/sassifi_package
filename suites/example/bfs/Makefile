@@ -53,7 +53,7 @@ all: clean mkdir $(EXEC) install
 
 
 $(EXEC): $(OBJS)  
-	$(NVCC) -ccbin $(CXX)  --compiler-options  "$(CXXFLAGS)" $^ -o $@ $(LDFLAGS) $(INCLUDE) $(NVCCFLAGS)
+	$(NVCC) -ccbin $(CXX)  --compiler-options  "$(CXXFLAGS)" $^ -o $@ $(LDFLAGS) $(INCLUDE) $(NVCCFLAGS) $(EXTRA_LINK_FLAGS)
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCLUDE) 
@@ -74,8 +74,13 @@ install:
 
 generate:
 	./$(EXEC) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose --generate
-	
+
+
 test:
 	./$(EXEC) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose
 
-	
+golden:
+	./$(EXEC) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose > golden_stdout.txt 2>golden_stderr.txt
+	sed -i '/LOGFILENAME/c\REPLACED.' golden_stdout.txt 
+	sed -i '/Overall time/c\REPLACED.' golden_stdout.txt 
+	sed -i '/Wasted time/c\REPLACED.' golden_stdout.txt 
