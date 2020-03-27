@@ -31,7 +31,7 @@ int BFSGraph(rad::DeviceVector<Node>& d_graph_nodes,
 		rad::DeviceVector<bool_t>& d_updating_graph_mask,
 		rad::DeviceVector<bool_t>& d_graph_visited,
 		rad::DeviceVector<int>& d_graph_edges, rad::DeviceVector<int>& d_cost,
-		unsigned& stream, int no_of_nodes) {
+		cudaStream_t& stream, int no_of_nodes) {
 
 	//make a bool_t to check if the execution is over
 	static rad::DeviceVector<bool_t> d_over(1);
@@ -58,12 +58,12 @@ int BFSGraph(rad::DeviceVector<Node>& d_graph_nodes,
 		//if no thread changes this value then the loop stops
 		stop[0] = FALSE;
 		d_over = stop;
-		Kernel<<<grid, threads>>>(d_graph_nodes.data(),
+		Kernel<<<grid, threads, 0, stream>>>(d_graph_nodes.data(),
 				d_graph_edges.data(), d_graph_mask.data(),
 				d_updating_graph_mask.data(), d_graph_visited.data(),
 				d_cost.data(), no_of_nodes);
 
-		Kernel2<<<grid, threads>>>(d_graph_mask.data(),
+		Kernel2<<<grid, threads, 0, stream>>>(d_graph_mask.data(),
 				d_updating_graph_mask.data(), d_graph_visited.data(),
 				d_over.data(), no_of_nodes);
 

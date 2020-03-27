@@ -14,7 +14,7 @@ int BFSGraph(rad::DeviceVector<Node>& d_graph_nodes,
 		rad::DeviceVector<bool_t>& d_updating_graph_mask,
 		rad::DeviceVector<bool_t>& d_graph_visited,
 		rad::DeviceVector<int>& d_graph_edges, rad::DeviceVector<int>& d_cost,
-		unsigned& stream, int no_of_nodes);
+		cudaStream_t& stream, int no_of_nodes);
 
 void Usage(int argc, char**argv) {
 
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 			h_updating_graph_mask, h_graph_visited, h_graph_edges,
 			parameters.input);
 
-	auto streams_in_parallel = 1; //parameters.sm_count * WARPS_PER_SM;
+	auto streams_in_parallel = parameters.sm_count * WARPS_PER_SM;
 
 	std::string test_info = "";
 	test_info += "streams:" + std::to_string(streams_in_parallel);
@@ -187,14 +187,13 @@ int main(int argc, char** argv) {
 	}
 
 	// allocate mem for the result on host side
-//	std::vector<cudaStream_t> streams(streams_in_parallel);
+	std::vector<cudaStream_t> streams(streams_in_parallel);
 	std::vector<std::vector<int>> h_cost(streams_in_parallel,
 			std::vector<int>(no_of_nodes, -1));
 
 	for (auto stream = 0; stream < streams_in_parallel; stream++) {
 		h_cost[stream][source] = 0;
-		std::cout << "sTREAM " << stream << std::endl;
-//		rad::checkFrameworkErrors(cudaStreamCreate(&streams[stream]));
+		rad::checkFrameworkErrors(cudaStreamCreate(&streams[stream]));
 	}
 
 	//Copy the Node list to device memory
@@ -234,22 +233,20 @@ int main(int argc, char** argv) {
 		}
 
 		set_time = rad::mysecond() - set_time;
-		unsigned st = 0;
+
 		//Start traversing the tree
 
 		auto kernel_time = rad::mysecond();
 		log.start_iteration();
-
 		for (int i = 0; i < streams_in_parallel; i++) {
 			k_times[i] = BFSGraph(h_d_graph_nodes[i], h_d_graph_mask[i],
 					h_d_updating_graph_mask[i], h_d_graph_visited[i],
-					h_d_graph_edges[i], h_d_cost[i], st, no_of_nodes);
+					h_d_graph_edges[i], h_d_cost[i], streams[i], no_of_nodes);
 		}
 
-//		for (auto& stream : streams) {
-//			rad::checkFrameworkErrors(cudaStreamSynchronize(stream));
-//		}
-		rad::checkFrameworkErrors(cudaDeviceSynchronize());
+		for (auto& stream : streams) {
+			rad::checkFrameworkErrors(cudaStreamSynchronize(stream));
+		}
 		log.end_iteration();
 		//need to reset if error happens here
 		rad::checkFrameworkErrors(cudaGetLastError());
@@ -300,8 +297,8 @@ int main(int argc, char** argv) {
 				<< std::endl;
 	}
 
-	//for (auto& stream : streams) {
-	//	rad::checkFrameworkErrors(cudaStreamDestroy(stream));
-	//}
+	for (auto& stream : streams) {
+		rad::checkFrameworkErrors(cudaStreamDestroy(stream));
+	}
 
 }
