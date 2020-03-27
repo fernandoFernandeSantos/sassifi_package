@@ -5,7 +5,7 @@ CXXFLAGS= -std=c++11 -o3 -fopenmp
 EXEC=cudaBFS
 LOGS=1
 BUILDPROFILER=0
-ITERATIONS=10
+ITERATIONS=1
 GOLD=/home/carol/radiation-benchmarks/gold.data
 INPUT=/home/carol/radiation-benchmarks/data/bfs/graph1MW_6.txt
 
