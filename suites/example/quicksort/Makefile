@@ -2,7 +2,15 @@ include ../common_env.mk
 
 TARGET = quicksort
 
-NVCC_FLAGS =  $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
+#SIZE=134217728
+SIZE=1048576 
+
+RAD=/home/carol/radiation-benchmarks
+LOG_FLAGS+= -DLOGS  -I$(RAD)/src/cuda/common
+
+
+CXX=g++-4.8
+NVCC_FLAGS = -ccbin $(CXX) $(LOG_FLAGS) -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
 LINK_FLAGS = -std=c++11 $(GENCODE) -lcudart -lcudadevrt $(EXTRA_LINK_FLAGS)
 
 all: clean $(TARGET) install
@@ -15,13 +23,13 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 golden:
-	./quicksort -size=1048576 -input=quicksort_input_134217728 -gold=quicksort_gold_1048576 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
+	./quicksort -size=$(SIZE) -input=quicksort_input_134217728 -gold=quicksort_gold_$(SIZE) -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
 
 test:
-	./quicksort -size=1048576 -input=quicksort_input_134217728 -gold=quicksort_gold_1048576 -iterations=1
+	./quicksort -size=$(SIZE) -input=quicksort_input_134217728 -gold=quicksort_gold_$(SIZE) -iterations=1
 
 generate:
-	./quicksort -size=1048576 -input=quicksort_input_134217728 -gold=quicksort_gold_1048576 -generate -iterations=1
+	./quicksort -size=$(SIZE) -input=quicksort_input_134217728 -gold=quicksort_gold_$(SIZE) -generate -iterations=1
 	
 quicksort_generate: clean
 	$(NVCC) -o $(TARGET) cdpAdvancedQuicksort.cu cdpBitonicSort.cu  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)
