@@ -5,7 +5,7 @@ OPNUM=1
 DMR=none
 ALPHA=1.0
 BETA=0.0
-SIZE=4096
+SIZE=256
 PRECISION=float
 
 ${BIN_DIR}/gemm --size ${SIZE} --precision ${PRECISION} --dmr ${DMR} --iterations 1 --alpha ${ALPHA} --beta ${BETA} --input_a ${APP_DIR}/a_float_${ALPHA}_${BETA}_${SIZE}_cublas_0_tensor_0.matrix --input_b ${APP_DIR}/b_float_${ALPHA}_${BETA}_${SIZE}_cublas_0_tensor_0.matrix --input_c ${APP_DIR}/c_float_${ALPHA}_${BETA}_${SIZE}_cublas_0_tensor_0.matrix  --gold ${APP_DIR}/g_float_${ALPHA}_${BETA}_${SIZE}_cublas_0_tensor_0.matrix --opnum ${OPNUM}  > stdout.txt 2> stderr.txt
