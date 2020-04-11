@@ -71,19 +71,19 @@ rf_bfm_list = [p.FLIP_SINGLE_BIT]
 
 inst_value_igid_bfm_map = {
     #  Supported models
-    p.GPR: 		[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    p.CC: 		[p.FLIP_SINGLE_BIT],
-    p.PR: 		[p.FLIP_SINGLE_BIT],
-    p.STORE_OP: 	[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    p.IADD_IMUL_OP: 	[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    #p.FADD_FMUL_OP: 	[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    #p.DADD_DMUL_OP: 	[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    p.MAD_OP: 		[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    p.FFMA_OP: 		[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    #p.DFMA_OP:	        [p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    p.SETP_OP:		[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    p.LDS_OP: 		[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
-    p.LD_OP: 		[p.FLIP_SINGLE_BIT] #, p.WARP_FLIP_SINGLE_BIT],
+    p.GPR:              [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.CC:               [p.FLIP_SINGLE_BIT],
+    p.PR:               [p.FLIP_SINGLE_BIT],
+    p.STORE_OP:         [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.IADD_IMUL_OP:     [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.FADD_FMUL_OP:     [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.DADD_DMUL_OP:     [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.MAD_OP:           [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.FFMA_OP:          [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.DFMA_OP:          [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.SETP_OP:          [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.LDS_OP:           [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
+    p.LD_OP:            [p.FLIP_SINGLE_BIT], #, p.WARP_FLIP_SINGLE_BIT],
 
     #  Supported models
     # ~ p.GPR: [p.FLIP_SINGLE_BIT, p.FLIP_TWO_BITS, p.RANDOM_VALUE, p.ZERO_VALUE, p.WARP_FLIP_SINGLE_BIT, p.WARP_FLIP_TWO_BITS, p.WARP_RANDOM_VALUE, p.WARP_ZERO_VALUE],

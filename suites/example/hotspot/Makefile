@@ -3,7 +3,7 @@ include ../common_env.mk
 PRECISION=-DPRECISION_SINGLE
 
 TARGET = hotspot
-LOG_FLAGS=-DLOGS -I/home/carol/radiation-benchmarks/src/cuda/common/include  -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper
+LOG_FLAGS=-DLOGS -I/home/carol/radiation-benchmarks/src/cuda/common  -I$(LOGHELPER_INC) -L$(LOGHELPER_LIB) -lLogHelper
 
 CXX=g++-4.8
 NVCC_FLAGS = $(PRECISION) $(LOG_FLAGS) -ccbin $(CXX) -rdc=true -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) -Xcompiler " -fopenmp"
@@ -26,13 +26,13 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 golden:
-	./hotspot -size=1024 -sim_time=10000 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
+	./hotspot -size=1024 -sim_time=10 -streams=1 -input_temp=temp_1024 -input_power=power_1024 -gold_temp=gold_1024_1 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
 
 test:
-	./hotspot -size=1024 -sim_time=10000 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1
+	./hotspot -size=1024 -sim_time=10 -streams=1 -input_temp=temp_1024 -input_power=power_1024 -gold_temp=gold_1024_1 -iterations=1
 
 generate:
-	./hotspot -size=1024 -sim_time=10000 -streams=1 -temp_file=temp_1024 -power_file=power_1024 -gold_file=gold_1024_1 -iterations=1 -generate
+	./hotspot -size=1024 -sim_time=10 -streams=1 -input_temp=temp_1024 -input_power=power_1024 -gold_temp=gold_1024_1 -iterations=1 -generate
 
 clean:
 	rm -f *.o *~ hotspot

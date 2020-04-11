@@ -20,14 +20,17 @@ install:
 	cp $(TARGET) $(REGRESSION_HOME)/bin/$(OPTION)/$(SUITE_NAME)/
 
 
+SIZE=134217728
+#SIZE=1048576 
+
 test:
-	./$(TARGET) -size=1048576 -input=mergesort_input_134217728 -gold=mergesort_gold_1048576 -iterations=1
+	./$(TARGET) -size=$(SIZE) -input=mergesort_input_134217728 -gold=mergesort_gold_$(SIZE) -iterations=1
 
 golden:
-	./$(TARGET) -size=1048576 -input=mergesort_input_134217728 -gold=mergesort_gold_1048576 -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
+	./$(TARGET) -size=$(SIZE) -input=mergesort_input_134217728 -gold=mergesort_gold_$(SIZE) -iterations=1 > golden_stdout.txt 2>golden_stderr.txt
 
 generate:
-	./$(TARGET) -generate -size=1048576 -input=mergesort_input_134217728 -gold=mergesort_gold_1048576 -iterations=1
+	./$(TARGET) -generate -size=$(SIZE) -input=mergesort_input_134217728 -gold=mergesort_gold_$(SIZE) -iterations=1
 
 mergesort_generate:
 	$(NVCC) -o mergesort bitonic.cu main.cpp mergeSort.cu mergeSort_host.cpp mergeSort_validate.cpp  $(NVCC_FLAGS) -L$(CUDA_LIB_DIR) $(LINK_FLAGS)

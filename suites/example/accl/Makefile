@@ -5,7 +5,7 @@ CXXFLAGS= -std=c++11 -O3
 EXEC=cudaACCL
 LOGS=1
 BUILDPROFILER=0
-ITERATIONS=10
+ITERATIONS=1
 SIZE=7
 FRAMES=7
 GOLD=/home/carol/radiation-benchmarks/data/accl/gold_$(SIZE)_$(FRAMES).data
@@ -78,3 +78,10 @@ generate:
 test:
 	./$(EXEC) --size $(SIZE) --frames $(FRAMES) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose;
 	
+
+golden:
+	./$(EXEC) --size $(SIZE) --frames $(FRAMES) --input $(INPUT) --gold $(GOLD) --iterations $(ITERATIONS) --verbose  > golden_stdout.txt 2>golden_stderr.txt
+	sed -i '/LOGFILENAME/c\REPLACED.' golden_stdout.txt 
+	sed -i '/time/c\REPLACED.' golden_stdout.txt 
+	sed -i '/Wasted time/c\REPLACED.' golden_stdout.txt 
+
