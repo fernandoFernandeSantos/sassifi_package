@@ -8,7 +8,7 @@ BASE_DIR=/home/carol/SASSIFI/sassifi_package/suites/example
 #first build include dir loghelper
 make -C ${BASE_DIR}/include/
 
-for i in gemm_tensorcores; #LeNetCUDA accl hotspot lava lud lulesh mergesort nw quicksort;
+for i in nw; #hotspot; ##quicksort; #accl; #bfs; # mergesort; # gemm_tensorcores mergesort nw quicksort;
 do
     echo "###############################################################"
     echo "                     DOING FOR $i"

@@ -1,4 +1,0 @@
-Accelerated Connected Component Labeling
-========================================
-Loading input image...
-.Image Segmentation ended.
