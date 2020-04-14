@@ -23,8 +23,8 @@ VPATH=./src/
 TARGET=darknet
 OBJDIR=./obj/
 
-CC=gcc
-CXX=g++
+CC=gcc-4.8
+CXX=g++-4.8
 #NVCC=nvcc 
 OPTS=-O3
 LDFLAGS= -lm -pthread 
@@ -90,7 +90,7 @@ DEPS = $(wildcard src/*.h) Makefile
 ############################################################################################
 #-------------------------------------------------------------------------------------------
 #-rdc=true
-NVCC_FLAGS += -rdc=true  -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) $(GENCODE)
+NVCC_FLAGS += -ccbin $(CXX) -rdc=true  -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) $(GENCODE)
 
 LINK_FLAGS = -L$(CUDA_LIB_DIR) -lcudart -lcudadevrt -lcuda -lcudart -lcublas -lcurand $(EXTRA_LINK_FLAGS)
 

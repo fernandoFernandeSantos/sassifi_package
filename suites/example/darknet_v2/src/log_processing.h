@@ -13,7 +13,6 @@
 #include "layer.h" //save layer
 #include "box.h" //boxes
 
-
 #include "abft.h"
 #include "args.h" //load gold
 
@@ -24,10 +23,13 @@
 
 #define LAYER_GOLD "/var/radiation-benchmarks/data/"
 
+#define PR_THRESHOLD 0.5
+#define CONSIDERING_DETECTION 0.2
+
+#define MAX_ERROR_COUNT 500 * 2
 
 static const char *ABFT_TYPES[] = { "none", "gemm", "smart_pooling", "l1", "l2",
-		"trained_weights" };
-
+		"trained_weights", "dmr", "tmr" };
 
 typedef struct prob_array_ {
 	box *boxes;
@@ -71,12 +73,13 @@ extern "C" {
  * functions to start log file
  */
 void start_count_app(char *test, int save_layer, int abft, int iterations,
-		char *app);
+		char *app, unsigned char use_tensor_core_mode);
 
 void finish_count_app();
 
 void start_iteration_app();
 void end_iteration_app();
+void update_timestamp_app();
 
 /**
  * compare and save layers
@@ -102,13 +105,15 @@ void delete_detection_var(detection*, Args*);
 
 detection load_gold(Args*);
 
-void compare(detection *det, float **f_probs, box *f_boxes, int num,
-		int classes, int img, int save_layer, int test_iteration,
-		char *img_list_path, error_return max_pool_errors);
+int compare(detection *det, float **f_probs, box *f_boxes, int num, int classes,
+		int img, int save_layers, int test_iteration, char *img_list_path,
+		error_return max_pool_errors, image im, int stream_mr);
 
 void clear_boxes_and_probs(box*, float**, int, int);
 
 void print_detection(detection);
+
+inline void print_box(box b);
 
 #ifdef __cplusplus
 } //end extern "C"

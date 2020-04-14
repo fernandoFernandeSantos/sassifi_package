@@ -735,6 +735,10 @@ image *load_all_images_sized(image *img_array, int net_w, int net_h,
 	image *ret = (image*) malloc(sizeof(image) * list_size);
 	for (i = 0; i < list_size; i++) {
 		ret[i] = letterbox_image(img_array[i], net_w, net_h);
+		if (i > 500) {
+			update_timestamp_app();
+		}
+
 	}
 	return ret;
 }
@@ -745,6 +749,9 @@ image *load_all_images(detection det) {
 	image *ret = (image*) malloc(sizeof(image) * det.plist_size);
 	for (i = 0; i < det.plist_size; i++) {
 		ret[i] = load_image_color(det.img_names[i], 0, 0);
+		if (i > 500) {
+			update_timestamp_app();
+		}
 	}
 	return ret;
 }
@@ -757,6 +764,41 @@ void free_all_images(image *array, int list_size) {
 	}
 }
 //-------------------------------------------------------------------------------------
+int set_abft_approach(Args* arg) {
+	//#ifdef GPU
+	int mr_size = 1;
+	switch (arg->abft) {
+	case GEMM:
+		printf("%s ABFT not implemented yet\n", ABFT_TYPES[arg->abft]);
+		exit(-1);
+		break;
+	case SMART_POOLING:
+		set_abft_smartpool(arg->abft);
+		break;
+	case L1_HARDENING:
+		printf("%s ABFT not implemented yet\n", ABFT_TYPES[arg->abft]);
+		exit(-1);
+		break;
+	case L2_HARDENING:
+		printf("%s ABFT not implemented yet\n", ABFT_TYPES[arg->abft]);
+		exit(-1);
+		break;
+	case TRAINED_WEIGHTS:
+		printf("%s ABFT not implemented yet\n", ABFT_TYPES[arg->abft]);
+		exit(-1);
+		break;
+	case SMART_DMR:
+		mr_size = 2;
+		break;
+	case SMART_TMR:
+		mr_size = 3;
+		break;
+	default:
+		printf("No ABFT was set\n");
+		break;
+	}
+	return mr_size;
+}
 
 /**
  * Function created only for radiation test only
@@ -797,33 +839,11 @@ void test_detector_radiation(Args *args) {
 	//if abft is set these parameters will also be set
 	error_return max_pool_errors;
 	init_error_return(&max_pool_errors);
+	int mr_size;
 	//  set abft
 	if (args->abft >= 0 && args->abft < MAX_ABFT_TYPES) {
 #ifdef GPU
-		switch (args->abft) {
-			case 1:
-			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
-			exit(-1);
-			break;
-			case 2:
-			set_abft_smartpool(args->abft);
-			break;
-			case 3:
-			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
-			exit(-1);
-			break;
-			case 4:
-			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
-			exit(-1);
-			break;
-			case 5:
-			printf("%s ABFT not implemented yet\n", ABFT_TYPES[args->abft]);
-			exit(-1);
-			break;
-			default:
-			printf("No ABFT was set\n");
-			break;
-		}
+		mr_size = set_abft_approach(args);
 #endif
 	}
 
@@ -837,6 +857,7 @@ void test_detector_radiation(Args *args) {
 	//need to allocate layers arrays
 	alloc_gold_layers_arrays(&gold, &net);
 	// this loop will iterate all iteration on args * image_size
+	int overall_errors = 0;
 	for (i = 0; i < args->iterations; i++) {
 		for (it = 0; it < gold.plist_size; it++) {
 			image im = im_array[it];
@@ -867,16 +888,23 @@ void test_detector_radiation(Args *args) {
 #ifdef GPU
 			//before compare copy maxpool err detection values
 			//smart pooling
-			if (args->abft == 2)
-			get_and_reset_error_detected_values(max_pool_errors);
+			if (args->abft == 2) {
+				get_and_reset_error_detected_values(&max_pool_errors);
+			}
 #endif
-			compare(&gold, probs, boxes, l.w * l.h * l.n, l.classes, it,
-					args->save_layers, i, args->img_list_path, max_pool_errors);
+			int error_count = compare(&gold, probs, boxes, l.w * l.h * l.n, l.classes, it,
+					args->save_layers, i, args->img_list_path, max_pool_errors, im, 1);
 			time_cmp = mysecond() - time_cmp;
 
 			printf(
 					"Iteration %d - image %d predicted in %f seconds. Comparisson in %f seconds.\n",
 					i, it, time, time_cmp);
+
+			if ((overall_errors +=  error_count) > MAX_ERROR_COUNT){
+				const char error_string[1000];
+				sprintf(error_string, "%d ERRORS DETECTED, WHITCH IS MUCH MORE THAN %d. FINISHING APPLICATION\n", overall_errors, MAX_ERROR_COUNT);
+				error(error_string);
+			}
 
 //########################################
 
