@@ -165,7 +165,7 @@ cublasHandle_t blas_handle() {
         init[i] = 1;
 
         //use tensor cores
-        printf("Tensor cores %d, handle %d\n", use_tensor_cores, handle[i]);
+        //printf("Tensor cores %d, handle %d\n", use_tensor_cores, handle[i]);
         /*if (use_tensor_cores == 0){
             cublasSetMathMode(handle[i], CUBLAS_DEFAULT_MATH);
         }else if(use_tensor_cores == 1){

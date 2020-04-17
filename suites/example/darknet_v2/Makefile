@@ -1,12 +1,12 @@
 include ../common_env.mk
 
-GPU?=1
+GPU=1
 CUDNN=0
 OPENCV=0
 DEBUG=0
 
 #for radiation setup
-LOGS?=0
+LOGS=1
 GEN_IMG?=0 #if you want to generate images on gold generator execution
 
 #ARCH= -gencode arch=compute_30,code=sm_30 \
@@ -80,8 +80,6 @@ ifeq ($(LOGS), 1)
 LOGHELPERINC=-I../include/
 LOGHELPERLIB= -L../include/ -lLogHelper -DLOGS=1
 HELPFUL=-I../include/
-else
-HELPFUL=-I../include/
 endif
 
 OBJS = $(addprefix $(OBJDIR), $(OBJ))
@@ -92,11 +90,12 @@ DEPS = $(wildcard src/*.h) Makefile
 #-rdc=true
 NVCC_FLAGS += -ccbin $(CXX) -rdc=true  -Xptxas -v -I$(CUDA_BASE_DIR)/include/ $(EXTRA_NVCC_FLAGS) $(GENCODE)
 
-LINK_FLAGS = -L$(CUDA_LIB_DIR) -lcudart -lcudadevrt -lcuda -lcudart -lcublas -lcurand $(EXTRA_LINK_FLAGS)
+LINK_FLAGS =  -L$(CUDA_LIB_DIR) -lcudart -lcudadevrt -lcuda -lcudart -lcublas -lcurand $(EXTRA_LINK_FLAGS)
 
 LD_LIB=LD_LIBRARY_PATH=/usr/local/sassi7/lib64/
 
 ALL_FLAGS=$(NVCC_FLAGS) $(LINK_FLAGS)
+
 #-------------------------------------------------------------------------------------------
 ############################################################################################
 
@@ -134,15 +133,17 @@ test_pure_yolo:
 	./darknet detect cfg/yolo.cfg ../../../data/darknet/yolo_v2.weights data/dog.jpg
 	
 test:
-	./darknet test_radiation -d $(RAD_DIR)/data/darknet/fault_injection.csv -n 1 -s 1 -a 0 
+	./darknet test_radiation -d $(RAD_DIR)/data/darknet/fault_injection.csv -n 1 -s 0 -a 0 
 	
 golden:
-	./darknet test_radiation -d $(RAD_DIR)/data/darknet/fault_injection.csv -n 1 -s 1 -a 0 > golden_stdout.txt 2>golden_stderr.txt
+	./darknet test_radiation -d $(RAD_DIR)/data/darknet/fault_injection.csv -n 1 -s 0 -a 0 > golden_stdout.txt 2>golden_stderr.txt
+	sed -i '/Iteration 0 - image/c\REPLACED.' golden_stdout.txt 
+
 
 generate:
 	./darknet test_radiation  -c $(RAD_DIR)/src/cuda/darknet_v2/cfg/yolo.cfg \
 								  -w $(RAD_DIR)/data/darknet/yolo_v2.weights \
-								  -g 1 -d $(RAD_DIR)/data/darknet/fault_injection.csv -s 1 -l   \
+								  -g 1 -d $(RAD_DIR)/data/darknet/fault_injection.csv -s 0 -l   \
 								  $(RAD_DIR)/data/networks_img_list/fault_injection.txt -a 0
 
 
