@@ -66,5 +66,9 @@ generate:
 	./$(EXEC) --size $(SIZE) --input ./input_$(SIZE).data --gold ./gold_$(SIZE).data --verbose --generate
 
 test:
-	./$(EXEC) --size $(SIZE) --input ./input_$(SIZE).data --gold ./gold_$(SIZE).data --verbose --iterations 10
+	./$(EXEC) --size $(SIZE) --input ./input_$(SIZE).data --gold ./gold_$(SIZE).data --verbose --iterations 1
+
+
+golden:
+	./$(EXEC) --size $(SIZE) --input ./input_$(SIZE).data --gold ./gold_$(SIZE).data --verbose --iterations 1 > golden_stdout.txt 2>golden_stderr.txt
 	
