@@ -97,7 +97,7 @@ void fatal(parameters *params, const char *s) {
 #endif
     exit(1);
 }
-
+//update on sassifi
 void readInput(parameters *params) {
     // =================== Read all files
     int i, j;
